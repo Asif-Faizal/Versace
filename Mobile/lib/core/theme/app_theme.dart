@@ -19,7 +19,7 @@ class AppTheme {
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-        elevation: 0,
+        elevation: 0,scrolledUnderElevation: 0,
         centerTitle: true,
         iconTheme: IconThemeData(color: Colors.black),
       ),
@@ -91,8 +91,8 @@ class AppTheme {
       ),
       // Card Theme
       cardTheme: CardTheme(
-        color: Colors.white,
-        elevation: 0,
+        color: Colors.grey[100],
+        elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(2),
         ),
@@ -199,6 +199,7 @@ class AppTheme {
       // AppBar Theme
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.black,
+        scrolledUnderElevation: 0,
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
@@ -206,17 +207,17 @@ class AppTheme {
       ),
       // Switch Theme
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return Colors.white;
           }
           return Colors.black;
         }),
-        trackColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
-            return Colors.white.withOpacity(0.5);
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return Colors.white.withValues(alpha: 0.5);
           }
-          return Colors.grey.withOpacity(0.5);
+          return Colors.grey.withValues(alpha: 0.5);
         }),
       ),
       // Button Themes
@@ -272,8 +273,9 @@ class AppTheme {
       ),
       // Card Theme
       cardTheme: CardTheme(
-        color: Colors.grey[900],
-        elevation: 0,
+        color: const Color.fromARGB(255, 26, 26, 26),
+        elevation: 2,
+        shadowColor: Colors.grey[900],
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(2),
         ),
