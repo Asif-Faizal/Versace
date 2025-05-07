@@ -23,6 +23,21 @@ class AppTheme {
         centerTitle: true,
         iconTheme: IconThemeData(color: Colors.black),
       ),
+      // Switch Theme
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return Colors.black;
+          }
+          return Colors.white;
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return Colors.black.withValues(alpha: 0.5);
+          }
+          return Colors.grey.withValues(alpha: 0.5);
+        }),
+      ),
       // Button Themes
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -31,7 +46,7 @@ class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(2),
           ),
         ),
       ),
@@ -41,7 +56,7 @@ class AppTheme {
           side: const BorderSide(color: Colors.black),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(2),
           ),
         ),
       ),
@@ -54,21 +69,22 @@ class AppTheme {
       // Input Decoration Theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.grey[100],
+        fillColor: Colors.grey[200],
+        labelStyle: TextStyle(color: Colors.grey[700]),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(2),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(2),
+          borderSide: const BorderSide(color: Colors.black, width: 0.2),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.black),
+          borderRadius: BorderRadius.circular(2),
+          borderSide: const BorderSide(color: Colors.black, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(2),
           borderSide: const BorderSide(color: Colors.red),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -78,7 +94,7 @@ class AppTheme {
         color: Colors.white,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(2),
         ),
       ),
       // Text Theme
@@ -86,39 +102,39 @@ class AppTheme {
         // Display styles
         displayLarge: TextStyle(
           fontFamily: 'Balapan',
-          fontSize: 57,
-          fontWeight: FontWeight.w400,
+          fontSize: 30,
+          fontWeight: FontWeight.w100,
           color: Colors.black,
         ),
         displayMedium: TextStyle(
           fontFamily: 'OPTIRadiant',
-          fontSize: 45,
-          fontWeight: FontWeight.w700,
+          fontSize: 35,
+          fontWeight: FontWeight.bold,
           color: Colors.black,
         ),
         displaySmall: TextStyle(
           fontFamily: 'OPTIRadiant',
-          fontSize: 36,
-          fontWeight: FontWeight.w700,
+          fontSize: 30,
+          fontWeight: FontWeight.bold,
           color: Colors.black,
         ),
         
         // Title styles
         titleLarge: TextStyle(
           fontFamily: 'OPTIRadiant',
-          fontSize: 22,
+          fontSize: 28,
           fontWeight: FontWeight.w700,
           color: Colors.black,
         ),
         titleMedium: TextStyle(
           fontFamily: 'OPTIRadiant',
-          fontSize: 16,
+          fontSize: 24,
           fontWeight: FontWeight.w700,
           color: Colors.black,
         ),
         titleSmall: TextStyle(
           fontFamily: 'OPTIRadiant',
-          fontSize: 14,
+          fontSize: 20,
           fontWeight: FontWeight.w700,
           color: Colors.black,
         ),
@@ -126,19 +142,19 @@ class AppTheme {
         // Body styles
         bodyLarge: TextStyle(
           fontFamily: 'Nonesuch',
-          fontSize: 16,
+          fontSize: 20,
           fontWeight: FontWeight.w400,
           color: Colors.black,
         ),
         bodyMedium: TextStyle(
           fontFamily: 'Nonesuch',
-          fontSize: 14,
+          fontSize: 16,
           fontWeight: FontWeight.w400,
           color: Colors.black,
         ),
         bodySmall: TextStyle(
           fontFamily: 'Nonesuch',
-          fontSize: 12,
+          fontSize: 14,
           fontWeight: FontWeight.w400,
           color: Colors.black,
         ),
@@ -146,20 +162,20 @@ class AppTheme {
         // Label styles
         labelLarge: TextStyle(
           fontFamily: 'Nonesuch',
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
           color: Colors.black,
         ),
         labelMedium: TextStyle(
           fontFamily: 'Nonesuch',
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
+          fontSize: 17,
+          fontWeight: FontWeight.bold,
           color: Colors.black,
         ),
         labelSmall: TextStyle(
           fontFamily: 'Nonesuch',
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
+          fontSize: 15,
+          fontWeight: FontWeight.bold,
           color: Colors.black,
         ),
       ),
@@ -188,6 +204,21 @@ class AppTheme {
         centerTitle: true,
         iconTheme: IconThemeData(color: Colors.white),
       ),
+      // Switch Theme
+      switchTheme: SwitchThemeData(
+        thumbColor: MaterialStateProperty.resolveWith((states) {
+          if (states.contains(MaterialState.selected)) {
+            return Colors.white;
+          }
+          return Colors.black;
+        }),
+        trackColor: MaterialStateProperty.resolveWith((states) {
+          if (states.contains(MaterialState.selected)) {
+            return Colors.white.withOpacity(0.5);
+          }
+          return Colors.grey.withOpacity(0.5);
+        }),
+      ),
       // Button Themes
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -196,7 +227,7 @@ class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(2),
           ),
         ),
       ),
@@ -206,7 +237,7 @@ class AppTheme {
           side: const BorderSide(color: Colors.white),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(2),
           ),
         ),
       ),
@@ -220,20 +251,21 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.grey[900],
+        labelStyle: TextStyle(color: Colors.grey[200]),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(2),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(2),
+          borderSide: const BorderSide(color: Colors.white, width: 0.2),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.white),
+          borderRadius: BorderRadius.circular(2),
+          borderSide: const BorderSide(color: Colors.white, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(2),
           borderSide: const BorderSide(color: Colors.red),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -243,7 +275,7 @@ class AppTheme {
         color: Colors.grey[900],
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(2),
         ),
       ),
       // Text Theme
@@ -251,39 +283,39 @@ class AppTheme {
         // Display styles
         displayLarge: TextStyle(
           fontFamily: 'Balapan',
-          fontSize: 57,
-          fontWeight: FontWeight.w400,
+          fontSize: 30,
+          fontWeight: FontWeight.w100,
           color: Colors.white,
         ),
         displayMedium: TextStyle(
           fontFamily: 'OPTIRadiant',
-          fontSize: 45,
-          fontWeight: FontWeight.w700,
+          fontSize: 35,
+          fontWeight: FontWeight.bold,
           color: Colors.white,
         ),
         displaySmall: TextStyle(
           fontFamily: 'OPTIRadiant',
-          fontSize: 36,
-          fontWeight: FontWeight.w700,
+          fontSize: 30,
+          fontWeight: FontWeight.bold,
           color: Colors.white,
         ),
         
         // Title styles
         titleLarge: TextStyle(
           fontFamily: 'OPTIRadiant',
-          fontSize: 22,
+          fontSize: 28,
           fontWeight: FontWeight.w700,
           color: Colors.white,
         ),
         titleMedium: TextStyle(
           fontFamily: 'OPTIRadiant',
-          fontSize: 16,
+          fontSize: 24,
           fontWeight: FontWeight.w700,
           color: Colors.white,
         ),
         titleSmall: TextStyle(
           fontFamily: 'OPTIRadiant',
-          fontSize: 14,
+          fontSize: 20,
           fontWeight: FontWeight.w700,
           color: Colors.white,
         ),
@@ -291,19 +323,19 @@ class AppTheme {
         // Body styles
         bodyLarge: TextStyle(
           fontFamily: 'Nonesuch',
-          fontSize: 16,
+          fontSize: 20,
           fontWeight: FontWeight.w400,
           color: Colors.white,
         ),
         bodyMedium: TextStyle(
           fontFamily: 'Nonesuch',
-          fontSize: 14,
+          fontSize: 17,
           fontWeight: FontWeight.w400,
           color: Colors.white,
         ),
         bodySmall: TextStyle(
           fontFamily: 'Nonesuch',
-          fontSize: 12,
+          fontSize: 15,
           fontWeight: FontWeight.w400,
           color: Colors.white,
         ),
@@ -311,20 +343,20 @@ class AppTheme {
         // Label styles
         labelLarge: TextStyle(
           fontFamily: 'Nonesuch',
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
           color: Colors.white,
         ),
         labelMedium: TextStyle(
           fontFamily: 'Nonesuch',
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
+          fontSize: 17,
+          fontWeight: FontWeight.bold,
           color: Colors.white,
         ),
         labelSmall: TextStyle(
           fontFamily: 'Nonesuch',
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
+          fontSize: 15,
+          fontWeight: FontWeight.bold,
           color: Colors.white,
         ),
       ),
