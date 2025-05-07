@@ -1,6 +1,6 @@
 import winston from 'winston';
 import { Request, Response, NextFunction } from 'express';
-import config from '../config';
+import config from '../config/config';
 
 // Create the logger instance
 const logger = winston.createLogger({

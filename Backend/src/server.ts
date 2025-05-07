@@ -5,8 +5,10 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
-import config from './config';
-import logger, { requestLogger, errorLogger } from './utils/logger';
+import config from './config/config';
+import logger, { requestLogger } from './utils/logger';
+import authRoutes from './routes/auth';
+import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
 
@@ -22,11 +24,15 @@ app.use(requestLogger);
 
 // Basic middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors({
   origin: config.corsOrigin,
   credentials: true
 }));
+
+// Routes
+app.use('/api/auth', authRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {
@@ -34,10 +40,7 @@ app.get('/health', (req, res) => {
 });
 
 // Error handling middleware
-app.use(errorLogger);
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  res.status(500).json({ error: 'Something went wrong!' });
-});
+app.use(errorHandler);
 
 // Connect to MongoDB and start server
 const startServer = async () => {
@@ -63,4 +66,6 @@ process.on('unhandledRejection', (err: Error) => {
   process.exit(1);
 });
 
-startServer(); 
+startServer();
+
+export default app; 
