@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:versace/features/dashboard/presentation/home_screen.dart';
-import 'package:versace/features/splash/presentation/cubit/cubit/splash_cubit.dart';
-import 'package:versace/features/splash/presentation/cubit/cubit/splash_state.dart';
+import 'package:versace/core/routing/routing_constants.dart';
+import 'package:versace/core/routing/routing_extension.dart';
+import 'package:versace/features/splash/cubit/splash/splash_cubit.dart';
+import 'package:versace/features/splash/cubit/splash/splash_state.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -14,9 +15,7 @@ class SplashScreen extends StatelessWidget {
       child: BlocConsumer<SplashCubit, SplashState>(
         listener: (context, state) {
           if (state.type == SplashStateType.completed) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (_) => const HomePage()),
-            );
+            context.navigateToReplace(RouteConstants.home);
           }
         },
         builder: (context, state) {

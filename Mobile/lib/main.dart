@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:versace/core/injection/injection_container.dart' as di;
+import 'package:versace/core/routing/routing_constants.dart';
+import 'package:versace/core/routing/routing_generator.dart';
+import 'package:versace/core/routing/routing_service.dart';
+import 'package:versace/core/storage/storage_helper.dart';
 import 'package:versace/core/theme/app_theme.dart';
 import 'package:versace/core/theme/cubit/theme_cubit.dart';
 import 'package:versace/core/theme/cubit/theme_state.dart';
-import 'package:versace/features/splash/presentation/splash_screen.dart';
+import 'package:versace/features/splash/cubit/splash/splash_cubit.dart';
+
+import 'features/dashboard/cubit/auto_scroll_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,19 +31,34 @@ class MyApp extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => di.getIt<ThemeCubit>(),
-      child: BlocBuilder<ThemeCubit, ThemeState>(
-        builder: (context, state) {
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: 'Versace',
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: state.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-            home: const SplashScreen(),
-          );
-        },
+    return Provider<StorageHelper>(
+      create: (_) => di.getIt<StorageHelper>(),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (_) => di.getIt<ThemeCubit>(),
+          ),
+          BlocProvider(
+            create: (_) => di.getIt<SplashCubit>(),
+          ),
+          BlocProvider(
+            create: (_) => di.getIt<AutoScrollCubit>(),
+          ),
+        ],
+        child: BlocBuilder<ThemeCubit, ThemeState>(
+          builder: (context, state) {
+            return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              title: 'Versace',
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: state.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+              navigatorKey: NavigationService().navigatorKey,
+              initialRoute: RouteConstants.splash,
+              onGenerateRoute: (settings) => RouteGenerator.generateRoute(settings, context),
+            );
+          },
+        ),
       ),
     );
   }
