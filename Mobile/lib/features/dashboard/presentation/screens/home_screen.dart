@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:versace/core/routing/routing_extension.dart';
+import '../../../../core/routing/routing_constants.dart';
 import '../widgets/auto_scroll_text.dart';
 
 class HomePage extends StatelessWidget {
@@ -61,7 +63,9 @@ class HomePage extends StatelessWidget {
         actions: [
           TextButton.icon(
             iconAlignment: IconAlignment.end,
-            onPressed: () {},
+            onPressed: () {
+              context.navigateTo(RouteConstants.search);
+            },
             icon: Icon(Icons.search, size: 15),
             label: Text('Search', style: textTheme.bodyMedium),
           ),

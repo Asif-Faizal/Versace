@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:versace/core/routing/routing_constants.dart';
-import 'package:versace/features/dashboard/presentation/screens/home_screen.dart';
+import 'package:versace/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:versace/features/dashboard/presentation/screens/search_screen.dart';
 import 'package:versace/features/splash/presentation/screens/splash_screen.dart';
 
+import '../../features/dashboard/cubit/bottom_nav_cubit.dart';
+import '../../features/dashboard/cubit/bottom_nav_state.dart';
 import '../../features/splash/presentation/screens/initial_screen.dart';
 
 /// Generates routes for the app using the route name and arguments
@@ -20,7 +22,21 @@ class RouteGenerator {
       case RouteConstants.initial:
         return _buildRoute(const InitialScreen(), settings);
       case RouteConstants.home:
-        return _buildRoute(const HomePage(), settings);
+        final navCubit = context.read<BottomNavCubit>();
+        navCubit.select(const BottomNavState.home());
+        return _buildRoute(const DashboardScreen(), settings);
+      case RouteConstants.favorites:
+        final navCubit = context.read<BottomNavCubit>();
+        navCubit.select(const BottomNavState.favorites());
+        return _buildRoute(const DashboardScreen(), settings);
+      case RouteConstants.cart:
+        final navCubit = context.read<BottomNavCubit>();
+        navCubit.select(const BottomNavState.cart());
+        return _buildRoute(const DashboardScreen(), settings);
+      case RouteConstants.profile:
+        final navCubit = context.read<BottomNavCubit>();
+        navCubit.select(const BottomNavState.profile());
+        return _buildRoute(const DashboardScreen(), settings);
       case RouteConstants.search:
         return _buildRoute(const SearchScreen(), settings);
       default:

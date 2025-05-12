@@ -3,4 +3,7 @@ class RouteConstants {
   static const String initial = '/initial';
   static const String home = '/home';
   static const String search = '/search';
+  static const String favorites = '/favorites';
+  static const String cart = '/cart';
+  static const String profile = '/profile';
 }

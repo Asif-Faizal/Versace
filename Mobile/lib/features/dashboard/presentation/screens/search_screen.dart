@@ -7,6 +7,8 @@ class SearchScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 100,
+        automaticallyImplyLeading: false,
         title: TextFormField(),
       ),
     );
