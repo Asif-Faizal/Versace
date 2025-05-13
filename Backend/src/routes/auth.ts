@@ -47,4 +47,7 @@ router.post('/logout', authenticate, AuthController.logout);
 router.put('/profile', authenticate, AuthController.updateProfile);
 router.delete('/account', authenticate, deleteAccountValidation, AuthController.deleteAccount);
 
+// Get user details
+router.get('/me', authenticate, AuthController.getUserDetails);
+
 export default router; 

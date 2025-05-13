@@ -111,4 +111,40 @@ export class AuthController {
       next(error);
     }
   }
+
+  static async getUserDetails(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user?._id) {
+        throw new AppError(StatusCodes.UNAUTHORIZED, 'Not authenticated');
+      }
+      // Get device info from headers
+      const deviceInfo = AuthController.getDeviceInfo(req);
+      if (!deviceInfo.deviceId) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'Device ID header is required');
+      }
+      // Fetch user details from DB
+      const { User } = await import('../models/User');
+      const user = await User.findById(req.user._id).select('-password -refreshToken');
+      if (!user) {
+        throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+      }
+      // Check for deviceId mismatch
+      if (user.lastUsedDeviceId && user.lastUsedDeviceId !== deviceInfo.deviceId) {
+        throw new AppError(StatusCodes.UNAUTHORIZED, 'Device ID mismatch');
+      }
+      res.status(StatusCodes.OK).json({
+        _id: user._id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        isActive: user.isActive,
+        isEmailVerified: user.isEmailVerified,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
