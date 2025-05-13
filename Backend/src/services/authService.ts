@@ -4,6 +4,7 @@ import config from '../config/config';
 import { StatusCodes } from '../utils/statusCodes';
 import { AppError } from '../middleware/errorHandler';
 import { blacklistToken } from '../middleware/auth';
+import EmailService from './emailService';
 
 interface TokenPayload {
   userId: string;
@@ -285,5 +286,57 @@ export class AuthService {
     }
 
     await User.findByIdAndDelete(userId);
+  }
+
+  private static generateOtp(): string {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+
+  static async sendOtp(email: string): Promise<void> {
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+    }
+
+    if (user.isEmailVerified) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Email is already verified');
+    }
+
+    const otp = this.generateOtp();
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    user.emailOtp = otp;
+    user.emailOtpExpiry = otpExpiry;
+    await user.save();
+
+    await EmailService.sendOtpEmail(email, otp);
+  }
+
+  static async verifyOtp(email: string, otp: string): Promise<void> {
+    const user = await User.findOne({ email }).select('+emailOtp +emailOtpExpiry');
+    if (!user) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+    }
+
+    if (user.isEmailVerified) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Email is already verified');
+    }
+
+    if (!user.emailOtp || !user.emailOtpExpiry) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'No OTP found. Please request a new OTP');
+    }
+
+    if (user.emailOtpExpiry < new Date()) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'OTP has expired. Please request a new OTP');
+    }
+
+    if (user.emailOtp !== otp) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Invalid OTP');
+    }
+
+    user.isEmailVerified = true;
+    user.emailOtp = undefined;
+    user.emailOtpExpiry = undefined;
+    await user.save();
   }
 } 

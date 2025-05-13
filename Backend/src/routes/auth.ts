@@ -26,10 +26,21 @@ const deleteAccountValidation = [
   body('password').notEmpty().withMessage('Password is required for account deletion')
 ];
 
+const otpValidation = [
+  body('email').isEmail().withMessage('Please enter a valid email')
+];
+
+const verifyOtpValidation = [
+  body('email').isEmail().withMessage('Please enter a valid email'),
+  body('otp').isLength({ min: 6, max: 6 }).withMessage('OTP must be 6 digits')
+];
+
 // Public routes
 router.post('/register', registerValidation, AuthController.register);
 router.post('/login', loginValidation, AuthController.login);
 router.post('/refresh-token', refreshTokenValidation, AuthController.refreshToken);
+router.post('/send-otp', otpValidation, AuthController.sendOtp);
+router.post('/verify-otp', verifyOtpValidation, AuthController.verifyOtp);
 
 // Protected routes
 router.post('/logout', authenticate, AuthController.logout);

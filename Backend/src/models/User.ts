@@ -17,6 +17,9 @@ export interface IUser extends Document {
   deviceOs?: string;
   lastUsedDeviceId?: string;
   tokenExpiry?: Date;
+  emailOtp?: string;
+  emailOtpExpiry?: Date;
+  isEmailVerified: boolean;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -82,6 +85,18 @@ const userSchema = new Schema<IUser>({
   },
   tokenExpiry: {
     type: Date
+  },
+  emailOtp: {
+    type: String,
+    select: false
+  },
+  emailOtpExpiry: {
+    type: Date,
+    select: false
+  },
+  isEmailVerified: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true,

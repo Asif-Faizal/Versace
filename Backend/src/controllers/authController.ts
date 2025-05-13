@@ -91,4 +91,24 @@ export class AuthController {
       next(error);
     }
   }
+
+  static async sendOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email } = req.body;
+      await AuthService.sendOtp(email);
+      res.status(StatusCodes.OK).json({ message: 'OTP sent successfully' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async verifyOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, otp } = req.body;
+      await AuthService.verifyOtp(email, otp);
+      res.status(StatusCodes.OK).json({ message: 'Email verified successfully' });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

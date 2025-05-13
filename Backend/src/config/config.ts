@@ -16,6 +16,11 @@ const requiredEnvVars = [
   'RATE_LIMIT_MAX',
   'ACCESS_TOKEN_EXPIRY',
   'REFRESH_TOKEN_EXPIRY',
+  'EMAIL_HOST',
+  'EMAIL_PORT',
+  'EMAIL_USER',
+  'EMAIL_PASSWORD',
+  'EMAIL_FROM'
 ];
 
 // Check for missing variables
@@ -40,4 +45,12 @@ export default {
     accessTokenExpiry: process.env.ACCESS_TOKEN_EXPIRY!,
     refreshTokenExpiry: process.env.REFRESH_TOKEN_EXPIRY!,
   },
+  email: {
+    host: process.env.EMAIL_HOST!,
+    port: parseInt(process.env.EMAIL_PORT!, 10),
+    secure: process.env.EMAIL_SECURE === 'true',
+    user: process.env.EMAIL_USER!,
+    password: process.env.EMAIL_PASSWORD!,
+    from: process.env.EMAIL_FROM!
+  }
 } as const;
