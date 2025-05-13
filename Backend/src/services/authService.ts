@@ -302,8 +302,16 @@ export class AuthService {
       throw new AppError(StatusCodes.BAD_REQUEST, 'Email is already verified');
     }
 
+    // Prevent resending OTP within the resend interval
+    if (user.emailOtpExpiry && user.emailOtp && user.emailOtpExpiry.getTime() > Date.now()) {
+      const timeLeft = user.emailOtpExpiry.getTime() - Date.now();
+      if (timeLeft > (config.otp.expiryMs - config.otp.resendIntervalMs)) {
+        throw new AppError(StatusCodes.TOO_MANY_REQUESTS, 'Please wait for 1 minute before requesting another OTP');
+      }
+    }
+
     const otp = this.generateOtp();
-    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const otpExpiry = new Date(Date.now() + config.otp.expiryMs); // 1 minute
 
     user.emailOtp = otp;
     user.emailOtpExpiry = otpExpiry;

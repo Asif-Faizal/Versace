@@ -52,5 +52,9 @@ export default {
     user: process.env.EMAIL_USER!,
     password: process.env.EMAIL_PASSWORD!,
     from: process.env.EMAIL_FROM!
+  },
+  otp: {
+    expiryMs: 60 * 1000,
+    resendIntervalMs: 60 * 1000
   }
 } as const;
