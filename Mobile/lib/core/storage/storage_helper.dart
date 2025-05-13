@@ -27,20 +27,17 @@ class StorageHelper {
   Box<bool> get _themeBox => Hive.box<bool>(_themeBoxName);
   Box<String> get _authBox => Hive.box<String>(_authBoxName);
   Box<String> get _deviceInfoBox => Hive.box<String>(_deviceInfoBoxName);
+
   // Theme methods
   bool get isDarkMode => _themeBox.get(_isDarkModeKey) ?? false;
-
   Future<void> setDarkMode(bool value) async {
     await _themeBox.put(_isDarkModeKey, value);
   }
 
   // Auth methods
   bool get isLoggedIn => _authBox.get(_isLoggedInKey) == 'true';
-
   String? get accessToken => _authBox.get(_accessTokenKey);
-
   String? get refreshToken => _authBox.get(_refreshTokenKey);
-
   Future<void> setAuthData({
     required bool isLoggedIn,
     String? accessToken,
@@ -54,7 +51,6 @@ class StorageHelper {
       await _authBox.put(_refreshTokenKey, refreshToken);
     }
   }
-
   Future<void> clearAuthData() async {
     await _authBox.deleteAll([
       _isLoggedInKey,
@@ -77,17 +73,11 @@ class StorageHelper {
     await _deviceInfoBox.put(_deviceOsKey, deviceOs);
     await _deviceInfoBox.put(_deviceOsVersionKey, deviceOsVersion);
   }
-
   String? get deviceId => _deviceInfoBox.get(_deviceIdKey);
-
   String? get deviceModel => _deviceInfoBox.get(_deviceModelKey);
-
   String? get deviceManufacturer => _deviceInfoBox.get(_deviceManufacturerKey);
-
   String? get deviceOs => _deviceInfoBox.get(_deviceOsKey);
-
   String? get deviceOsVersion => _deviceInfoBox.get(_deviceOsVersionKey);
-
   Future<void> clearDeviceInfo() async {
     await _deviceInfoBox.deleteAll([
       _deviceIdKey,
@@ -97,4 +87,4 @@ class StorageHelper {
       _deviceOsVersionKey,
     ]);
   }
-} 
+}
