@@ -23,6 +23,7 @@ mixin _$BottomNavState {
     required TResult Function() favorites,
     required TResult Function() cart,
     required TResult Function() profile,
+    required TResult Function() search,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
@@ -30,6 +31,7 @@ mixin _$BottomNavState {
     TResult? Function()? favorites,
     TResult? Function()? cart,
     TResult? Function()? profile,
+    TResult? Function()? search,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
@@ -37,6 +39,7 @@ mixin _$BottomNavState {
     TResult Function()? favorites,
     TResult Function()? cart,
     TResult Function()? profile,
+    TResult Function()? search,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -45,6 +48,7 @@ mixin _$BottomNavState {
     required TResult Function(FavoritesNav value) favorites,
     required TResult Function(CartNav value) cart,
     required TResult Function(ProfileNav value) profile,
+    required TResult Function(SearchNav value) search,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
@@ -52,6 +56,7 @@ mixin _$BottomNavState {
     TResult? Function(FavoritesNav value)? favorites,
     TResult? Function(CartNav value)? cart,
     TResult? Function(ProfileNav value)? profile,
+    TResult? Function(SearchNav value)? search,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
@@ -59,6 +64,7 @@ mixin _$BottomNavState {
     TResult Function(FavoritesNav value)? favorites,
     TResult Function(CartNav value)? cart,
     TResult Function(ProfileNav value)? profile,
+    TResult Function(SearchNav value)? search,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
 }
@@ -132,6 +138,7 @@ class _$HomeNavImpl implements HomeNav {
     required TResult Function() favorites,
     required TResult Function() cart,
     required TResult Function() profile,
+    required TResult Function() search,
   }) {
     return home();
   }
@@ -143,6 +150,7 @@ class _$HomeNavImpl implements HomeNav {
     TResult? Function()? favorites,
     TResult? Function()? cart,
     TResult? Function()? profile,
+    TResult? Function()? search,
   }) {
     return home?.call();
   }
@@ -154,6 +162,7 @@ class _$HomeNavImpl implements HomeNav {
     TResult Function()? favorites,
     TResult Function()? cart,
     TResult Function()? profile,
+    TResult Function()? search,
     required TResult orElse(),
   }) {
     if (home != null) {
@@ -169,6 +178,7 @@ class _$HomeNavImpl implements HomeNav {
     required TResult Function(FavoritesNav value) favorites,
     required TResult Function(CartNav value) cart,
     required TResult Function(ProfileNav value) profile,
+    required TResult Function(SearchNav value) search,
   }) {
     return home(this);
   }
@@ -180,6 +190,7 @@ class _$HomeNavImpl implements HomeNav {
     TResult? Function(FavoritesNav value)? favorites,
     TResult? Function(CartNav value)? cart,
     TResult? Function(ProfileNav value)? profile,
+    TResult? Function(SearchNav value)? search,
   }) {
     return home?.call(this);
   }
@@ -191,6 +202,7 @@ class _$HomeNavImpl implements HomeNav {
     TResult Function(FavoritesNav value)? favorites,
     TResult Function(CartNav value)? cart,
     TResult Function(ProfileNav value)? profile,
+    TResult Function(SearchNav value)? search,
     required TResult orElse(),
   }) {
     if (home != null) {
@@ -251,6 +263,7 @@ class _$FavoritesNavImpl implements FavoritesNav {
     required TResult Function() favorites,
     required TResult Function() cart,
     required TResult Function() profile,
+    required TResult Function() search,
   }) {
     return favorites();
   }
@@ -262,6 +275,7 @@ class _$FavoritesNavImpl implements FavoritesNav {
     TResult? Function()? favorites,
     TResult? Function()? cart,
     TResult? Function()? profile,
+    TResult? Function()? search,
   }) {
     return favorites?.call();
   }
@@ -273,6 +287,7 @@ class _$FavoritesNavImpl implements FavoritesNav {
     TResult Function()? favorites,
     TResult Function()? cart,
     TResult Function()? profile,
+    TResult Function()? search,
     required TResult orElse(),
   }) {
     if (favorites != null) {
@@ -288,6 +303,7 @@ class _$FavoritesNavImpl implements FavoritesNav {
     required TResult Function(FavoritesNav value) favorites,
     required TResult Function(CartNav value) cart,
     required TResult Function(ProfileNav value) profile,
+    required TResult Function(SearchNav value) search,
   }) {
     return favorites(this);
   }
@@ -299,6 +315,7 @@ class _$FavoritesNavImpl implements FavoritesNav {
     TResult? Function(FavoritesNav value)? favorites,
     TResult? Function(CartNav value)? cart,
     TResult? Function(ProfileNav value)? profile,
+    TResult? Function(SearchNav value)? search,
   }) {
     return favorites?.call(this);
   }
@@ -310,6 +327,7 @@ class _$FavoritesNavImpl implements FavoritesNav {
     TResult Function(FavoritesNav value)? favorites,
     TResult Function(CartNav value)? cart,
     TResult Function(ProfileNav value)? profile,
+    TResult Function(SearchNav value)? search,
     required TResult orElse(),
   }) {
     if (favorites != null) {
@@ -370,6 +388,7 @@ class _$CartNavImpl implements CartNav {
     required TResult Function() favorites,
     required TResult Function() cart,
     required TResult Function() profile,
+    required TResult Function() search,
   }) {
     return cart();
   }
@@ -381,6 +400,7 @@ class _$CartNavImpl implements CartNav {
     TResult? Function()? favorites,
     TResult? Function()? cart,
     TResult? Function()? profile,
+    TResult? Function()? search,
   }) {
     return cart?.call();
   }
@@ -392,6 +412,7 @@ class _$CartNavImpl implements CartNav {
     TResult Function()? favorites,
     TResult Function()? cart,
     TResult Function()? profile,
+    TResult Function()? search,
     required TResult orElse(),
   }) {
     if (cart != null) {
@@ -407,6 +428,7 @@ class _$CartNavImpl implements CartNav {
     required TResult Function(FavoritesNav value) favorites,
     required TResult Function(CartNav value) cart,
     required TResult Function(ProfileNav value) profile,
+    required TResult Function(SearchNav value) search,
   }) {
     return cart(this);
   }
@@ -418,6 +440,7 @@ class _$CartNavImpl implements CartNav {
     TResult? Function(FavoritesNav value)? favorites,
     TResult? Function(CartNav value)? cart,
     TResult? Function(ProfileNav value)? profile,
+    TResult? Function(SearchNav value)? search,
   }) {
     return cart?.call(this);
   }
@@ -429,6 +452,7 @@ class _$CartNavImpl implements CartNav {
     TResult Function(FavoritesNav value)? favorites,
     TResult Function(CartNav value)? cart,
     TResult Function(ProfileNav value)? profile,
+    TResult Function(SearchNav value)? search,
     required TResult orElse(),
   }) {
     if (cart != null) {
@@ -489,6 +513,7 @@ class _$ProfileNavImpl implements ProfileNav {
     required TResult Function() favorites,
     required TResult Function() cart,
     required TResult Function() profile,
+    required TResult Function() search,
   }) {
     return profile();
   }
@@ -500,6 +525,7 @@ class _$ProfileNavImpl implements ProfileNav {
     TResult? Function()? favorites,
     TResult? Function()? cart,
     TResult? Function()? profile,
+    TResult? Function()? search,
   }) {
     return profile?.call();
   }
@@ -511,6 +537,7 @@ class _$ProfileNavImpl implements ProfileNav {
     TResult Function()? favorites,
     TResult Function()? cart,
     TResult Function()? profile,
+    TResult Function()? search,
     required TResult orElse(),
   }) {
     if (profile != null) {
@@ -526,6 +553,7 @@ class _$ProfileNavImpl implements ProfileNav {
     required TResult Function(FavoritesNav value) favorites,
     required TResult Function(CartNav value) cart,
     required TResult Function(ProfileNav value) profile,
+    required TResult Function(SearchNav value) search,
   }) {
     return profile(this);
   }
@@ -537,6 +565,7 @@ class _$ProfileNavImpl implements ProfileNav {
     TResult? Function(FavoritesNav value)? favorites,
     TResult? Function(CartNav value)? cart,
     TResult? Function(ProfileNav value)? profile,
+    TResult? Function(SearchNav value)? search,
   }) {
     return profile?.call(this);
   }
@@ -548,6 +577,7 @@ class _$ProfileNavImpl implements ProfileNav {
     TResult Function(FavoritesNav value)? favorites,
     TResult Function(CartNav value)? cart,
     TResult Function(ProfileNav value)? profile,
+    TResult Function(SearchNav value)? search,
     required TResult orElse(),
   }) {
     if (profile != null) {
@@ -559,4 +589,129 @@ class _$ProfileNavImpl implements ProfileNav {
 
 abstract class ProfileNav implements BottomNavState {
   const factory ProfileNav() = _$ProfileNavImpl;
+}
+
+/// @nodoc
+abstract class _$$SearchNavImplCopyWith<$Res> {
+  factory _$$SearchNavImplCopyWith(
+    _$SearchNavImpl value,
+    $Res Function(_$SearchNavImpl) then,
+  ) = __$$SearchNavImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$SearchNavImplCopyWithImpl<$Res>
+    extends _$BottomNavStateCopyWithImpl<$Res, _$SearchNavImpl>
+    implements _$$SearchNavImplCopyWith<$Res> {
+  __$$SearchNavImplCopyWithImpl(
+    _$SearchNavImpl _value,
+    $Res Function(_$SearchNavImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of BottomNavState
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+
+class _$SearchNavImpl implements SearchNav {
+  const _$SearchNavImpl();
+
+  @override
+  String toString() {
+    return 'BottomNavState.search()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$SearchNavImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() home,
+    required TResult Function() favorites,
+    required TResult Function() cart,
+    required TResult Function() profile,
+    required TResult Function() search,
+  }) {
+    return search();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? home,
+    TResult? Function()? favorites,
+    TResult? Function()? cart,
+    TResult? Function()? profile,
+    TResult? Function()? search,
+  }) {
+    return search?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? home,
+    TResult Function()? favorites,
+    TResult Function()? cart,
+    TResult Function()? profile,
+    TResult Function()? search,
+    required TResult orElse(),
+  }) {
+    if (search != null) {
+      return search();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(HomeNav value) home,
+    required TResult Function(FavoritesNav value) favorites,
+    required TResult Function(CartNav value) cart,
+    required TResult Function(ProfileNav value) profile,
+    required TResult Function(SearchNav value) search,
+  }) {
+    return search(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(HomeNav value)? home,
+    TResult? Function(FavoritesNav value)? favorites,
+    TResult? Function(CartNav value)? cart,
+    TResult? Function(ProfileNav value)? profile,
+    TResult? Function(SearchNav value)? search,
+  }) {
+    return search?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(HomeNav value)? home,
+    TResult Function(FavoritesNav value)? favorites,
+    TResult Function(CartNav value)? cart,
+    TResult Function(ProfileNav value)? profile,
+    TResult Function(SearchNav value)? search,
+    required TResult orElse(),
+  }) {
+    if (search != null) {
+      return search(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class SearchNav implements BottomNavState {
+  const factory SearchNav() = _$SearchNavImpl;
 }

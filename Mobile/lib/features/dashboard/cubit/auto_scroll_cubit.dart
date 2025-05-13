@@ -1,147 +1,86 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:async';
-import 'auto_scroll_state.dart';
+
+class AutoScrollState {
+  final bool isScrolling;
+  final double scrollPosition;
+  final int totalItems;
+
+  const AutoScrollState({
+    this.isScrolling = true,
+    this.scrollPosition = 0.0,
+    this.totalItems = 50,
+  });
+
+  AutoScrollState copyWith({
+    bool? isScrolling,
+    double? scrollPosition,
+    int? totalItems,
+  }) {
+    return AutoScrollState(
+      isScrolling: isScrolling ?? this.isScrolling,
+      scrollPosition: scrollPosition ?? this.scrollPosition,
+      totalItems: totalItems ?? this.totalItems,
+    );
+  }
+}
 
 class AutoScrollCubit extends Cubit<AutoScrollState> {
-  final ScrollController scrollController;
+  final ScrollController scrollController = ScrollController();
   Timer? _scrollTimer;
-  Timer? _updateTimer;
-  bool _isDisposed = false;
   final Duration scrollDuration;
   final double itemWidth;
-  double _textWidth;
-  int _visibleItems = 1;
-  double _currentOffset = 0;
-  bool _isScrolling = true;
 
   AutoScrollCubit({
-    required this.scrollController,
-    required double textWidth,
-    this.scrollDuration = const Duration(milliseconds: 1000),
+    this.scrollDuration = const Duration(milliseconds: 30),
     this.itemWidth = 400,
-  }) : _textWidth = textWidth,
-       super(const AutoScrollState()) {
-    emit(state.copyWith(
-      totalItems: 1,
-      textWidth: textWidth,
-    ));
-    _calculateVisibleItems();
-    _startScrollTimer();
-    _startUpdateTimer();
+  }) : super(const AutoScrollState()) {
+    _startScrolling();
   }
 
-  void _calculateVisibleItems() {
-    if (!scrollController.hasClients || itemWidth <= 0) {
-      emit(state.copyWith(totalItems: 1));
-      return;
-    }
+  void _startScrolling() {
+    _scrollTimer?.cancel();
+    _scrollTimer = Timer.periodic(scrollDuration, (_) {
+      if (!state.isScrolling || !scrollController.hasClients) return;
 
-    try {
-      final screenWidth = scrollController.position.viewportDimension;
-      if (screenWidth <= 0) {
-        emit(state.copyWith(totalItems: 1));
-        return;
-      }
-
-      _visibleItems = (screenWidth / itemWidth).ceil() + 1;
-      if (_visibleItems <= 0) {
-        _visibleItems = 1;
-      }
-
-      emit(state.copyWith(
-        totalItems: _visibleItems,
-        textWidth: _textWidth,
-      ));
-    } catch (e) {
-      emit(state.copyWith(totalItems: 1));
-    }
-  }
-
-  // Separate timer for continuous scrolling (no UI updates)
-  void _startScrollTimer() {
-    if (_scrollTimer != null) {
-      _scrollTimer?.cancel();
-    }
-
-    const scrollStep = 2.0;
-    const updateInterval = Duration(milliseconds: 16); // 60 FPS
-
-    _scrollTimer = Timer.periodic(updateInterval, (timer) {
-      if (_isDisposed || !scrollController.hasClients || !_isScrolling) {
-        return;
-      }
-
-      try {
-        _currentOffset += scrollStep;
-        final maxScroll = itemWidth * _visibleItems;
-        
-        if (_currentOffset >= maxScroll) {
-          _currentOffset = 0;
-          scrollController.jumpTo(0);
-        } else {
-          scrollController.jumpTo(_currentOffset);
-        }
-      } catch (e) {
-        pauseScrolling();
-      }
-    });
-  }
-
-  // Separate timer for UI updates (very infrequent)
-  void _startUpdateTimer() {
-    if (_updateTimer != null) {
-      _updateTimer?.cancel();
-    }
-
-    // Update UI much less frequently (every 3 seconds)
-    _updateTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      if (_isDisposed || !_isScrolling) {
-        return;
-      }
-
-      try {
-        if (scrollController.hasClients) {
-          final currentIndex = (_currentOffset / itemWidth).floor() % _visibleItems;
-          emit(state.copyWith(
-            currentIndex: currentIndex,
-            isScrolling: true,
-          ));
-        }
-      } catch (e) {
-        // Ignore UI update errors
+      final currentPosition = scrollController.position.pixels;
+      final maxExtent = scrollController.position.maxScrollExtent;
+      
+      // Add small increment for smooth scrolling
+      final nextPosition = currentPosition + 2;
+      
+      // Reset to beginning when reaching the end
+      if (nextPosition >= maxExtent) {
+        scrollController.jumpTo(0);
+        emit(state.copyWith(scrollPosition: 0));
+      } else {
+        scrollController.jumpTo(nextPosition);
+        emit(state.copyWith(scrollPosition: nextPosition));
       }
     });
   }
 
   void pauseScrolling() {
-    _isScrolling = false;
     _scrollTimer?.cancel();
-    _updateTimer?.cancel();
     emit(state.copyWith(isScrolling: false));
   }
 
   void resumeScrolling() {
-    if (!_isScrolling) {
-      _isScrolling = true;
-      _startScrollTimer();
-      _startUpdateTimer();
+    if (!state.isScrolling) {
+      emit(state.copyWith(isScrolling: true));
+      _startScrolling();
     }
   }
 
-  void updateTextWidth(double newWidth) {
-    if (newWidth != _textWidth) {
-      _textWidth = newWidth;
-      emit(state.copyWith(textWidth: newWidth));
-      _calculateVisibleItems();
-    }
+  void resetScrollPosition() {
+    scrollController.jumpTo(0);
+    emit(state.copyWith(scrollPosition: 0));
   }
 
   @override
   Future<void> close() {
-    _isDisposed = true;
     _scrollTimer?.cancel();
-    _updateTimer?.cancel();
     scrollController.dispose();
     return super.close();
   }

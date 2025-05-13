@@ -29,6 +29,12 @@ flutter:
   assets:
     - lib/assets/images/logo-white.png
     - lib/assets/images/logo-black.png
+    - lib/assets/images/img.jpg
+    - lib/assets/images/shirt.jpg
+    - lib/assets/images/collection1.jpg
+    - lib/assets/images/collection2.jpg
+    - lib/assets/images/broken.png
+    - lib/assets/images/shopping-cart.png
 
   fonts:
     - family: Balapan

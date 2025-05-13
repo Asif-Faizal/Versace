@@ -12,6 +12,11 @@ export interface IUser extends Document {
   role: 'user' | 'admin';
   isActive: boolean;
   refreshToken?: string;
+  deviceId?: string;
+  deviceModel?: string;
+  deviceOs?: string;
+  lastUsedDeviceId?: string;
+  tokenExpiry?: Date;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -58,6 +63,25 @@ const userSchema = new Schema<IUser>({
   refreshToken: {
     type: String,
     select: false
+  },
+  deviceId: {
+    type: String,
+    trim: true
+  },
+  deviceModel: {
+    type: String,
+    trim: true
+  },
+  deviceOs: {
+    type: String,
+    trim: true
+  },
+  lastUsedDeviceId: {
+    type: String,
+    trim: true
+  },
+  tokenExpiry: {
+    type: Date
   }
 }, {
   timestamps: true,

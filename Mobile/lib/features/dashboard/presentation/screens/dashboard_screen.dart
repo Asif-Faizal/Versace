@@ -7,6 +7,7 @@ import 'home_screen.dart';
 import 'favirites_screen.dart';
 import 'cart_screen.dart';
 import 'profile_screen.dart';
+import 'search_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -29,6 +30,7 @@ class DashboardScreen extends StatelessWidget {
       favorites: () => const FavoritesScreen(),
       cart: () => const CartScreen(),
       profile: () => const ProfileScreen(),
+      search: () => const SearchScreen(),
     );
   }
 } 

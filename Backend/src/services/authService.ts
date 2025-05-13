@@ -3,6 +3,7 @@ import { User, IUser } from '../models/User';
 import config from '../config/config';
 import { StatusCodes } from '../utils/statusCodes';
 import { AppError } from '../middleware/errorHandler';
+import { blacklistToken } from '../middleware/auth';
 
 interface TokenPayload {
   userId: string;
@@ -20,6 +21,12 @@ interface AuthResponse {
   };
   accessToken: string;
   refreshToken: string;
+}
+
+interface DeviceInfo {
+  deviceId?: string;
+  deviceModel?: string;
+  deviceOs?: string;
 }
 
 export class AuthService {
@@ -49,11 +56,24 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
+  private static validateDevice(user: IUser, deviceInfo?: DeviceInfo): void {
+    if (!deviceInfo?.deviceId) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Device ID is required');
+    }
+
+    if (user.lastUsedDeviceId && user.lastUsedDeviceId !== deviceInfo.deviceId) {
+      throw new AppError(StatusCodes.FORBIDDEN, 'Access denied: Device mismatch');
+    }
+  }
+
   static async register(userData: {
     email: string;
     password: string;
     firstName: string;
     lastName: string;
+    deviceId?: string;
+    deviceModel?: string;
+    deviceOs?: string;
   }): Promise<AuthResponse> {
     const existingUser = await User.findOne({ email: userData.email });
     if (existingUser) {
@@ -64,6 +84,8 @@ export class AuthService {
     const tokens = this.generateTokens(user);
 
     user.refreshToken = tokens.refreshToken;
+    user.lastUsedDeviceId = userData.deviceId;
+    user.tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
     await user.save();
 
     return {
@@ -78,7 +100,7 @@ export class AuthService {
     };
   }
 
-  static async login(email: string, password: string): Promise<AuthResponse> {
+  static async login(email: string, password: string, deviceInfo?: DeviceInfo): Promise<AuthResponse> {
     const user = await User.findOne({ email });
     if (!user) {
       throw new AppError(StatusCodes.UNAUTHORIZED, 'Invalid credentials');
@@ -89,9 +111,20 @@ export class AuthService {
       throw new AppError(StatusCodes.UNAUTHORIZED, 'Invalid credentials');
     }
 
+    this.validateDevice(user, deviceInfo);
+
+    // Update device information if provided
+    if (deviceInfo) {
+      user.deviceId = deviceInfo.deviceId;
+      user.deviceModel = deviceInfo.deviceModel;
+      user.deviceOs = deviceInfo.deviceOs;
+      user.lastUsedDeviceId = deviceInfo.deviceId;
+    }
+
     const tokens = this.generateTokens(user);
 
     user.refreshToken = tokens.refreshToken;
+    user.tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
     await user.save();
 
     return {
@@ -106,22 +139,38 @@ export class AuthService {
     };
   }
 
-  static async refreshTokens(refreshToken: string): Promise<AuthResponse> {
+  static async refreshTokens(refreshToken: string, deviceInfo?: DeviceInfo): Promise<AuthResponse> {
     if (!config.jwtSecret) {
       throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR, 'JWT secret is not configured');
     }
 
     try {
       const decoded = jwt.verify(refreshToken, config.jwtSecret) as TokenPayload;
-      const user = await User.findById(decoded.userId);
+      const user = await User.findById(decoded.userId).select('+refreshToken');
 
       if (!user || user.refreshToken !== refreshToken) {
         throw new AppError(StatusCodes.UNAUTHORIZED, 'Invalid refresh token');
       }
 
+      // Check if token has expired
+      if (user.tokenExpiry && user.tokenExpiry < new Date()) {
+        throw new AppError(StatusCodes.UNAUTHORIZED, 'Token has expired');
+      }
+
+      this.validateDevice(user, deviceInfo);
+
+      // Update device information if provided
+      if (deviceInfo) {
+        user.deviceId = deviceInfo.deviceId;
+        user.deviceModel = deviceInfo.deviceModel;
+        user.deviceOs = deviceInfo.deviceOs;
+        user.lastUsedDeviceId = deviceInfo.deviceId;
+      }
+
       const tokens = this.generateTokens(user);
 
       user.refreshToken = tokens.refreshToken;
+      user.tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
       await user.save();
 
       return {
@@ -142,22 +191,53 @@ export class AuthService {
     }
   }
 
-  static async logout(userId: string): Promise<void> {
-    const user = await User.findByIdAndUpdate(userId, { refreshToken: null });
-    if (!user) {
-      throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
-    }
-  }
-
-  static async updateUser(userId: string, updateData: Partial<IUser>): Promise<AuthResponse> {
+  static async logout(userId: string, deviceInfo?: DeviceInfo, accessToken?: string): Promise<void> {
     const user = await User.findById(userId);
     if (!user) {
       throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
     }
 
+    this.validateDevice(user, deviceInfo);
+
+    // Update device information if provided
+    if (deviceInfo) {
+      user.deviceId = deviceInfo.deviceId;
+      user.deviceModel = deviceInfo.deviceModel;
+      user.deviceOs = deviceInfo.deviceOs;
+    }
+
+    // Invalidate tokens
+    user.refreshToken = undefined;
+    user.tokenExpiry = new Date(0); // Set to epoch time to ensure token is expired
+    
+    // Blacklist the access token if provided
+    if (accessToken) {
+      blacklistToken(accessToken);
+    }
+
+    await user.save();
+  }
+
+  static async updateUser(userId: string, updateData: Partial<IUser>, deviceInfo?: DeviceInfo): Promise<AuthResponse> {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
+    }
+
+    this.validateDevice(user, deviceInfo);
+
     // Prevent updating sensitive fields
     const { password, role, refreshToken, ...safeUpdateData } = updateData;
     Object.assign(user, safeUpdateData);
+
+    // Update device information if provided
+    if (deviceInfo) {
+      user.deviceId = deviceInfo.deviceId;
+      user.deviceModel = deviceInfo.deviceModel;
+      user.deviceOs = deviceInfo.deviceOs;
+      user.lastUsedDeviceId = deviceInfo.deviceId;
+    }
+
     await user.save();
 
     const tokens = this.generateTokens(user);
@@ -174,10 +254,19 @@ export class AuthService {
     };
   }
 
-  static async deleteUser(userId: string): Promise<void> {
-    const result = await User.findByIdAndDelete(userId);
-    if (!result) {
+  static async deleteUser(userId: string, deviceInfo?: DeviceInfo): Promise<void> {
+    const user = await User.findById(userId);
+    if (!user) {
       throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
     }
+
+    this.validateDevice(user, deviceInfo);
+
+    // Log device information before deletion if provided
+    if (deviceInfo) {
+      console.log(`User deleted from device: ${deviceInfo.deviceId}, Model: ${deviceInfo.deviceModel}, OS: ${deviceInfo.deviceOs}`);
+    }
+
+    await User.findByIdAndDelete(userId);
   }
 } 

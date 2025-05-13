@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:versace/core/routing/routing_constants.dart';
 import 'package:versace/features/dashboard/presentation/screens/dashboard_screen.dart';
-import 'package:versace/features/dashboard/presentation/screens/search_screen.dart';
 import 'package:versace/features/splash/presentation/screens/splash_screen.dart';
 
 import '../../features/dashboard/cubit/bottom_nav_cubit.dart';
@@ -38,7 +37,9 @@ class RouteGenerator {
         navCubit.select(const BottomNavState.profile());
         return _buildRoute(const DashboardScreen(), settings);
       case RouteConstants.search:
-        return _buildRoute(const SearchScreen(), settings);
+        final navCubit = context.read<BottomNavCubit>();
+        navCubit.select(const BottomNavState.search());
+        return _buildRoute(const DashboardScreen(), settings);
       default:
         return _errorRoute('Error', context);
     }

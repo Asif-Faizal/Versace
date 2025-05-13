@@ -8,4 +8,5 @@ class BottomNavState with _$BottomNavState {
   const factory BottomNavState.favorites() = FavoritesNav;
   const factory BottomNavState.cart() = CartNav;
   const factory BottomNavState.profile() = ProfileNav;
+  const factory BottomNavState.search() = SearchNav;
 } 

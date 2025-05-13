@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../cubit/auto_scroll_cubit.dart';
-import '../../cubit/auto_scroll_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../cubit/auto_scroll_cubit.dart';
 import 'package:versace/core/injection/injection_container.dart';
 
-class AutoScrollText extends StatefulWidget {
+class AutoScrollText extends StatelessWidget {
   final String text;
   final TextStyle? style;
   final double itemWidth;
@@ -16,115 +15,81 @@ class AutoScrollText extends StatefulWidget {
     required this.text,
     this.style,
     this.itemWidth = 400,
-    this.scrollDuration = const Duration(milliseconds: 1000),
+    this.scrollDuration = const Duration(milliseconds: 30),
     this.margin = const EdgeInsets.symmetric(horizontal: 8),
   });
 
   @override
-  State<AutoScrollText> createState() => _AutoScrollTextState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => getIt<AutoScrollCubit>(),
+      child: _AutoScrollTextView(
+        text: text,
+        style: style,
+        itemWidth: itemWidth,
+        margin: margin,
+      ),
+    );
+  }
 }
 
-class _AutoScrollTextState extends State<AutoScrollText> with SingleTickerProviderStateMixin {
-  late final ScrollController _scrollController;
-  late final AutoScrollCubit _cubit;
-  final GlobalKey _textKey = GlobalKey();
+class _AutoScrollTextView extends StatelessWidget {
+  final String text;
+  final TextStyle? style;
+  final double itemWidth;
+  final EdgeInsets margin;
 
-  @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController();
-    _cubit = getIt<AutoScrollCubit>(
-      param1: _scrollController,
-      param2: 0.0,
-    );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _measureTextWidth();
-    });
-  }
-
-  void _measureTextWidth() {
-    final RenderBox? renderBox = _textKey.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox != null) {
-      final textWidth = renderBox.size.width;
-      if (textWidth > 0) {
-        _cubit.updateTextWidth(textWidth);
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
+  const _AutoScrollTextView({
+    required this.text,
+    this.style,
+    required this.itemWidth,
+    required this.margin,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Get theme-related properties outside the BlocBuilder for efficiency
-    final primaryColor = Theme.of(context).primaryColor;
-    final defaultColor = widget.style?.color;
+    // Get direct theme colors
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    final cubit = context.read<AutoScrollCubit>();
     
-    return BlocProvider.value(
-      value: _cubit,
-      child: BlocBuilder<AutoScrollCubit, AutoScrollState>(
-        buildWhen: (previous, current) => 
-          previous.currentIndex != current.currentIndex || 
-          previous.totalItems != current.totalItems,
-        builder: (context, state) {
-          return GestureDetector(
-            onTapDown: (_) => context.read<AutoScrollCubit>().pauseScrolling(),
-            onTapUp: (_) => context.read<AutoScrollCubit>().resumeScrolling(),
-            child: SizedBox(
-              height: 40,
-              child: Stack(
-                children: [
-                  // Hidden text for measurement
-                  Positioned(
-                    left: -9999,
-                    child: Text(
-                      widget.text,
-                      key: _textKey,
-                      style: widget.style,
+    // Initialize scroll controller after build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!cubit.scrollController.hasClients) return;
+    });
+    
+    return BlocBuilder<AutoScrollCubit, AutoScrollState>(
+      builder: (context, state) {
+        return SizedBox(
+          height: 40,
+          child: ListView.builder(
+            controller: cubit.scrollController,
+            scrollDirection: Axis.horizontal,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: state.totalItems,
+            itemBuilder: (context, index) {
+              // Highlight one item every 10 positions
+              final isHighlighted = index % 10 == 0;
+              
+              return Container(
+                width: itemWidth,
+                margin: margin,
+                child: Center(
+                  child: Text(
+                    text,
+                    style: (style ?? TextStyle(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : Colors.black,
+                    )).copyWith(
+                      color: isHighlighted ? primaryColor : null,
                     ),
                   ),
-                  // Scrollable text with smooth animation
-                  ListView.builder(
-                    controller: _scrollController,
-                    scrollDirection: Axis.horizontal,
-                    itemCount: state.totalItems * 3,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      final isCurrentIndex = index % state.totalItems == state.currentIndex;
-                      
-                      // Use AnimatedDefaultTextStyle for smooth text color transitions
-                      return Container(
-                        width: widget.itemWidth,
-                        margin: widget.margin,
-                        child: Center(
-                          child: AnimatedDefaultTextStyle(
-                            duration: const Duration(milliseconds: 800),
-                            curve: Curves.easeInOut,
-                            style: widget.style?.copyWith(
-                              color: isCurrentIndex 
-                                  ? primaryColor 
-                                  : defaultColor,
-                            ) ?? TextStyle(
-                              color: isCurrentIndex 
-                                  ? primaryColor 
-                                  : Colors.black,
-                            ),
-                            child: Text(widget.text),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 } 

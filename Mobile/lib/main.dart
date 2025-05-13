@@ -12,7 +12,6 @@ import 'package:versace/core/theme/cubit/theme_cubit.dart';
 import 'package:versace/core/theme/cubit/theme_state.dart';
 import 'package:versace/features/splash/cubit/splash/splash_cubit.dart';
 
-import 'features/dashboard/cubit/auto_scroll_cubit.dart';
 import 'features/dashboard/cubit/bottom_nav_cubit.dart';
 
 void main() async {
@@ -41,9 +40,6 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider(
             create: (_) => di.getIt<SplashCubit>(),
-          ),
-          BlocProvider(
-            create: (_) => di.getIt<AutoScrollCubit>(),
           ),
           BlocProvider(
             create: (_) => di.getIt<BottomNavCubit>(),

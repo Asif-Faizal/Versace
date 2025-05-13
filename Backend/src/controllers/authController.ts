@@ -4,9 +4,21 @@ import { StatusCodes } from '../utils/statusCodes';
 import { AppError } from '../middleware/errorHandler';
 
 export class AuthController {
+  private static getDeviceInfo(req: Request) {
+    return {
+      deviceId: req.headers['deviceid'] as string,
+      deviceModel: req.headers['devicemodel'] as string,
+      deviceOs: req.headers['deviceos'] as string
+    };
+  }
+
   static async register(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await AuthService.register(req.body);
+      const deviceInfo = AuthController.getDeviceInfo(req);
+      const result = await AuthService.register({
+        ...req.body,
+        ...deviceInfo
+      });
       res.status(StatusCodes.CREATED).json(result);
     } catch (error) {
       next(error);
@@ -16,7 +28,8 @@ export class AuthController {
   static async login(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, password } = req.body;
-      const result = await AuthService.login(email, password);
+      const deviceInfo = AuthController.getDeviceInfo(req);
+      const result = await AuthService.login(email, password, deviceInfo);
       res.status(StatusCodes.OK).json(result);
     } catch (error) {
       next(error);
@@ -26,7 +39,8 @@ export class AuthController {
   static async refreshToken(req: Request, res: Response, next: NextFunction) {
     try {
       const { refreshToken } = req.body;
-      const result = await AuthService.refreshTokens(refreshToken);
+      const deviceInfo = AuthController.getDeviceInfo(req);
+      const result = await AuthService.refreshTokens(refreshToken, deviceInfo);
       res.status(StatusCodes.OK).json(result);
     } catch (error) {
       next(error);
@@ -38,7 +52,9 @@ export class AuthController {
       if (!req.user?._id) {
         throw new AppError(StatusCodes.UNAUTHORIZED, 'Not authenticated');
       }
-      await AuthService.logout(req.user._id);
+      const deviceInfo = AuthController.getDeviceInfo(req);
+      const accessToken = req.headers.authorization?.split(' ')[1];
+      await AuthService.logout(req.user._id, deviceInfo, accessToken);
       res.status(StatusCodes.NO_CONTENT).send();
     } catch (error) {
       next(error);
@@ -50,7 +66,8 @@ export class AuthController {
       if (!req.user?._id) {
         throw new AppError(StatusCodes.UNAUTHORIZED, 'Not authenticated');
       }
-      const result = await AuthService.updateUser(req.user._id, req.body);
+      const deviceInfo = AuthController.getDeviceInfo(req);
+      const result = await AuthService.updateUser(req.user._id, req.body, deviceInfo);
       res.status(StatusCodes.OK).json(result);
     } catch (error) {
       next(error);
@@ -62,7 +79,8 @@ export class AuthController {
       if (!req.user?._id) {
         throw new AppError(StatusCodes.UNAUTHORIZED, 'Not authenticated');
       }
-      await AuthService.deleteUser(req.user._id);
+      const deviceInfo = AuthController.getDeviceInfo(req);
+      await AuthService.deleteUser(req.user._id, deviceInfo);
       res.status(StatusCodes.NO_CONTENT).send();
     } catch (error) {
       next(error);

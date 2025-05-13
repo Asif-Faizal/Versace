@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:versace/core/storage/storage_helper.dart';
@@ -24,15 +23,11 @@ Future<void> init() async {
   getIt.registerFactory(() => ThemeCubit(getIt<StorageHelper>()));
   getIt.registerFactory(() => SplashCubit());
   
-  // AutoScrollCubit factory with parameters
-  getIt.registerFactoryParam<AutoScrollCubit, ScrollController, double>(
-    (scrollController, textWidth) => AutoScrollCubit(
-      scrollController: scrollController,
-      textWidth: textWidth,
-      scrollDuration: const Duration(milliseconds: 2000),
-      itemWidth: 200,
-    ),
-  );
+  // Factory for AutoScrollCubit
+  getIt.registerFactory(() => AutoScrollCubit(
+    scrollDuration: const Duration(milliseconds: 30),
+    itemWidth: 400,
+  ));
 
   // Register BottomNavCubit as a singleton
   getIt.registerLazySingleton<BottomNavCubit>(() => BottomNavCubit());

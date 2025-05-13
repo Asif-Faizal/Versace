@@ -17,10 +17,9 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$AutoScrollState {
-  int get currentIndex => throw _privateConstructorUsedError;
   bool get isScrolling => throw _privateConstructorUsedError;
+  double get scrollPosition => throw _privateConstructorUsedError;
   int get totalItems => throw _privateConstructorUsedError;
-  double get textWidth => throw _privateConstructorUsedError;
 
   /// Create a copy of AutoScrollState
   /// with the given fields replaced by the non-null parameter values.
@@ -36,12 +35,7 @@ abstract class $AutoScrollStateCopyWith<$Res> {
     $Res Function(AutoScrollState) then,
   ) = _$AutoScrollStateCopyWithImpl<$Res, AutoScrollState>;
   @useResult
-  $Res call({
-    int currentIndex,
-    bool isScrolling,
-    int totalItems,
-    double textWidth,
-  });
+  $Res call({bool isScrolling, double scrollPosition, int totalItems});
 }
 
 /// @nodoc
@@ -59,33 +53,27 @@ class _$AutoScrollStateCopyWithImpl<$Res, $Val extends AutoScrollState>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? currentIndex = null,
     Object? isScrolling = null,
+    Object? scrollPosition = null,
     Object? totalItems = null,
-    Object? textWidth = null,
   }) {
     return _then(
       _value.copyWith(
-            currentIndex:
-                null == currentIndex
-                    ? _value.currentIndex
-                    : currentIndex // ignore: cast_nullable_to_non_nullable
-                        as int,
             isScrolling:
                 null == isScrolling
                     ? _value.isScrolling
                     : isScrolling // ignore: cast_nullable_to_non_nullable
                         as bool,
+            scrollPosition:
+                null == scrollPosition
+                    ? _value.scrollPosition
+                    : scrollPosition // ignore: cast_nullable_to_non_nullable
+                        as double,
             totalItems:
                 null == totalItems
                     ? _value.totalItems
                     : totalItems // ignore: cast_nullable_to_non_nullable
                         as int,
-            textWidth:
-                null == textWidth
-                    ? _value.textWidth
-                    : textWidth // ignore: cast_nullable_to_non_nullable
-                        as double,
           )
           as $Val,
     );
@@ -101,12 +89,7 @@ abstract class _$$AutoScrollStateImplCopyWith<$Res>
   ) = __$$AutoScrollStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    int currentIndex,
-    bool isScrolling,
-    int totalItems,
-    double textWidth,
-  });
+  $Res call({bool isScrolling, double scrollPosition, int totalItems});
 }
 
 /// @nodoc
@@ -123,33 +106,27 @@ class __$$AutoScrollStateImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? currentIndex = null,
     Object? isScrolling = null,
+    Object? scrollPosition = null,
     Object? totalItems = null,
-    Object? textWidth = null,
   }) {
     return _then(
       _$AutoScrollStateImpl(
-        currentIndex:
-            null == currentIndex
-                ? _value.currentIndex
-                : currentIndex // ignore: cast_nullable_to_non_nullable
-                    as int,
         isScrolling:
             null == isScrolling
                 ? _value.isScrolling
                 : isScrolling // ignore: cast_nullable_to_non_nullable
                     as bool,
+        scrollPosition:
+            null == scrollPosition
+                ? _value.scrollPosition
+                : scrollPosition // ignore: cast_nullable_to_non_nullable
+                    as double,
         totalItems:
             null == totalItems
                 ? _value.totalItems
                 : totalItems // ignore: cast_nullable_to_non_nullable
                     as int,
-        textWidth:
-            null == textWidth
-                ? _value.textWidth
-                : textWidth // ignore: cast_nullable_to_non_nullable
-                    as double,
       ),
     );
   }
@@ -159,28 +136,24 @@ class __$$AutoScrollStateImplCopyWithImpl<$Res>
 
 class _$AutoScrollStateImpl implements _AutoScrollState {
   const _$AutoScrollStateImpl({
-    this.currentIndex = 0,
-    this.isScrolling = false,
-    this.totalItems = 0,
-    this.textWidth = 0.0,
+    this.isScrolling = true,
+    this.scrollPosition = 0.0,
+    this.totalItems = 50,
   });
 
-  @override
-  @JsonKey()
-  final int currentIndex;
   @override
   @JsonKey()
   final bool isScrolling;
   @override
   @JsonKey()
-  final int totalItems;
+  final double scrollPosition;
   @override
   @JsonKey()
-  final double textWidth;
+  final int totalItems;
 
   @override
   String toString() {
-    return 'AutoScrollState(currentIndex: $currentIndex, isScrolling: $isScrolling, totalItems: $totalItems, textWidth: $textWidth)';
+    return 'AutoScrollState(isScrolling: $isScrolling, scrollPosition: $scrollPosition, totalItems: $totalItems)';
   }
 
   @override
@@ -188,24 +161,17 @@ class _$AutoScrollStateImpl implements _AutoScrollState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$AutoScrollStateImpl &&
-            (identical(other.currentIndex, currentIndex) ||
-                other.currentIndex == currentIndex) &&
             (identical(other.isScrolling, isScrolling) ||
                 other.isScrolling == isScrolling) &&
+            (identical(other.scrollPosition, scrollPosition) ||
+                other.scrollPosition == scrollPosition) &&
             (identical(other.totalItems, totalItems) ||
-                other.totalItems == totalItems) &&
-            (identical(other.textWidth, textWidth) ||
-                other.textWidth == textWidth));
+                other.totalItems == totalItems));
   }
 
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    currentIndex,
-    isScrolling,
-    totalItems,
-    textWidth,
-  );
+  int get hashCode =>
+      Object.hash(runtimeType, isScrolling, scrollPosition, totalItems);
 
   /// Create a copy of AutoScrollState
   /// with the given fields replaced by the non-null parameter values.
@@ -221,20 +187,17 @@ class _$AutoScrollStateImpl implements _AutoScrollState {
 
 abstract class _AutoScrollState implements AutoScrollState {
   const factory _AutoScrollState({
-    final int currentIndex,
     final bool isScrolling,
+    final double scrollPosition,
     final int totalItems,
-    final double textWidth,
   }) = _$AutoScrollStateImpl;
 
   @override
-  int get currentIndex;
-  @override
   bool get isScrolling;
   @override
-  int get totalItems;
+  double get scrollPosition;
   @override
-  double get textWidth;
+  int get totalItems;
 
   /// Create a copy of AutoScrollState
   /// with the given fields replaced by the non-null parameter values.

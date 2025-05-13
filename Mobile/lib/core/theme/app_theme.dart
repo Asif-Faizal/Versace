@@ -44,16 +44,16 @@ class AppTheme {
       // Input Decoration Theme
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(3),
           borderSide: const BorderSide(color: Colors.black),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(3),
           borderSide: const BorderSide(color: Colors.black),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(color: Colors.black),
+          borderRadius: BorderRadius.circular(3),
+          borderSide: const BorderSide(color: Colors.black, width: 2),
         ),
       ),
       // Switch Theme
@@ -236,16 +236,16 @@ class AppTheme {
       // Input Decoration Theme
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(3),
           borderSide: const BorderSide(color: Colors.white),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(3),
           borderSide: const BorderSide(color: Colors.white),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(color: Colors.white),
+          borderRadius: BorderRadius.circular(3),
+          borderSide: const BorderSide(color: Colors.white, width: 2),
         ),
       ),
       // Switch Theme

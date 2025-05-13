@@ -10,14 +10,33 @@ class MainBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final navCubit = context.watch<BottomNavCubit>();
     final navState = navCubit.state;
-    return SizedBox(
+    final isSearchActive = navState.maybeWhen(search: () => true, orElse: () => false);
+    final previousState = navCubit.previousState;
+    
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDarkMode ? Colors.black : Colors.white;
+    final borderColor = isDarkMode ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1);
+    
+    return Container(
       height: 40,
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        border: Border(
+          top: BorderSide(
+            color: borderColor,
+            width: 0.5,
+          ),
+        ),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _NavBarItem(
             label: 'Home',
-            selected: navState.maybeWhen(home: () => true, orElse: () => false),
+            selected: navState.maybeWhen(
+              home: () => true, 
+              orElse: () => isSearchActive && previousState?.maybeWhen(home: () => true, orElse: () => false) == true
+            ),
             onTap: () {
               if (!navState.maybeWhen(home: () => true, orElse: () => false)) {
                 context.read<BottomNavCubit>().select(const BottomNavState.home());
@@ -26,7 +45,10 @@ class MainBottomNavBar extends StatelessWidget {
           ),
           _NavBarItem(
             label: 'Favorites',
-            selected: navState.maybeWhen(favorites: () => true, orElse: () => false),
+            selected: navState.maybeWhen(
+              favorites: () => true, 
+              orElse: () => isSearchActive && previousState?.maybeWhen(favorites: () => true, orElse: () => false) == true
+            ),
             onTap: () {
               if (!navState.maybeWhen(favorites: () => true, orElse: () => false)) {
                 context.read<BottomNavCubit>().select(const BottomNavState.favorites());
@@ -35,7 +57,10 @@ class MainBottomNavBar extends StatelessWidget {
           ),
           _NavBarItem(
             label: 'Cart',
-            selected: navState.maybeWhen(cart: () => true, orElse: () => false),
+            selected: navState.maybeWhen(
+              cart: () => true, 
+              orElse: () => isSearchActive && previousState?.maybeWhen(cart: () => true, orElse: () => false) == true
+            ),
             onTap: () {
               if (!navState.maybeWhen(cart: () => true, orElse: () => false)) {
                 context.read<BottomNavCubit>().select(const BottomNavState.cart());
@@ -44,7 +69,10 @@ class MainBottomNavBar extends StatelessWidget {
           ),
           _NavBarItem(
             label: 'Profile',
-            selected: navState.maybeWhen(profile: () => true, orElse: () => false),
+            selected: navState.maybeWhen(
+              profile: () => true, 
+              orElse: () => isSearchActive && previousState?.maybeWhen(profile: () => true, orElse: () => false) == true
+            ),
             onTap: () {
               if (!navState.maybeWhen(profile: () => true, orElse: () => false)) {
                 context.read<BottomNavCubit>().select(const BottomNavState.profile());
@@ -65,17 +93,35 @@ class _NavBarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? Theme.of(context).primaryColor : Theme.of(context).textTheme.bodyMedium?.color;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    
+    // Use primary color from colorScheme for selected items
+    final selectedColor = colorScheme.primary;
+    
+    // Use text color from the textTheme for unselected items with reduced opacity
+    final unselectedColor = textTheme.bodyMedium?.color?.withValues(alpha:  0.6);
+    
+    final color = selected ? selectedColor : unselectedColor;
+    
     return Expanded(
       child: InkWell(
         onTap: onTap,
+        overlayColor: WidgetStateProperty.all(Colors.transparent),
         child: Container(
           height: double.infinity,
           alignment: Alignment.center,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(label, style: TextStyle(color: color, fontWeight: selected ? FontWeight.bold : FontWeight.normal)),
+              Text(
+                label, 
+                style: textTheme.bodySmall?.copyWith(
+                  color: color, 
+                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                  fontSize: 14,
+                ),
+              ),
               AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 margin: const EdgeInsets.only(top: 2),
