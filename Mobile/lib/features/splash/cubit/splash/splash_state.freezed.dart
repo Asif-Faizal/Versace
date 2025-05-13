@@ -18,6 +18,11 @@ final _privateConstructorUsedError = UnsupportedError(
 /// @nodoc
 mixin _$SplashState {
   SplashStateType get type => throw _privateConstructorUsedError;
+  String? get deviceId => throw _privateConstructorUsedError;
+  String? get deviceModel => throw _privateConstructorUsedError;
+  String? get deviceManufacturer => throw _privateConstructorUsedError;
+  String? get deviceOs => throw _privateConstructorUsedError;
+  String? get deviceOsVersion => throw _privateConstructorUsedError;
 
   /// Create a copy of SplashState
   /// with the given fields replaced by the non-null parameter values.
@@ -33,7 +38,14 @@ abstract class $SplashStateCopyWith<$Res> {
     $Res Function(SplashState) then,
   ) = _$SplashStateCopyWithImpl<$Res, SplashState>;
   @useResult
-  $Res call({SplashStateType type});
+  $Res call({
+    SplashStateType type,
+    String? deviceId,
+    String? deviceModel,
+    String? deviceManufacturer,
+    String? deviceOs,
+    String? deviceOsVersion,
+  });
 }
 
 /// @nodoc
@@ -50,7 +62,14 @@ class _$SplashStateCopyWithImpl<$Res, $Val extends SplashState>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? type = null}) {
+  $Res call({
+    Object? type = null,
+    Object? deviceId = freezed,
+    Object? deviceModel = freezed,
+    Object? deviceManufacturer = freezed,
+    Object? deviceOs = freezed,
+    Object? deviceOsVersion = freezed,
+  }) {
     return _then(
       _value.copyWith(
             type:
@@ -58,6 +77,31 @@ class _$SplashStateCopyWithImpl<$Res, $Val extends SplashState>
                     ? _value.type
                     : type // ignore: cast_nullable_to_non_nullable
                         as SplashStateType,
+            deviceId:
+                freezed == deviceId
+                    ? _value.deviceId
+                    : deviceId // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            deviceModel:
+                freezed == deviceModel
+                    ? _value.deviceModel
+                    : deviceModel // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            deviceManufacturer:
+                freezed == deviceManufacturer
+                    ? _value.deviceManufacturer
+                    : deviceManufacturer // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            deviceOs:
+                freezed == deviceOs
+                    ? _value.deviceOs
+                    : deviceOs // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            deviceOsVersion:
+                freezed == deviceOsVersion
+                    ? _value.deviceOsVersion
+                    : deviceOsVersion // ignore: cast_nullable_to_non_nullable
+                        as String?,
           )
           as $Val,
     );
@@ -73,7 +117,14 @@ abstract class _$$SplashStateImplCopyWith<$Res>
   ) = __$$SplashStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({SplashStateType type});
+  $Res call({
+    SplashStateType type,
+    String? deviceId,
+    String? deviceModel,
+    String? deviceManufacturer,
+    String? deviceOs,
+    String? deviceOsVersion,
+  });
 }
 
 /// @nodoc
@@ -89,7 +140,14 @@ class __$$SplashStateImplCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? type = null}) {
+  $Res call({
+    Object? type = null,
+    Object? deviceId = freezed,
+    Object? deviceModel = freezed,
+    Object? deviceManufacturer = freezed,
+    Object? deviceOs = freezed,
+    Object? deviceOsVersion = freezed,
+  }) {
     return _then(
       _$SplashStateImpl(
         type:
@@ -97,6 +155,31 @@ class __$$SplashStateImplCopyWithImpl<$Res>
                 ? _value.type
                 : type // ignore: cast_nullable_to_non_nullable
                     as SplashStateType,
+        deviceId:
+            freezed == deviceId
+                ? _value.deviceId
+                : deviceId // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        deviceModel:
+            freezed == deviceModel
+                ? _value.deviceModel
+                : deviceModel // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        deviceManufacturer:
+            freezed == deviceManufacturer
+                ? _value.deviceManufacturer
+                : deviceManufacturer // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        deviceOs:
+            freezed == deviceOs
+                ? _value.deviceOs
+                : deviceOs // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        deviceOsVersion:
+            freezed == deviceOsVersion
+                ? _value.deviceOsVersion
+                : deviceOsVersion // ignore: cast_nullable_to_non_nullable
+                    as String?,
       ),
     );
   }
@@ -105,15 +188,32 @@ class __$$SplashStateImplCopyWithImpl<$Res>
 /// @nodoc
 
 class _$SplashStateImpl implements _SplashState {
-  const _$SplashStateImpl({this.type = SplashStateType.initial});
+  const _$SplashStateImpl({
+    this.type = SplashStateType.initial,
+    this.deviceId,
+    this.deviceModel,
+    this.deviceManufacturer,
+    this.deviceOs,
+    this.deviceOsVersion,
+  });
 
   @override
   @JsonKey()
   final SplashStateType type;
+  @override
+  final String? deviceId;
+  @override
+  final String? deviceModel;
+  @override
+  final String? deviceManufacturer;
+  @override
+  final String? deviceOs;
+  @override
+  final String? deviceOsVersion;
 
   @override
   String toString() {
-    return 'SplashState(type: $type)';
+    return 'SplashState(type: $type, deviceId: $deviceId, deviceModel: $deviceModel, deviceManufacturer: $deviceManufacturer, deviceOs: $deviceOs, deviceOsVersion: $deviceOsVersion)';
   }
 
   @override
@@ -121,11 +221,29 @@ class _$SplashStateImpl implements _SplashState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$SplashStateImpl &&
-            (identical(other.type, type) || other.type == type));
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.deviceId, deviceId) ||
+                other.deviceId == deviceId) &&
+            (identical(other.deviceModel, deviceModel) ||
+                other.deviceModel == deviceModel) &&
+            (identical(other.deviceManufacturer, deviceManufacturer) ||
+                other.deviceManufacturer == deviceManufacturer) &&
+            (identical(other.deviceOs, deviceOs) ||
+                other.deviceOs == deviceOs) &&
+            (identical(other.deviceOsVersion, deviceOsVersion) ||
+                other.deviceOsVersion == deviceOsVersion));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, type);
+  int get hashCode => Object.hash(
+    runtimeType,
+    type,
+    deviceId,
+    deviceModel,
+    deviceManufacturer,
+    deviceOs,
+    deviceOsVersion,
+  );
 
   /// Create a copy of SplashState
   /// with the given fields replaced by the non-null parameter values.
@@ -137,10 +255,27 @@ class _$SplashStateImpl implements _SplashState {
 }
 
 abstract class _SplashState implements SplashState {
-  const factory _SplashState({final SplashStateType type}) = _$SplashStateImpl;
+  const factory _SplashState({
+    final SplashStateType type,
+    final String? deviceId,
+    final String? deviceModel,
+    final String? deviceManufacturer,
+    final String? deviceOs,
+    final String? deviceOsVersion,
+  }) = _$SplashStateImpl;
 
   @override
   SplashStateType get type;
+  @override
+  String? get deviceId;
+  @override
+  String? get deviceModel;
+  @override
+  String? get deviceManufacturer;
+  @override
+  String? get deviceOs;
+  @override
+  String? get deviceOsVersion;
 
   /// Create a copy of SplashState
   /// with the given fields replaced by the non-null parameter values.

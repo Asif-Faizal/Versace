@@ -6,6 +6,11 @@ part 'splash_state.freezed.dart';
 abstract class SplashState with _$SplashState {
   const factory SplashState({
     @Default(SplashStateType.initial) SplashStateType type,
+    String? deviceId,
+    String? deviceModel,
+    String? deviceManufacturer,
+    String? deviceOs,
+    String? deviceOsVersion,
   }) = _SplashState;
 }
 
