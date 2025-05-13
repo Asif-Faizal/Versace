@@ -89,7 +89,7 @@ class InitialScreen extends StatelessWidget {
               height: 60,
               child: OutlinedButton(
                 onPressed: () {
-                  context.navigateTo(RouteConstants.enterEmail);
+                  context.navigateTo(RouteConstants.registerUser);
                 },
                 child: Text('Create Account'),
               ),

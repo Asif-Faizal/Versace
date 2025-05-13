@@ -52,11 +52,11 @@ class ExceptionHandler {
           e.toString().contains('Connection timed out')) {
         return Left(NetworkFailure());
       }
-      return Left(ServerFailure());
+      return Left(ServerFailure(message: e.toString()));
     } on ServerException catch (e) {
       debugPrint("__________SERVER EXCEPTION____________");
-      debugPrint(e.toString());
-      return Left(ServerFailure());
+      final errorMessage = e.message;
+      return Left(ServerFailure(message: errorMessage));
     } catch (e) {
       debugPrint("__________GENERAL EXCEPTION____________");
       debugPrint(e.toString());

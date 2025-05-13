@@ -6,8 +6,10 @@ import 'package:versace/features/splash/presentation/screens/splash_screen.dart'
 
 import '../../features/dashboard/cubit/bottom_nav_cubit.dart';
 import '../../features/dashboard/cubit/bottom_nav_state.dart';
-import '../../features/register/presentation/screens/enter_email_screen.dart';
+import '../../features/register/presentation/screens/enter_password_screen.dart';
+import '../../features/register/presentation/screens/register_user_screen.dart';
 import '../../features/splash/presentation/screens/initial_screen.dart';
+import 'routing_arguments.dart';
 
 /// Generates routes for the app using the route name and arguments
 class RouteGenerator {
@@ -41,8 +43,13 @@ class RouteGenerator {
         final navCubit = context.read<BottomNavCubit>();
         navCubit.select(const BottomNavState.search());
         return _buildRoute(const DashboardScreen(), settings);
-      case RouteConstants.enterEmail:
-        return _buildRoute(const EnterEmailScreen(), settings);
+      case RouteConstants.registerUser:
+        return _buildRoute(const RegisterUserScreen(), settings);
+      case RouteConstants.enterPassword:
+        if (args is EnterPasswordArguments) {
+          return _buildRoute(EnterPasswordScreen(arguments: args), settings);
+        }
+        return _errorRoute('Error', context);
       default:
         return _errorRoute('Error', context);
     }

@@ -12,6 +12,7 @@ import '../../features/register/data/email_verification/email_verification_repo_
 import '../../features/register/domain/email_verification/email_verification_repo.dart';
 import '../../features/register/domain/email_verification/usecases/sent_email_otp.dart';
 import '../../features/register/domain/email_verification/usecases/verify_email_otp.dart';
+import '../../features/register/presentation/cubits/password_visibility_cubit.dart';
 import '../../features/splash/cubit/splash/splash_cubit.dart';
 
 final getIt = GetIt.instance;
@@ -29,6 +30,7 @@ Future<void> init() async {
   // Cubits
   getIt.registerFactory(() => ThemeCubit(getIt<StorageHelper>()));
   getIt.registerFactory(() => SplashCubit());
+  getIt.registerFactory(() => PasswordVisibilityCubit());
   
   // Factory for AutoScrollCubit
   getIt.registerFactory(() => AutoScrollCubit(

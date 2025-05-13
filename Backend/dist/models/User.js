@@ -39,6 +39,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const errorHandler_1 = require("../middleware/errorHandler");
+const statusCodes_1 = require("../utils/statusCodes");
 const userSchema = new mongoose_1.Schema({
     email: {
         type: String,
@@ -80,6 +82,37 @@ const userSchema = new mongoose_1.Schema({
     refreshToken: {
         type: String,
         select: false
+    },
+    deviceId: {
+        type: String,
+        trim: true
+    },
+    deviceModel: {
+        type: String,
+        trim: true
+    },
+    deviceOs: {
+        type: String,
+        trim: true
+    },
+    lastUsedDeviceId: {
+        type: String,
+        trim: true
+    },
+    tokenExpiry: {
+        type: Date
+    },
+    emailOtp: {
+        type: String,
+        select: false
+    },
+    emailOtpExpiry: {
+        type: Date,
+        select: false
+    },
+    isEmailVerified: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true,
@@ -101,11 +134,16 @@ userSchema.pre('save', async function (next) {
         next();
     }
     catch (error) {
-        next(error);
+        next(new errorHandler_1.AppError(statusCodes_1.StatusCodes.INTERNAL_SERVER_ERROR, 'Error hashing password', false));
     }
 });
 // Compare password method
 userSchema.methods.comparePassword = async function (candidatePassword) {
-    return bcrypt_1.default.compare(candidatePassword, this.password);
+    try {
+        return await bcrypt_1.default.compare(candidatePassword, this.password);
+    }
+    catch (error) {
+        throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.INTERNAL_SERVER_ERROR, 'Error comparing passwords', false);
+    }
 };
 exports.User = mongoose_1.default.model('User', userSchema);

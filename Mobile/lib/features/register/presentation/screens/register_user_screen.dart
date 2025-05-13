@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:versace/core/routing/routing_extension.dart';
+import '../../../../core/routing/routing_arguments.dart';
+import '../../../../core/routing/routing_constants.dart';
 import '../../../../core/util/validate_email.dart';
-import '../../bloc/email_verification/email_verification_bloc.dart';
-import '../../bloc/email_verification/email_verification_event.dart';
 
-class EnterEmailScreen extends StatelessWidget {
-  const EnterEmailScreen({super.key});
+class RegisterUserScreen extends StatelessWidget {
+  const RegisterUserScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final double height = MediaQuery.of(context).size.height;
     final textTheme = Theme.of(context).textTheme;
     final formKey = GlobalKey<FormState>();
     final TextEditingController emailController = TextEditingController();
+    final TextEditingController firstNameController = TextEditingController();
+    final TextEditingController lastNameController = TextEditingController();
 
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-      ),
+      appBar: AppBar(automaticallyImplyLeading: false),
       body: Padding(
         padding: const EdgeInsets.all(15),
         child: Form(
@@ -25,23 +24,41 @@ class EnterEmailScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: height * 0.08),
-              Text(
-                'Welcome!',
-                style: textTheme.titleLarge,
-              ),
+              Text('Welcome!', style: textTheme.titleLarge),
               const SizedBox(height: 10),
               Text(
                 'Please enter your email address to continue.',
                 style: textTheme.bodyMedium,
               ),
               const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 7,
+                    child: TextFormField(
+                    controller: firstNameController,
+                    decoration: InputDecoration(
+                      labelText: 'First Name*',
+                    ),
+                  )),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    flex: 6,
+                    child: TextFormField(
+                      controller: lastNameController,
+                      decoration: InputDecoration(
+                        labelText: 'Last Name',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  labelText: 'Email Address',
-                  hintText: 'Enter your email',
+                  labelText: 'Email Address*',
                   prefixIcon: const Icon(Icons.email_outlined),
                 ),
                 validator: validateEmail,
@@ -57,19 +74,10 @@ class EnterEmailScreen extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () {
                     if (formKey.currentState!.validate()) {
-                      context.read<EmailVerificationBloc>().add(EmailVerificationEvent.sendOtpRequested(email: emailController.text));
-                      // showModalBottomSheet(
-                      //   shape: const RoundedRectangleBorder(
-                      //     borderRadius: BorderRadius.vertical(top: Radius.circular(5)),
-                      //   ),
-                      //   context: context,
-                      //   builder: (context) => OtpBottomSheet(onVerifyTap: (otp){}, title: 'Verify Email', subTitle: 'Enter the 6-digit code sent to your email address', buttonText: 'Verify', mobile: emailController.text),
-                      // );
+                      context.navigateTo( RouteConstants.enterPassword, arguments: EnterPasswordArguments(email: emailController.text, firstName: firstNameController.text, lastName: lastNameController.text));
                     }
                   },
-                  child: const Text(
-                    'Verify Email',
-                  ),
+                  child: const Text('Verify Email'),
                 ),
               ),
               const SizedBox(height: 30),

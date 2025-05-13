@@ -7,3 +7,14 @@ abstract class RouteArguments extends Equatable {
   @override
   bool get stringify => true;
 }
+
+class EnterPasswordArguments extends RouteArguments {
+  final String email;
+  final String firstName;
+  final String lastName;
+
+  const EnterPasswordArguments({required this.email, required this.firstName, required this.lastName});
+
+  @override
+  List<Object?> get props => [email, firstName, lastName];
+}

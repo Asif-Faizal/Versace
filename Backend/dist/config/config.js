@@ -7,22 +7,55 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv_1 = __importDefault(require("dotenv"));
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
 dotenv_1.default.config({ path: envFile });
-if (!process.env.MONGO_URI || !process.env.JWT_SECRET) {
-    throw new Error('Required environment variables are missing');
-}
+// List of required environment variables
+const requiredEnvVars = [
+    'NODE_ENV',
+    'PORT',
+    'MONGO_URI',
+    'JWT_SECRET',
+    'CORS_ORIGIN',
+    'LOG_LEVEL',
+    'RATE_LIMIT_WINDOW_MS',
+    'RATE_LIMIT_MAX',
+    'ACCESS_TOKEN_EXPIRY',
+    'REFRESH_TOKEN_EXPIRY',
+    'EMAIL_HOST',
+    'EMAIL_PORT',
+    'EMAIL_USER',
+    'EMAIL_PASSWORD',
+    'EMAIL_FROM'
+];
+// Check for missing variables
+requiredEnvVars.forEach((name) => {
+    if (!process.env[name]) {
+        throw new Error(`Missing required environment variable: ${name}`);
+    }
+});
 exports.default = {
-    env: process.env.NODE_ENV || 'development',
-    port: process.env.PORT ? parseInt(process.env.PORT, 10) : 5000,
+    env: process.env.NODE_ENV,
+    port: parseInt(process.env.PORT, 10),
     mongoUri: process.env.MONGO_URI,
     jwtSecret: process.env.JWT_SECRET,
     corsOrigin: process.env.CORS_ORIGIN,
-    logLevel: process.env.LOG_LEVEL || 'info',
+    logLevel: process.env.LOG_LEVEL,
     rateLimit: {
-        windowMs: process.env.RATE_LIMIT_WINDOW_MS ? parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) : 15 * 60 * 1000,
-        max: process.env.RATE_LIMIT_MAX ? parseInt(process.env.RATE_LIMIT_MAX, 10) : 100,
+        windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10),
+        max: parseInt(process.env.RATE_LIMIT_MAX, 10),
     },
     jwt: {
-        accessTokenExpiry: process.env.ACCESS_TOKEN_EXPIRY || '15m',
-        refreshTokenExpiry: process.env.REFRESH_TOKEN_EXPIRY || '7d',
+        accessTokenExpiry: process.env.ACCESS_TOKEN_EXPIRY,
+        refreshTokenExpiry: process.env.REFRESH_TOKEN_EXPIRY,
+    },
+    email: {
+        host: process.env.EMAIL_HOST,
+        port: parseInt(process.env.EMAIL_PORT, 10),
+        secure: process.env.EMAIL_SECURE === 'true',
+        user: process.env.EMAIL_USER,
+        password: process.env.EMAIL_PASSWORD,
+        from: process.env.EMAIL_FROM
+    },
+    otp: {
+        expiryMs: 60 * 1000,
+        resendIntervalMs: 60 * 1000
     }
 };

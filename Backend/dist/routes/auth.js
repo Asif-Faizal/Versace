@@ -19,12 +19,26 @@ const loginValidation = [
 const refreshTokenValidation = [
     (0, express_validator_1.body)('refreshToken').notEmpty().withMessage('Refresh token is required')
 ];
+const deleteAccountValidation = [
+    (0, express_validator_1.body)('password').notEmpty().withMessage('Password is required for account deletion')
+];
+const otpValidation = [
+    (0, express_validator_1.body)('email').isEmail().withMessage('Please enter a valid email')
+];
+const verifyOtpValidation = [
+    (0, express_validator_1.body)('email').isEmail().withMessage('Please enter a valid email'),
+    (0, express_validator_1.body)('otp').isLength({ min: 6, max: 6 }).withMessage('OTP must be 6 digits')
+];
 // Public routes
 router.post('/register', registerValidation, authController_1.AuthController.register);
 router.post('/login', loginValidation, authController_1.AuthController.login);
 router.post('/refresh-token', refreshTokenValidation, authController_1.AuthController.refreshToken);
+router.post('/send-otp', otpValidation, authController_1.AuthController.sendOtp);
+router.post('/verify-otp', verifyOtpValidation, authController_1.AuthController.verifyOtp);
 // Protected routes
 router.post('/logout', auth_1.authenticate, authController_1.AuthController.logout);
 router.put('/profile', auth_1.authenticate, authController_1.AuthController.updateProfile);
-router.delete('/account', auth_1.authenticate, authController_1.AuthController.deleteAccount);
+router.delete('/account', auth_1.authenticate, deleteAccountValidation, authController_1.AuthController.deleteAccount);
+// Get user details
+router.get('/me', auth_1.authenticate, authController_1.AuthController.getUserDetails);
 exports.default = router;

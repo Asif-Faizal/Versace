@@ -8,5 +8,6 @@ class RouteConstants {
   static const String profile = '/profile';
 
   // Register
-  static const String enterEmail = '/enter-email';
+  static const String registerUser = '/register-user';
+  static const String enterPassword = '/enter-password';
 }
