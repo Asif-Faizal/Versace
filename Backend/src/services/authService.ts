@@ -254,17 +254,34 @@ export class AuthService {
     };
   }
 
-  static async deleteUser(userId: string, deviceInfo?: DeviceInfo): Promise<void> {
-    const user = await User.findById(userId);
+  static async deleteUser(
+    userId: string, 
+    password: string, 
+    deviceInfo?: DeviceInfo, 
+    accessToken?: string
+  ): Promise<void> {
+    const user = await User.findById(userId).select('+password');
     if (!user) {
       throw new AppError(StatusCodes.NOT_FOUND, 'User not found');
     }
 
+    // Verify password
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) {
+      throw new AppError(StatusCodes.UNAUTHORIZED, 'Invalid password');
+    }
+
+    // Validate device
     this.validateDevice(user, deviceInfo);
 
     // Log device information before deletion if provided
     if (deviceInfo) {
       console.log(`User deleted from device: ${deviceInfo.deviceId}, Model: ${deviceInfo.deviceModel}, OS: ${deviceInfo.deviceOs}`);
+    }
+
+    // Blacklist the access token if provided
+    if (accessToken) {
+      blacklistToken(accessToken);
     }
 
     await User.findByIdAndDelete(userId);

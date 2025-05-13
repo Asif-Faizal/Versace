@@ -22,6 +22,10 @@ const refreshTokenValidation = [
   body('refreshToken').notEmpty().withMessage('Refresh token is required')
 ];
 
+const deleteAccountValidation = [
+  body('password').notEmpty().withMessage('Password is required for account deletion')
+];
+
 // Public routes
 router.post('/register', registerValidation, AuthController.register);
 router.post('/login', loginValidation, AuthController.login);
@@ -30,6 +34,6 @@ router.post('/refresh-token', refreshTokenValidation, AuthController.refreshToke
 // Protected routes
 router.post('/logout', authenticate, AuthController.logout);
 router.put('/profile', authenticate, AuthController.updateProfile);
-router.delete('/account', authenticate, AuthController.deleteAccount);
+router.delete('/account', authenticate, deleteAccountValidation, AuthController.deleteAccount);
 
 export default router; 

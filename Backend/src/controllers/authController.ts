@@ -79,8 +79,13 @@ export class AuthController {
       if (!req.user?._id) {
         throw new AppError(StatusCodes.UNAUTHORIZED, 'Not authenticated');
       }
+      const { password } = req.body;
+      if (!password) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'Password is required for account deletion');
+      }
       const deviceInfo = AuthController.getDeviceInfo(req);
-      await AuthService.deleteUser(req.user._id, deviceInfo);
+      const accessToken = req.headers.authorization?.split(' ')[1];
+      await AuthService.deleteUser(req.user._id, password, deviceInfo, accessToken);
       res.status(StatusCodes.NO_CONTENT).send();
     } catch (error) {
       next(error);
