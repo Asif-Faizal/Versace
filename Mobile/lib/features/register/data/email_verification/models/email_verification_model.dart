@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../domain/email_verification/email_verification_entity.dart';
+import '../../../domain/email_verification/entity/email_verification_entity.dart';
 
 part 'email_verification_model.freezed.dart';
 part 'email_verification_model.g.dart';

@@ -4,7 +4,14 @@ import 'package:versace/core/storage/storage_helper.dart';
 import 'package:versace/core/theme/cubit/theme_cubit.dart';
 import 'package:versace/features/dashboard/cubit/auto_scroll_cubit.dart';
 import 'package:versace/features/dashboard/cubit/bottom_nav_cubit.dart';
+import 'package:http/http.dart' as http;
 
+import '../../features/register/bloc/email_verification/email_verification_bloc.dart';
+import '../../features/register/data/email_verification/email_verification_datasource.dart';
+import '../../features/register/data/email_verification/email_verification_repo_impl.dart';
+import '../../features/register/domain/email_verification/email_verification_repo.dart';
+import '../../features/register/domain/email_verification/usecases/sent_email_otp.dart';
+import '../../features/register/domain/email_verification/usecases/verify_email_otp.dart';
 import '../../features/splash/cubit/splash/splash_cubit.dart';
 
 final getIt = GetIt.instance;
@@ -31,4 +38,17 @@ Future<void> init() async {
 
   // Register BottomNavCubit as a singleton
   getIt.registerLazySingleton<BottomNavCubit>(() => BottomNavCubit());
+
+  // HTTP Client
+  getIt.registerLazySingleton<http.Client>(() => http.Client());
+
+  // Email Verification
+  getIt.registerLazySingleton<EmailVerificationRepository>(() => EmailVerificationRepositoryImpl(dataSource: getIt<EmailVerificationDataSource>()));
+  getIt.registerLazySingleton<EmailVerificationDataSource>(() => EmailVerificationDataSourceImpl(client: getIt<http.Client>()));
+  getIt.registerLazySingleton<SentEmailOtpUsecase>(() => SentEmailOtpUsecase(repository: getIt<EmailVerificationRepository>()));
+  getIt.registerLazySingleton<VerifyEmailOtpUsecase>(() => VerifyEmailOtpUsecase(repository: getIt<EmailVerificationRepository>()));
+  getIt.registerLazySingleton<EmailVerificationBloc>(() => EmailVerificationBloc(
+    sentEmailOtpUsecase: getIt<SentEmailOtpUsecase>(),
+    verifyEmailOtpUsecase: getIt<VerifyEmailOtpUsecase>(),
+  ));
 }

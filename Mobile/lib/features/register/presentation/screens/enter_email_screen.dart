@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:versace/core/widgets/otp_bottom_sheet.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/util/validate_email.dart';
+import '../../bloc/email_verification/email_verification_bloc.dart';
+import '../../bloc/email_verification/email_verification_event.dart';
 
 class EnterEmailScreen extends StatelessWidget {
   const EnterEmailScreen({super.key});
@@ -55,13 +57,14 @@ class EnterEmailScreen extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () {
                     if (formKey.currentState!.validate()) {
-                      showModalBottomSheet(
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(5)),
-                        ),
-                        context: context,
-                        builder: (context) => OtpBottomSheet(onVerifyTap: (otp){}, title: 'Verify Email', subTitle: 'Enter the 6-digit code sent to your email address', buttonText: 'Verify', mobile: emailController.text),
-                      );
+                      context.read<EmailVerificationBloc>().add(EmailVerificationEvent.sendOtpRequested(email: emailController.text));
+                      // showModalBottomSheet(
+                      //   shape: const RoundedRectangleBorder(
+                      //     borderRadius: BorderRadius.vertical(top: Radius.circular(5)),
+                      //   ),
+                      //   context: context,
+                      //   builder: (context) => OtpBottomSheet(onVerifyTap: (otp){}, title: 'Verify Email', subTitle: 'Enter the 6-digit code sent to your email address', buttonText: 'Verify', mobile: emailController.text),
+                      // );
                     }
                   },
                   child: const Text(
