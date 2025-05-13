@@ -6,4 +6,7 @@ class RouteConstants {
   static const String favorites = '/favorites';
   static const String cart = '/cart';
   static const String profile = '/profile';
+
+  // Register
+  static const String enterEmail = '/enter-email';
 }
