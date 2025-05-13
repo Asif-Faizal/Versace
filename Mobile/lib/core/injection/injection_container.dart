@@ -6,6 +6,7 @@ import 'package:versace/features/dashboard/cubit/auto_scroll_cubit.dart';
 import 'package:versace/features/dashboard/cubit/bottom_nav_cubit.dart';
 import 'package:http/http.dart' as http;
 
+import '../../features/login/cubit/password_visibility/password_visibility_login_cubit.dart';
 import '../../features/register/bloc/email_verification/email_verification_bloc.dart';
 import '../../features/register/data/email_verification/email_verification_datasource.dart';
 import '../../features/register/data/email_verification/email_verification_repo_impl.dart';
@@ -31,6 +32,7 @@ Future<void> init() async {
   getIt.registerFactory(() => ThemeCubit(getIt<StorageHelper>()));
   getIt.registerFactory(() => SplashCubit());
   getIt.registerFactory(() => PasswordVisibilityCubit());
+  getIt.registerFactory(() => PasswordVisibilityLoginCubit());
   
   // Factory for AutoScrollCubit
   getIt.registerFactory(() => AutoScrollCubit(

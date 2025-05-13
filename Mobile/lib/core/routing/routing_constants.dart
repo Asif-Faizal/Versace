@@ -10,4 +10,7 @@ class RouteConstants {
   // Register
   static const String registerUser = '/register-user';
   static const String enterPassword = '/enter-password';
+
+  // Login
+  static const String login = '/login';
 }

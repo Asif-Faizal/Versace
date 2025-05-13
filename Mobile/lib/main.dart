@@ -13,6 +13,7 @@ import 'package:versace/core/theme/cubit/theme_state.dart';
 import 'package:versace/features/splash/cubit/splash/splash_cubit.dart';
 
 import 'features/dashboard/cubit/bottom_nav_cubit.dart';
+import 'features/login/cubit/password_visibility/password_visibility_login_cubit.dart';
 import 'features/register/bloc/email_verification/email_verification_bloc.dart';
 import 'features/register/presentation/cubits/password_visibility_cubit.dart';
 
@@ -51,6 +52,9 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider(
             create: (_) => di.getIt<PasswordVisibilityCubit>(),
+          ),
+          BlocProvider(
+            create: (_) => di.getIt<PasswordVisibilityLoginCubit>(),
           ),
         ],
         child: BlocBuilder<ThemeCubit, ThemeState>(

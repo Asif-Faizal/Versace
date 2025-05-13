@@ -79,7 +79,9 @@ class InitialScreen extends StatelessWidget {
               width: double.infinity,
               height: 60,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  context.navigateTo(RouteConstants.login);
+                },
                 child: Text('Login'),
               ),
             ),

@@ -6,6 +6,7 @@ import 'package:versace/features/splash/presentation/screens/splash_screen.dart'
 
 import '../../features/dashboard/cubit/bottom_nav_cubit.dart';
 import '../../features/dashboard/cubit/bottom_nav_state.dart';
+import '../../features/login/presentation/screens/login_screen.dart';
 import '../../features/register/presentation/screens/enter_password_screen.dart';
 import '../../features/register/presentation/screens/register_user_screen.dart';
 import '../../features/splash/presentation/screens/initial_screen.dart';
@@ -50,6 +51,8 @@ class RouteGenerator {
           return _buildRoute(EnterPasswordScreen(arguments: args), settings);
         }
         return _errorRoute('Error', context);
+      case RouteConstants.login:
+        return _buildRoute(LoginScreen(), settings);
       default:
         return _errorRoute('Error', context);
     }

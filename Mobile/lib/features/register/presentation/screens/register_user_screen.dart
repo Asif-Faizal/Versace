@@ -16,7 +16,7 @@ class RegisterUserScreen extends StatelessWidget {
     final TextEditingController lastNameController = TextEditingController();
 
     return Scaffold(
-      appBar: AppBar(automaticallyImplyLeading: false),
+      appBar: AppBar(),
       body: Padding(
         padding: const EdgeInsets.all(15),
         child: Form(
@@ -32,11 +32,21 @@ class RegisterUserScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     flex: 7,
                     child: TextFormField(
+                      keyboardType: TextInputType.name,
                     controller: firstNameController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'First name is required';
+                      }else if(value.length < 3){
+                        return 'First name must be at least 3 characters long';
+                      }
+                      return null;
+                    },
                     decoration: InputDecoration(
                       labelText: 'First Name*',
                     ),
@@ -45,6 +55,7 @@ class RegisterUserScreen extends StatelessWidget {
                   Expanded(
                     flex: 6,
                     child: TextFormField(
+                      keyboardType: TextInputType.name,
                       controller: lastNameController,
                       decoration: InputDecoration(
                         labelText: 'Last Name',
@@ -63,9 +74,6 @@ class RegisterUserScreen extends StatelessWidget {
                 ),
                 validator: validateEmail,
                 autovalidateMode: AutovalidateMode.disabled,
-                onChanged: (value) {
-                  // Handle email changes if needed
-                },
               ),
               const Spacer(),
               SizedBox(
@@ -77,7 +85,7 @@ class RegisterUserScreen extends StatelessWidget {
                       context.navigateTo( RouteConstants.enterPassword, arguments: EnterPasswordArguments(email: emailController.text, firstName: firstNameController.text, lastName: lastNameController.text));
                     }
                   },
-                  child: const Text('Verify Email'),
+                  child: const Text('Continue'),
                 ),
               ),
               const SizedBox(height: 30),
