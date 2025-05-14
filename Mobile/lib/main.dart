@@ -12,6 +12,8 @@ import 'package:versace/core/theme/cubit/theme_cubit.dart';
 import 'package:versace/core/theme/cubit/theme_state.dart';
 import 'package:versace/features/splash/cubit/splash/splash_cubit.dart';
 
+import 'core/api/enviornment_config.dart';
+import 'core/api/api_config.dart';
 import 'features/dashboard/cubit/bottom_nav_cubit.dart';
 import 'features/login/cubit/password_visibility/password_visibility_login_cubit.dart';
 import 'features/register/bloc/email_verification/email_verification_bloc.dart';
@@ -19,6 +21,8 @@ import 'features/register/presentation/cubits/password_visibility_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  EnvironmentConfig.setEnvironment(Environment.simulator);
+  await ApiConfig.loadEnv();
   await di.init();
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,

@@ -37,7 +37,7 @@ flutter:
     - lib/assets/images/collection2.jpg
     - lib/assets/images/broken.png
     - lib/assets/images/shopping-cart.png
-    - .env.local
+    - .env.simulator
     - .env.development
     - .env.production
 

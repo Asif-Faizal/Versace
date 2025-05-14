@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/theme/widgets/theme_switch.dart';
 import '../../cubit/bottom_nav_cubit.dart';
 import '../../cubit/bottom_nav_state.dart';
 import '../widgets/auto_scroll_text.dart';
@@ -193,7 +192,6 @@ class HomePage extends StatelessWidget {
             icon: Icon(Icons.search, size: 15),
             label: Text('Search', style: textTheme.bodyMedium),
           ),
-          ThemeSwitch(),
         ],
       ),
       body: CustomScrollView(

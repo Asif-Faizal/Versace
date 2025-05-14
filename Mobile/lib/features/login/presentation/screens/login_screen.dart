@@ -49,7 +49,7 @@ class LoginScreen extends StatelessWidget {
                     keyboardType: TextInputType.visiblePassword,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Confirm password is required';
+                        return 'Password is required';
                       } else if (value.length < 8) {
                         return 'Password must be at least 8 characters long';
                       }
@@ -80,7 +80,10 @@ class LoginScreen extends StatelessWidget {
                 width: double.infinity,
                 height: 60,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    if (formKey.currentState!.validate()) {
+                    }
+                  },
                   child: const Text('Login'),
                 ),
               ),

@@ -1,10 +1,10 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../../core/api/api_config.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/error/exception_handler.dart';
@@ -17,16 +17,15 @@ abstract class EmailVerificationDataSource {
 
 class EmailVerificationDataSourceImpl extends EmailVerificationDataSource {
   final http.Client client;
-  final String baseUrl;
 
-  EmailVerificationDataSourceImpl({required this.client}) : baseUrl = Platform.isIOS ? 'http://127.0.0.1:5000' : 'http://10.0.2.2:5000';
+  EmailVerificationDataSourceImpl({required this.client});
 
   @override
   Future<Either<Failure, EmailVerificationEntity>> sendOtp(String email) async {
     return await ExceptionHandler.handleApiCall(() async {
       debugPrint('Sending OTP to $email');
       final response = await client.post(
-        Uri.parse('$baseUrl/api/auth/send-otp'),
+        Uri.parse('${ApiConfig.baseUrl}/api/auth/send-otp'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email}),
       );
@@ -46,7 +45,7 @@ class EmailVerificationDataSourceImpl extends EmailVerificationDataSource {
   Future<Either<Failure, EmailVerificationEntity>> verifyOtp(String email, String otp) async {
     return await ExceptionHandler.handleApiCall(() async {
       final response = await client.post(
-        Uri.parse('$baseUrl/api/auth/verify-otp'),
+        Uri.parse('${ApiConfig.baseUrl}/api/auth/verify-otp'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'otp': otp}),
       );

@@ -18,7 +18,7 @@ class MainBottomNavBar extends StatelessWidget {
     final borderColor = isDarkMode ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1);
     
     return Container(
-      height: 40,
+      height: 65,
       decoration: BoxDecoration(
         color: backgroundColor,
         border: Border(
@@ -28,58 +28,61 @@ class MainBottomNavBar extends StatelessWidget {
           ),
         ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _NavBarItem(
-            label: 'Home',
-            selected: navState.maybeWhen(
-              home: () => true, 
-              orElse: () => isSearchActive && previousState?.maybeWhen(home: () => true, orElse: () => false) == true
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _NavBarItem(
+              label: 'Home',
+              selected: navState.maybeWhen(
+                home: () => true, 
+                orElse: () => isSearchActive && previousState?.maybeWhen(home: () => true, orElse: () => false) == true
+              ),
+              onTap: () {
+                if (!navState.maybeWhen(home: () => true, orElse: () => false)) {
+                  context.read<BottomNavCubit>().select(const BottomNavState.home());
+                }
+              },
             ),
-            onTap: () {
-              if (!navState.maybeWhen(home: () => true, orElse: () => false)) {
-                context.read<BottomNavCubit>().select(const BottomNavState.home());
-              }
-            },
-          ),
-          _NavBarItem(
-            label: 'Favorites',
-            selected: navState.maybeWhen(
-              favorites: () => true, 
-              orElse: () => isSearchActive && previousState?.maybeWhen(favorites: () => true, orElse: () => false) == true
+            _NavBarItem(
+              label: 'Favorites',
+              selected: navState.maybeWhen(
+                favorites: () => true, 
+                orElse: () => isSearchActive && previousState?.maybeWhen(favorites: () => true, orElse: () => false) == true
+              ),
+              onTap: () {
+                if (!navState.maybeWhen(favorites: () => true, orElse: () => false)) {
+                  context.read<BottomNavCubit>().select(const BottomNavState.favorites());
+                }
+              },
             ),
-            onTap: () {
-              if (!navState.maybeWhen(favorites: () => true, orElse: () => false)) {
-                context.read<BottomNavCubit>().select(const BottomNavState.favorites());
-              }
-            },
-          ),
-          _NavBarItem(
-            label: 'Cart',
-            selected: navState.maybeWhen(
-              cart: () => true, 
-              orElse: () => isSearchActive && previousState?.maybeWhen(cart: () => true, orElse: () => false) == true
+            _NavBarItem(
+              label: 'Cart',
+              selected: navState.maybeWhen(
+                cart: () => true, 
+                orElse: () => isSearchActive && previousState?.maybeWhen(cart: () => true, orElse: () => false) == true
+              ),
+              onTap: () {
+                if (!navState.maybeWhen(cart: () => true, orElse: () => false)) {
+                  context.read<BottomNavCubit>().select(const BottomNavState.cart());
+                }
+              },
             ),
-            onTap: () {
-              if (!navState.maybeWhen(cart: () => true, orElse: () => false)) {
-                context.read<BottomNavCubit>().select(const BottomNavState.cart());
-              }
-            },
-          ),
-          _NavBarItem(
-            label: 'Profile',
-            selected: navState.maybeWhen(
-              profile: () => true, 
-              orElse: () => isSearchActive && previousState?.maybeWhen(profile: () => true, orElse: () => false) == true
+            _NavBarItem(
+              label: 'Profile',
+              selected: navState.maybeWhen(
+                profile: () => true, 
+                orElse: () => isSearchActive && previousState?.maybeWhen(profile: () => true, orElse: () => false) == true
+              ),
+              onTap: () {
+                if (!navState.maybeWhen(profile: () => true, orElse: () => false)) {
+                  context.read<BottomNavCubit>().select(const BottomNavState.profile());
+                }
+              },
             ),
-            onTap: () {
-              if (!navState.maybeWhen(profile: () => true, orElse: () => false)) {
-                context.read<BottomNavCubit>().select(const BottomNavState.profile());
-              }
-            },
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -116,10 +119,9 @@ class _NavBarItem extends StatelessWidget {
             children: [
               Text(
                 label, 
-                style: textTheme.bodySmall?.copyWith(
+                style: textTheme.labelMedium?.copyWith(
                   color: color, 
                   fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                  fontSize: 14,
                 ),
               ),
               AnimatedContainer(
