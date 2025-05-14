@@ -15,13 +15,14 @@ import 'package:versace/features/splash/cubit/splash/splash_cubit.dart';
 import 'core/api/enviornment_config.dart';
 import 'core/api/api_config.dart';
 import 'features/dashboard/cubit/bottom_nav_cubit.dart';
+import 'features/login/bloc/login/login_bloc.dart';
 import 'features/login/cubit/password_visibility/password_visibility_login_cubit.dart';
 import 'features/register/bloc/email_verification/email_verification_bloc.dart';
 import 'features/register/presentation/cubits/password_visibility_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  EnvironmentConfig.setEnvironment(Environment.simulator);
+  EnvironmentConfig.setEnvironment(Environment.development);
   await ApiConfig.loadEnv();
   await di.init();
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -59,6 +60,9 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider(
             create: (_) => di.getIt<PasswordVisibilityLoginCubit>(),
+          ),
+          BlocProvider(
+            create: (_) => di.getIt<LoginBloc>(),
           ),
         ],
         child: BlocBuilder<ThemeCubit, ThemeState>(

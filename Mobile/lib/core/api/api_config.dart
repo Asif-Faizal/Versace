@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:flutter/services.dart' show rootBundle;
 import 'enviornment_config.dart';
 
 class ApiConfig {
@@ -17,18 +17,20 @@ class ApiConfig {
         envFileName = '.env.production';
         break;
     }
-    final file = File('Mobile/$envFileName');
-    if (await file.exists()) {
-      final lines = await file.readAsLines();
-      for (final line in lines) {
+    try {
+      final content = await rootBundle.loadString(envFileName);
+      for (final line in content.split('\n')) {
         final trimmed = line.trim();
         if (trimmed.startsWith('BASE_URL')) {
           final parts = trimmed.split('=');
           if (parts.length == 2) {
-            baseUrl = parts[1].trim().replaceAll('"', '');
+            baseUrl = parts[1].trim().replaceAll('\"', '');
+            print('Loaded BASE_URL: $baseUrl');
           }
         }
       }
+    } catch (e) {
+      print('Env file not found or error reading: $e');
     }
   }
 }

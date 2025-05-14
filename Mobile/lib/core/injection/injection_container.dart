@@ -6,7 +6,12 @@ import 'package:versace/features/dashboard/cubit/auto_scroll_cubit.dart';
 import 'package:versace/features/dashboard/cubit/bottom_nav_cubit.dart';
 import 'package:http/http.dart' as http;
 
+import '../../features/login/bloc/login/login_bloc.dart';
 import '../../features/login/cubit/password_visibility/password_visibility_login_cubit.dart';
+import '../../features/login/data/login/login_datasource.dart';
+import '../../features/login/data/login/login_repo_impl.dart';
+import '../../features/login/domain/login/login.dart';
+import '../../features/login/domain/login/login_repo.dart';
 import '../../features/register/bloc/email_verification/email_verification_bloc.dart';
 import '../../features/register/data/email_verification/email_verification_datasource.dart';
 import '../../features/register/data/email_verification/email_verification_repo_impl.dart';
@@ -33,7 +38,7 @@ Future<void> init() async {
   getIt.registerFactory(() => SplashCubit());
   getIt.registerFactory(() => PasswordVisibilityCubit());
   getIt.registerFactory(() => PasswordVisibilityLoginCubit());
-  
+
   // Factory for AutoScrollCubit
   getIt.registerFactory(() => AutoScrollCubit(
     scrollDuration: const Duration(milliseconds: 30),
@@ -55,4 +60,11 @@ Future<void> init() async {
     sentEmailOtpUsecase: getIt<SentEmailOtpUsecase>(),
     verifyEmailOtpUsecase: getIt<VerifyEmailOtpUsecase>(),
   ));
+
+
+  // Login
+  getIt.registerLazySingleton<LoginRemoteDataSource>(() => LoginRemoteDataSourceImpl(client: getIt<http.Client>()));
+  getIt.registerLazySingleton<LoginRepository>(() => LoginRepositoryImpl(remoteDataSource: getIt<LoginRemoteDataSource>()));
+  getIt.registerLazySingleton<LoginUsecase>(() => LoginUsecase(repository: getIt<LoginRepository>()));
+  getIt.registerLazySingleton<LoginBloc>(() => LoginBloc(loginUsecase: getIt<LoginUsecase>()));
 }

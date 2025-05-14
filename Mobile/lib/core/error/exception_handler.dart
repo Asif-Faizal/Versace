@@ -30,6 +30,7 @@ class ExceptionHandler {
   /// 
   /// Takes a function [apiCall] that returns a Future of type T
   /// Returns Either a Failure or the result of type T
+  /// NOTE: When handling a Failure, use the .message property or .toString() for user-facing errors.
   static Future<Either<Failure, T>> handleApiCall<T>(
     Future<T> Function() apiCall,
   ) async {

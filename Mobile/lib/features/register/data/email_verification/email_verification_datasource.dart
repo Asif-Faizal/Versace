@@ -9,6 +9,7 @@ import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/error/exception_handler.dart';
 import '../../domain/email_verification/entity/email_verification_entity.dart';
+import 'models/email_verification_model.dart';
 
 abstract class EmailVerificationDataSource {
   Future<Either<Failure, EmailVerificationEntity>> sendOtp(String email);
@@ -31,7 +32,7 @@ class EmailVerificationDataSourceImpl extends EmailVerificationDataSource {
       );
       debugPrint('Response: ${response.body}');
       if (response.statusCode == 200) {
-        return EmailVerificationEntity(message: 'Email sent successfully');
+        return EmailVerificationModel.fromJson(jsonDecode(response.body)).toEntity();
       } else {
         throw ServerException(
           message: jsonDecode(response.body)['error']['message'],
@@ -51,7 +52,7 @@ class EmailVerificationDataSourceImpl extends EmailVerificationDataSource {
       );
 
       if (response.statusCode == 200) {
-        return EmailVerificationEntity(message: 'Email verified successfully');
+        return EmailVerificationModel.fromJson(jsonDecode(response.body)).toEntity();
       } else {
         throw ServerException(
           message: 'Failed to verify OTP',

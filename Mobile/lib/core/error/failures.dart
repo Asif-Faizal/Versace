@@ -13,6 +13,9 @@ class ServerFailure extends Failure {
 
   @override
   List<Object> get props => [message];
+
+  @override
+  String toString() => message;
 }
 
 class CacheFailure extends Failure {}
@@ -36,6 +39,9 @@ class ValidationFailure extends Failure {
   
   @override
   List<Object> get props => [message];
+
+  @override
+  String toString() => message;
 }
 
 class UnknownFailure extends Failure {
@@ -45,4 +51,7 @@ class UnknownFailure extends Failure {
   
   @override
   List<Object> get props => [message];
+
+  @override
+  String toString() => message;
 }
