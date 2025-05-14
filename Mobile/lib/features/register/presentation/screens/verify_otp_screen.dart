@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:versace/core/routing/routing_extension.dart';
 import 'package:versace/core/widgets/error_snackbar.dart';
 import 'package:versace/features/register/bloc/email_verification/email_verification_bloc.dart';
+import '../../../../core/injection/injection_container.dart';
 import '../../../../core/routing/routing_arguments.dart';
 import '../../../../core/routing/routing_constants.dart';
 import '../../bloc/email_verification/email_verification_event.dart';
@@ -56,7 +57,7 @@ class VerifyOtpScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return BlocProvider(
-      create: (_) => OtpFocusCubit(),
+      create: (_) => getIt<OtpFocusCubit>(),
       child: Builder(
         builder: (context) {
           final cubit = context.read<OtpFocusCubit>();

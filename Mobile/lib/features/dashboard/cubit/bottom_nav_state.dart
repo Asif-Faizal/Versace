@@ -10,4 +10,5 @@ class BottomNavState with _$BottomNavState {
   const factory BottomNavState.profile() = ProfileNav;
   const factory BottomNavState.search() = SearchNav;
   const factory BottomNavState.editProfile() = EditProfileNav;
+  const factory BottomNavState.deleteAccount() = DeleteAccountNav;
 } 

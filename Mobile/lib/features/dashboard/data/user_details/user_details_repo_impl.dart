@@ -36,4 +36,13 @@ class UserDetailsRepoImpl implements UserDetailsRepo {
       (entity) => Right(entity),
     );
   }
+
+  @override
+  Future<Either<Failure, void>> deleteAccount(String password) async {
+    final response = await datasource.deleteAccount(password);
+    return response.fold(
+      (failure) => Left(failure),
+      (entity) => Right(entity),
+    );
+  }
 }

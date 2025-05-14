@@ -17,4 +17,5 @@ class RouteConstants {
   static const String cart = '/cart';
   static const String profile = '/profile';
   static const String editProfile = '/edit-profile';
+  static const String deleteAccount = '/delete-account';
 }

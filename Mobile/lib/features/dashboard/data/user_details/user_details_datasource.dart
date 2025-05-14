@@ -22,6 +22,7 @@ abstract class UserDetailsDatasource {
     UpdateUserRequestModel updateUserRequestModel,
   );
   Future<Either<Failure, void>> logout();
+  Future<Either<Failure, void>> deleteAccount(String password);
 }
 
 class UserDetailsDatasourceImpl implements UserDetailsDatasource {
@@ -117,6 +118,39 @@ class UserDetailsDatasourceImpl implements UserDetailsDatasource {
         },
       );
       debugPrint('Logout Response: ${response.statusCode}');
+      if (response.statusCode == 204) {
+        return;
+      } else {
+        throw ServerException(
+          message: jsonDecode(response.body)['error']['message'],
+          statusCode: response.statusCode,
+        );
+      }
+    });
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteAccount(String password) async {
+    final StorageHelper storageHelper = getIt<StorageHelper>();
+    final deviceId = await storageHelper.deviceId ?? '';
+    final deviceModel = await storageHelper.deviceModel ?? '';
+    final deviceOs = await storageHelper.deviceOs ?? '';
+    final deviceOsVersion = await storageHelper.deviceOsVersion ?? '';
+    final token = await storageHelper.accessToken ?? '';
+    return await ExceptionHandler.handleApiCall(() async {
+      final response = await client.delete(
+        Uri.parse('${ApiConfig.baseUrl}/api/auth/account'),
+        body: jsonEncode({'password': password}),
+        headers: {
+          'Content-Type': 'application/json',
+          'deviceid': deviceId,
+          'devicemodel': deviceModel,
+          'deviceos': deviceOs + deviceOsVersion,
+          'Authorization': 'Bearer $token',
+        },
+      );
+      debugPrint('Account Delete Response: ${response.statusCode}');
+      debugPrint('Account Delete Response: ${response.body}');
       if (response.statusCode == 204) {
         return;
       } else {

@@ -25,6 +25,7 @@ mixin _$BottomNavState {
     required TResult Function() profile,
     required TResult Function() search,
     required TResult Function() editProfile,
+    required TResult Function() deleteAccount,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
@@ -34,6 +35,7 @@ mixin _$BottomNavState {
     TResult? Function()? profile,
     TResult? Function()? search,
     TResult? Function()? editProfile,
+    TResult? Function()? deleteAccount,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
@@ -43,6 +45,7 @@ mixin _$BottomNavState {
     TResult Function()? profile,
     TResult Function()? search,
     TResult Function()? editProfile,
+    TResult Function()? deleteAccount,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -53,6 +56,7 @@ mixin _$BottomNavState {
     required TResult Function(ProfileNav value) profile,
     required TResult Function(SearchNav value) search,
     required TResult Function(EditProfileNav value) editProfile,
+    required TResult Function(DeleteAccountNav value) deleteAccount,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
@@ -62,6 +66,7 @@ mixin _$BottomNavState {
     TResult? Function(ProfileNav value)? profile,
     TResult? Function(SearchNav value)? search,
     TResult? Function(EditProfileNav value)? editProfile,
+    TResult? Function(DeleteAccountNav value)? deleteAccount,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
@@ -71,6 +76,7 @@ mixin _$BottomNavState {
     TResult Function(ProfileNav value)? profile,
     TResult Function(SearchNav value)? search,
     TResult Function(EditProfileNav value)? editProfile,
+    TResult Function(DeleteAccountNav value)? deleteAccount,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
 }
@@ -146,6 +152,7 @@ class _$HomeNavImpl implements HomeNav {
     required TResult Function() profile,
     required TResult Function() search,
     required TResult Function() editProfile,
+    required TResult Function() deleteAccount,
   }) {
     return home();
   }
@@ -159,6 +166,7 @@ class _$HomeNavImpl implements HomeNav {
     TResult? Function()? profile,
     TResult? Function()? search,
     TResult? Function()? editProfile,
+    TResult? Function()? deleteAccount,
   }) {
     return home?.call();
   }
@@ -172,6 +180,7 @@ class _$HomeNavImpl implements HomeNav {
     TResult Function()? profile,
     TResult Function()? search,
     TResult Function()? editProfile,
+    TResult Function()? deleteAccount,
     required TResult orElse(),
   }) {
     if (home != null) {
@@ -189,6 +198,7 @@ class _$HomeNavImpl implements HomeNav {
     required TResult Function(ProfileNav value) profile,
     required TResult Function(SearchNav value) search,
     required TResult Function(EditProfileNav value) editProfile,
+    required TResult Function(DeleteAccountNav value) deleteAccount,
   }) {
     return home(this);
   }
@@ -202,6 +212,7 @@ class _$HomeNavImpl implements HomeNav {
     TResult? Function(ProfileNav value)? profile,
     TResult? Function(SearchNav value)? search,
     TResult? Function(EditProfileNav value)? editProfile,
+    TResult? Function(DeleteAccountNav value)? deleteAccount,
   }) {
     return home?.call(this);
   }
@@ -215,6 +226,7 @@ class _$HomeNavImpl implements HomeNav {
     TResult Function(ProfileNav value)? profile,
     TResult Function(SearchNav value)? search,
     TResult Function(EditProfileNav value)? editProfile,
+    TResult Function(DeleteAccountNav value)? deleteAccount,
     required TResult orElse(),
   }) {
     if (home != null) {
@@ -277,6 +289,7 @@ class _$FavoritesNavImpl implements FavoritesNav {
     required TResult Function() profile,
     required TResult Function() search,
     required TResult Function() editProfile,
+    required TResult Function() deleteAccount,
   }) {
     return favorites();
   }
@@ -290,6 +303,7 @@ class _$FavoritesNavImpl implements FavoritesNav {
     TResult? Function()? profile,
     TResult? Function()? search,
     TResult? Function()? editProfile,
+    TResult? Function()? deleteAccount,
   }) {
     return favorites?.call();
   }
@@ -303,6 +317,7 @@ class _$FavoritesNavImpl implements FavoritesNav {
     TResult Function()? profile,
     TResult Function()? search,
     TResult Function()? editProfile,
+    TResult Function()? deleteAccount,
     required TResult orElse(),
   }) {
     if (favorites != null) {
@@ -320,6 +335,7 @@ class _$FavoritesNavImpl implements FavoritesNav {
     required TResult Function(ProfileNav value) profile,
     required TResult Function(SearchNav value) search,
     required TResult Function(EditProfileNav value) editProfile,
+    required TResult Function(DeleteAccountNav value) deleteAccount,
   }) {
     return favorites(this);
   }
@@ -333,6 +349,7 @@ class _$FavoritesNavImpl implements FavoritesNav {
     TResult? Function(ProfileNav value)? profile,
     TResult? Function(SearchNav value)? search,
     TResult? Function(EditProfileNav value)? editProfile,
+    TResult? Function(DeleteAccountNav value)? deleteAccount,
   }) {
     return favorites?.call(this);
   }
@@ -346,6 +363,7 @@ class _$FavoritesNavImpl implements FavoritesNav {
     TResult Function(ProfileNav value)? profile,
     TResult Function(SearchNav value)? search,
     TResult Function(EditProfileNav value)? editProfile,
+    TResult Function(DeleteAccountNav value)? deleteAccount,
     required TResult orElse(),
   }) {
     if (favorites != null) {
@@ -408,6 +426,7 @@ class _$CartNavImpl implements CartNav {
     required TResult Function() profile,
     required TResult Function() search,
     required TResult Function() editProfile,
+    required TResult Function() deleteAccount,
   }) {
     return cart();
   }
@@ -421,6 +440,7 @@ class _$CartNavImpl implements CartNav {
     TResult? Function()? profile,
     TResult? Function()? search,
     TResult? Function()? editProfile,
+    TResult? Function()? deleteAccount,
   }) {
     return cart?.call();
   }
@@ -434,6 +454,7 @@ class _$CartNavImpl implements CartNav {
     TResult Function()? profile,
     TResult Function()? search,
     TResult Function()? editProfile,
+    TResult Function()? deleteAccount,
     required TResult orElse(),
   }) {
     if (cart != null) {
@@ -451,6 +472,7 @@ class _$CartNavImpl implements CartNav {
     required TResult Function(ProfileNav value) profile,
     required TResult Function(SearchNav value) search,
     required TResult Function(EditProfileNav value) editProfile,
+    required TResult Function(DeleteAccountNav value) deleteAccount,
   }) {
     return cart(this);
   }
@@ -464,6 +486,7 @@ class _$CartNavImpl implements CartNav {
     TResult? Function(ProfileNav value)? profile,
     TResult? Function(SearchNav value)? search,
     TResult? Function(EditProfileNav value)? editProfile,
+    TResult? Function(DeleteAccountNav value)? deleteAccount,
   }) {
     return cart?.call(this);
   }
@@ -477,6 +500,7 @@ class _$CartNavImpl implements CartNav {
     TResult Function(ProfileNav value)? profile,
     TResult Function(SearchNav value)? search,
     TResult Function(EditProfileNav value)? editProfile,
+    TResult Function(DeleteAccountNav value)? deleteAccount,
     required TResult orElse(),
   }) {
     if (cart != null) {
@@ -539,6 +563,7 @@ class _$ProfileNavImpl implements ProfileNav {
     required TResult Function() profile,
     required TResult Function() search,
     required TResult Function() editProfile,
+    required TResult Function() deleteAccount,
   }) {
     return profile();
   }
@@ -552,6 +577,7 @@ class _$ProfileNavImpl implements ProfileNav {
     TResult? Function()? profile,
     TResult? Function()? search,
     TResult? Function()? editProfile,
+    TResult? Function()? deleteAccount,
   }) {
     return profile?.call();
   }
@@ -565,6 +591,7 @@ class _$ProfileNavImpl implements ProfileNav {
     TResult Function()? profile,
     TResult Function()? search,
     TResult Function()? editProfile,
+    TResult Function()? deleteAccount,
     required TResult orElse(),
   }) {
     if (profile != null) {
@@ -582,6 +609,7 @@ class _$ProfileNavImpl implements ProfileNav {
     required TResult Function(ProfileNav value) profile,
     required TResult Function(SearchNav value) search,
     required TResult Function(EditProfileNav value) editProfile,
+    required TResult Function(DeleteAccountNav value) deleteAccount,
   }) {
     return profile(this);
   }
@@ -595,6 +623,7 @@ class _$ProfileNavImpl implements ProfileNav {
     TResult? Function(ProfileNav value)? profile,
     TResult? Function(SearchNav value)? search,
     TResult? Function(EditProfileNav value)? editProfile,
+    TResult? Function(DeleteAccountNav value)? deleteAccount,
   }) {
     return profile?.call(this);
   }
@@ -608,6 +637,7 @@ class _$ProfileNavImpl implements ProfileNav {
     TResult Function(ProfileNav value)? profile,
     TResult Function(SearchNav value)? search,
     TResult Function(EditProfileNav value)? editProfile,
+    TResult Function(DeleteAccountNav value)? deleteAccount,
     required TResult orElse(),
   }) {
     if (profile != null) {
@@ -670,6 +700,7 @@ class _$SearchNavImpl implements SearchNav {
     required TResult Function() profile,
     required TResult Function() search,
     required TResult Function() editProfile,
+    required TResult Function() deleteAccount,
   }) {
     return search();
   }
@@ -683,6 +714,7 @@ class _$SearchNavImpl implements SearchNav {
     TResult? Function()? profile,
     TResult? Function()? search,
     TResult? Function()? editProfile,
+    TResult? Function()? deleteAccount,
   }) {
     return search?.call();
   }
@@ -696,6 +728,7 @@ class _$SearchNavImpl implements SearchNav {
     TResult Function()? profile,
     TResult Function()? search,
     TResult Function()? editProfile,
+    TResult Function()? deleteAccount,
     required TResult orElse(),
   }) {
     if (search != null) {
@@ -713,6 +746,7 @@ class _$SearchNavImpl implements SearchNav {
     required TResult Function(ProfileNav value) profile,
     required TResult Function(SearchNav value) search,
     required TResult Function(EditProfileNav value) editProfile,
+    required TResult Function(DeleteAccountNav value) deleteAccount,
   }) {
     return search(this);
   }
@@ -726,6 +760,7 @@ class _$SearchNavImpl implements SearchNav {
     TResult? Function(ProfileNav value)? profile,
     TResult? Function(SearchNav value)? search,
     TResult? Function(EditProfileNav value)? editProfile,
+    TResult? Function(DeleteAccountNav value)? deleteAccount,
   }) {
     return search?.call(this);
   }
@@ -739,6 +774,7 @@ class _$SearchNavImpl implements SearchNav {
     TResult Function(ProfileNav value)? profile,
     TResult Function(SearchNav value)? search,
     TResult Function(EditProfileNav value)? editProfile,
+    TResult Function(DeleteAccountNav value)? deleteAccount,
     required TResult orElse(),
   }) {
     if (search != null) {
@@ -801,6 +837,7 @@ class _$EditProfileNavImpl implements EditProfileNav {
     required TResult Function() profile,
     required TResult Function() search,
     required TResult Function() editProfile,
+    required TResult Function() deleteAccount,
   }) {
     return editProfile();
   }
@@ -814,6 +851,7 @@ class _$EditProfileNavImpl implements EditProfileNav {
     TResult? Function()? profile,
     TResult? Function()? search,
     TResult? Function()? editProfile,
+    TResult? Function()? deleteAccount,
   }) {
     return editProfile?.call();
   }
@@ -827,6 +865,7 @@ class _$EditProfileNavImpl implements EditProfileNav {
     TResult Function()? profile,
     TResult Function()? search,
     TResult Function()? editProfile,
+    TResult Function()? deleteAccount,
     required TResult orElse(),
   }) {
     if (editProfile != null) {
@@ -844,6 +883,7 @@ class _$EditProfileNavImpl implements EditProfileNav {
     required TResult Function(ProfileNav value) profile,
     required TResult Function(SearchNav value) search,
     required TResult Function(EditProfileNav value) editProfile,
+    required TResult Function(DeleteAccountNav value) deleteAccount,
   }) {
     return editProfile(this);
   }
@@ -857,6 +897,7 @@ class _$EditProfileNavImpl implements EditProfileNav {
     TResult? Function(ProfileNav value)? profile,
     TResult? Function(SearchNav value)? search,
     TResult? Function(EditProfileNav value)? editProfile,
+    TResult? Function(DeleteAccountNav value)? deleteAccount,
   }) {
     return editProfile?.call(this);
   }
@@ -870,6 +911,7 @@ class _$EditProfileNavImpl implements EditProfileNav {
     TResult Function(ProfileNav value)? profile,
     TResult Function(SearchNav value)? search,
     TResult Function(EditProfileNav value)? editProfile,
+    TResult Function(DeleteAccountNav value)? deleteAccount,
     required TResult orElse(),
   }) {
     if (editProfile != null) {
@@ -881,4 +923,141 @@ class _$EditProfileNavImpl implements EditProfileNav {
 
 abstract class EditProfileNav implements BottomNavState {
   const factory EditProfileNav() = _$EditProfileNavImpl;
+}
+
+/// @nodoc
+abstract class _$$DeleteAccountNavImplCopyWith<$Res> {
+  factory _$$DeleteAccountNavImplCopyWith(
+    _$DeleteAccountNavImpl value,
+    $Res Function(_$DeleteAccountNavImpl) then,
+  ) = __$$DeleteAccountNavImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$DeleteAccountNavImplCopyWithImpl<$Res>
+    extends _$BottomNavStateCopyWithImpl<$Res, _$DeleteAccountNavImpl>
+    implements _$$DeleteAccountNavImplCopyWith<$Res> {
+  __$$DeleteAccountNavImplCopyWithImpl(
+    _$DeleteAccountNavImpl _value,
+    $Res Function(_$DeleteAccountNavImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of BottomNavState
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+
+class _$DeleteAccountNavImpl implements DeleteAccountNav {
+  const _$DeleteAccountNavImpl();
+
+  @override
+  String toString() {
+    return 'BottomNavState.deleteAccount()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$DeleteAccountNavImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() home,
+    required TResult Function() favorites,
+    required TResult Function() cart,
+    required TResult Function() profile,
+    required TResult Function() search,
+    required TResult Function() editProfile,
+    required TResult Function() deleteAccount,
+  }) {
+    return deleteAccount();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? home,
+    TResult? Function()? favorites,
+    TResult? Function()? cart,
+    TResult? Function()? profile,
+    TResult? Function()? search,
+    TResult? Function()? editProfile,
+    TResult? Function()? deleteAccount,
+  }) {
+    return deleteAccount?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? home,
+    TResult Function()? favorites,
+    TResult Function()? cart,
+    TResult Function()? profile,
+    TResult Function()? search,
+    TResult Function()? editProfile,
+    TResult Function()? deleteAccount,
+    required TResult orElse(),
+  }) {
+    if (deleteAccount != null) {
+      return deleteAccount();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(HomeNav value) home,
+    required TResult Function(FavoritesNav value) favorites,
+    required TResult Function(CartNav value) cart,
+    required TResult Function(ProfileNav value) profile,
+    required TResult Function(SearchNav value) search,
+    required TResult Function(EditProfileNav value) editProfile,
+    required TResult Function(DeleteAccountNav value) deleteAccount,
+  }) {
+    return deleteAccount(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(HomeNav value)? home,
+    TResult? Function(FavoritesNav value)? favorites,
+    TResult? Function(CartNav value)? cart,
+    TResult? Function(ProfileNav value)? profile,
+    TResult? Function(SearchNav value)? search,
+    TResult? Function(EditProfileNav value)? editProfile,
+    TResult? Function(DeleteAccountNav value)? deleteAccount,
+  }) {
+    return deleteAccount?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(HomeNav value)? home,
+    TResult Function(FavoritesNav value)? favorites,
+    TResult Function(CartNav value)? cart,
+    TResult Function(ProfileNav value)? profile,
+    TResult Function(SearchNav value)? search,
+    TResult Function(EditProfileNav value)? editProfile,
+    TResult Function(DeleteAccountNav value)? deleteAccount,
+    required TResult orElse(),
+  }) {
+    if (deleteAccount != null) {
+      return deleteAccount(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class DeleteAccountNav implements BottomNavState {
+  const factory DeleteAccountNav() = _$DeleteAccountNavImpl;
 }

@@ -9,4 +9,5 @@ abstract class UserDetailsRepo {
   Future<Either<Failure, UserDetailsEntity>> getUserDetails();
   Future<Either<Failure, UpdateUserDetailsEntity>> updateUserDetails(UpdateUserRequestModel updateUserRequestModel);
   Future<Either<Failure, void>> logout();
+  Future<Either<Failure, void>> deleteAccount(String password);
 }

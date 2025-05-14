@@ -5,6 +5,7 @@ import '../../../../core/injection/injection_container.dart';
 import '../../cubit/bottom_nav_cubit.dart';
 import '../../cubit/bottom_nav_state.dart';
 import '../widgets/main_bottom_nav_bar.dart';
+import 'delete_account_screen.dart';
 import 'edit_profile_screen.dart';
 import 'home_screen.dart';
 import 'favirites_screen.dart';
@@ -13,8 +14,9 @@ import 'profile_screen.dart';
 import 'search_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({super.key, this.editProfileArguments});
+  const DashboardScreen({super.key, this.editProfileArguments, this.deleteAccountArguments});
   final EditProfileArguments? editProfileArguments;
+  final DeleteAccountArguments? deleteAccountArguments;
 
   @override
   Widget build(BuildContext context) {
@@ -105,6 +107,15 @@ class DashboardScreen extends StatelessWidget {
                 : const EditProfileArguments(firstName: '', lastName: ''));
 
         return EditProfileScreen(arguments: arguments);
+      },
+      deleteAccount: () {
+        DeleteAccountArguments arguments =
+            deleteAccountArguments ??
+            (getIt.isRegistered<DeleteAccountArguments>()
+                ? getIt<DeleteAccountArguments>()
+                : const DeleteAccountArguments(email: ''));
+
+        return DeleteAccountScreen(arguments: arguments);
       },
     );
   }

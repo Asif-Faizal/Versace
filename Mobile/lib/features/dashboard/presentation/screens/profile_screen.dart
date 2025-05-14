@@ -259,6 +259,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           title: Text('Logout'),
                                           trailing: Icon(Icons.logout),
                                         ),
+                                        ListTile(
+                                          onTap: () {
+                                            final deleteAccountArgs =
+                                                DeleteAccountArguments(
+                                                  email: user.email,
+                                                );
+
+                                            // Pass the arguments via the dashboard screen
+                                            final dashboardWidget =
+                                                context
+                                                    .findAncestorWidgetOfExactType<
+                                                      DashboardScreen
+                                                    >();
+                                            if (dashboardWidget != null) {
+                                              // Store the arguments
+                                              if (getIt
+                                                  .isRegistered<
+                                                    DeleteAccountArguments
+                                                  >()) {
+                                                getIt
+                                                    .unregister<
+                                                      DeleteAccountArguments
+                                                    >();
+                                              }
+                                              getIt.registerSingleton<
+                                                DeleteAccountArguments
+                                              >(deleteAccountArgs);
+                                            }
+
+                                            // Navigate to edit profile
+                                            context.read<BottomNavCubit>().select(
+                                              const BottomNavState.deleteAccount(),
+                                            );
+                                          },
+                                          title: Text('Delete Account'),
+                                          trailing: Icon(Icons.delete),
+                                        ),
                                       ],
                                     ),
                                   ),

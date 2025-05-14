@@ -15,4 +15,7 @@ class UserDetailsState with _$UserDetailsState {
   const factory UserDetailsState.logoutSuccess() = _LogoutSuccess;
   const factory UserDetailsState.logoutFailure(String message) = _LogoutFailure;
   const factory UserDetailsState.error(String message) = _Error;
+  const factory UserDetailsState.deleteAccountLoading() = _DeleteAccountLoading;
+  const factory UserDetailsState.deleteAccountSuccess() = _DeleteAccountSuccess;
+  const factory UserDetailsState.deleteAccountFailure(String message) = _DeleteAccountFailure;
 }

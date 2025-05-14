@@ -37,3 +37,12 @@ class EditProfileArguments extends RouteArguments {
   @override
   List<Object?> get props => [firstName, lastName];
 }
+
+class DeleteAccountArguments extends RouteArguments {
+  final String email;
+
+  const DeleteAccountArguments({required this.email});
+
+  @override
+  List<Object?> get props => [email];
+}

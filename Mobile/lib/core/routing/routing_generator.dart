@@ -47,6 +47,16 @@ class RouteGenerator {
             navCubit.select(const BottomNavState.profile());
           }
         );
+      case RouteConstants.deleteAccount:
+        final navCubit = context.read<BottomNavCubit>();
+        navCubit.select(const BottomNavState.profile());
+        return _buildRouteWithPopHandler(
+          const DashboardScreen(), 
+          settings,
+          (didPop, result) {
+            navCubit.select(const BottomNavState.deleteAccount());
+          }
+        );
       case RouteConstants.search:
         final navCubit = context.read<BottomNavCubit>();
         navCubit.select(const BottomNavState.search());

@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import '../../features/dashboard/bloc/user_details/user_details_bloc.dart';
 import '../../features/dashboard/data/user_details/user_details_datasource.dart';
 import '../../features/dashboard/data/user_details/user_details_repo_impl.dart';
+import '../../features/dashboard/domain/user_details/usecases/delete_account.dart';
 import '../../features/dashboard/domain/user_details/usecases/get_user_details.dart';
 import '../../features/dashboard/domain/user_details/usecases/update_user_details.dart';
 import '../../features/dashboard/domain/user_details/usecases/user_logout.dart';
@@ -91,5 +92,6 @@ Future<void> init() async {
   getIt.registerLazySingleton<GetUserDetailsUsecase>(() => GetUserDetailsUsecase(repository: getIt<UserDetailsRepo>()));
   getIt.registerLazySingleton<UpdateUserDetailsUsecase>(() => UpdateUserDetailsUsecase(repository: getIt<UserDetailsRepo>()));
   getIt.registerLazySingleton<UserLogoutUsecase>(() => UserLogoutUsecase(repository: getIt<UserDetailsRepo>()));
-  getIt.registerLazySingleton<UserDetailsBloc>(() => UserDetailsBloc(getUserDetailsUsecase: getIt<GetUserDetailsUsecase>(), updateUserDetailsUsecase: getIt<UpdateUserDetailsUsecase>(), userLogoutUsecase: getIt<UserLogoutUsecase>()));
+  getIt.registerLazySingleton<DeleteAccountUsecase>(() => DeleteAccountUsecase(repository: getIt<UserDetailsRepo>()));
+  getIt.registerLazySingleton<UserDetailsBloc>(() => UserDetailsBloc(getUserDetailsUsecase: getIt<GetUserDetailsUsecase>(), updateUserDetailsUsecase: getIt<UpdateUserDetailsUsecase>(), userLogoutUsecase: getIt<UserLogoutUsecase>(), deleteAccountUsecase: getIt<DeleteAccountUsecase>()));
 }

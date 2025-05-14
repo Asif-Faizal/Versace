@@ -23,6 +23,7 @@ mixin _$UserDetailsEvent {
     required TResult Function(UpdateUserRequestModel updateUserRequestModel)
     updateUserDetailsRequested,
     required TResult Function() logoutRequested,
+    required TResult Function(String password) deleteAccountRequested,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
@@ -30,6 +31,7 @@ mixin _$UserDetailsEvent {
     TResult? Function(UpdateUserRequestModel updateUserRequestModel)?
     updateUserDetailsRequested,
     TResult? Function()? logoutRequested,
+    TResult? Function(String password)? deleteAccountRequested,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
@@ -37,6 +39,7 @@ mixin _$UserDetailsEvent {
     TResult Function(UpdateUserRequestModel updateUserRequestModel)?
     updateUserDetailsRequested,
     TResult Function()? logoutRequested,
+    TResult Function(String password)? deleteAccountRequested,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -45,6 +48,8 @@ mixin _$UserDetailsEvent {
     required TResult Function(UpdateUserDetailsRequested value)
     updateUserDetailsRequested,
     required TResult Function(LogoutRequested value) logoutRequested,
+    required TResult Function(DeleteAccountRequested value)
+    deleteAccountRequested,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
@@ -52,6 +57,7 @@ mixin _$UserDetailsEvent {
     TResult? Function(UpdateUserDetailsRequested value)?
     updateUserDetailsRequested,
     TResult? Function(LogoutRequested value)? logoutRequested,
+    TResult? Function(DeleteAccountRequested value)? deleteAccountRequested,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
@@ -59,6 +65,7 @@ mixin _$UserDetailsEvent {
     TResult Function(UpdateUserDetailsRequested value)?
     updateUserDetailsRequested,
     TResult Function(LogoutRequested value)? logoutRequested,
+    TResult Function(DeleteAccountRequested value)? deleteAccountRequested,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
 }
@@ -133,6 +140,7 @@ class _$UserDetailsRequestedImpl implements UserDetailsRequested {
     required TResult Function(UpdateUserRequestModel updateUserRequestModel)
     updateUserDetailsRequested,
     required TResult Function() logoutRequested,
+    required TResult Function(String password) deleteAccountRequested,
   }) {
     return userDetailsRequested();
   }
@@ -144,6 +152,7 @@ class _$UserDetailsRequestedImpl implements UserDetailsRequested {
     TResult? Function(UpdateUserRequestModel updateUserRequestModel)?
     updateUserDetailsRequested,
     TResult? Function()? logoutRequested,
+    TResult? Function(String password)? deleteAccountRequested,
   }) {
     return userDetailsRequested?.call();
   }
@@ -155,6 +164,7 @@ class _$UserDetailsRequestedImpl implements UserDetailsRequested {
     TResult Function(UpdateUserRequestModel updateUserRequestModel)?
     updateUserDetailsRequested,
     TResult Function()? logoutRequested,
+    TResult Function(String password)? deleteAccountRequested,
     required TResult orElse(),
   }) {
     if (userDetailsRequested != null) {
@@ -170,6 +180,8 @@ class _$UserDetailsRequestedImpl implements UserDetailsRequested {
     required TResult Function(UpdateUserDetailsRequested value)
     updateUserDetailsRequested,
     required TResult Function(LogoutRequested value) logoutRequested,
+    required TResult Function(DeleteAccountRequested value)
+    deleteAccountRequested,
   }) {
     return userDetailsRequested(this);
   }
@@ -181,6 +193,7 @@ class _$UserDetailsRequestedImpl implements UserDetailsRequested {
     TResult? Function(UpdateUserDetailsRequested value)?
     updateUserDetailsRequested,
     TResult? Function(LogoutRequested value)? logoutRequested,
+    TResult? Function(DeleteAccountRequested value)? deleteAccountRequested,
   }) {
     return userDetailsRequested?.call(this);
   }
@@ -192,6 +205,7 @@ class _$UserDetailsRequestedImpl implements UserDetailsRequested {
     TResult Function(UpdateUserDetailsRequested value)?
     updateUserDetailsRequested,
     TResult Function(LogoutRequested value)? logoutRequested,
+    TResult Function(DeleteAccountRequested value)? deleteAccountRequested,
     required TResult orElse(),
   }) {
     if (userDetailsRequested != null) {
@@ -298,6 +312,7 @@ class _$UpdateUserDetailsRequestedImpl implements UpdateUserDetailsRequested {
     required TResult Function(UpdateUserRequestModel updateUserRequestModel)
     updateUserDetailsRequested,
     required TResult Function() logoutRequested,
+    required TResult Function(String password) deleteAccountRequested,
   }) {
     return updateUserDetailsRequested(updateUserRequestModel);
   }
@@ -309,6 +324,7 @@ class _$UpdateUserDetailsRequestedImpl implements UpdateUserDetailsRequested {
     TResult? Function(UpdateUserRequestModel updateUserRequestModel)?
     updateUserDetailsRequested,
     TResult? Function()? logoutRequested,
+    TResult? Function(String password)? deleteAccountRequested,
   }) {
     return updateUserDetailsRequested?.call(updateUserRequestModel);
   }
@@ -320,6 +336,7 @@ class _$UpdateUserDetailsRequestedImpl implements UpdateUserDetailsRequested {
     TResult Function(UpdateUserRequestModel updateUserRequestModel)?
     updateUserDetailsRequested,
     TResult Function()? logoutRequested,
+    TResult Function(String password)? deleteAccountRequested,
     required TResult orElse(),
   }) {
     if (updateUserDetailsRequested != null) {
@@ -335,6 +352,8 @@ class _$UpdateUserDetailsRequestedImpl implements UpdateUserDetailsRequested {
     required TResult Function(UpdateUserDetailsRequested value)
     updateUserDetailsRequested,
     required TResult Function(LogoutRequested value) logoutRequested,
+    required TResult Function(DeleteAccountRequested value)
+    deleteAccountRequested,
   }) {
     return updateUserDetailsRequested(this);
   }
@@ -346,6 +365,7 @@ class _$UpdateUserDetailsRequestedImpl implements UpdateUserDetailsRequested {
     TResult? Function(UpdateUserDetailsRequested value)?
     updateUserDetailsRequested,
     TResult? Function(LogoutRequested value)? logoutRequested,
+    TResult? Function(DeleteAccountRequested value)? deleteAccountRequested,
   }) {
     return updateUserDetailsRequested?.call(this);
   }
@@ -357,6 +377,7 @@ class _$UpdateUserDetailsRequestedImpl implements UpdateUserDetailsRequested {
     TResult Function(UpdateUserDetailsRequested value)?
     updateUserDetailsRequested,
     TResult Function(LogoutRequested value)? logoutRequested,
+    TResult Function(DeleteAccountRequested value)? deleteAccountRequested,
     required TResult orElse(),
   }) {
     if (updateUserDetailsRequested != null) {
@@ -427,6 +448,7 @@ class _$LogoutRequestedImpl implements LogoutRequested {
     required TResult Function(UpdateUserRequestModel updateUserRequestModel)
     updateUserDetailsRequested,
     required TResult Function() logoutRequested,
+    required TResult Function(String password) deleteAccountRequested,
   }) {
     return logoutRequested();
   }
@@ -438,6 +460,7 @@ class _$LogoutRequestedImpl implements LogoutRequested {
     TResult? Function(UpdateUserRequestModel updateUserRequestModel)?
     updateUserDetailsRequested,
     TResult? Function()? logoutRequested,
+    TResult? Function(String password)? deleteAccountRequested,
   }) {
     return logoutRequested?.call();
   }
@@ -449,6 +472,7 @@ class _$LogoutRequestedImpl implements LogoutRequested {
     TResult Function(UpdateUserRequestModel updateUserRequestModel)?
     updateUserDetailsRequested,
     TResult Function()? logoutRequested,
+    TResult Function(String password)? deleteAccountRequested,
     required TResult orElse(),
   }) {
     if (logoutRequested != null) {
@@ -464,6 +488,8 @@ class _$LogoutRequestedImpl implements LogoutRequested {
     required TResult Function(UpdateUserDetailsRequested value)
     updateUserDetailsRequested,
     required TResult Function(LogoutRequested value) logoutRequested,
+    required TResult Function(DeleteAccountRequested value)
+    deleteAccountRequested,
   }) {
     return logoutRequested(this);
   }
@@ -475,6 +501,7 @@ class _$LogoutRequestedImpl implements LogoutRequested {
     TResult? Function(UpdateUserDetailsRequested value)?
     updateUserDetailsRequested,
     TResult? Function(LogoutRequested value)? logoutRequested,
+    TResult? Function(DeleteAccountRequested value)? deleteAccountRequested,
   }) {
     return logoutRequested?.call(this);
   }
@@ -486,6 +513,7 @@ class _$LogoutRequestedImpl implements LogoutRequested {
     TResult Function(UpdateUserDetailsRequested value)?
     updateUserDetailsRequested,
     TResult Function(LogoutRequested value)? logoutRequested,
+    TResult Function(DeleteAccountRequested value)? deleteAccountRequested,
     required TResult orElse(),
   }) {
     if (logoutRequested != null) {
@@ -497,4 +525,171 @@ class _$LogoutRequestedImpl implements LogoutRequested {
 
 abstract class LogoutRequested implements UserDetailsEvent {
   const factory LogoutRequested() = _$LogoutRequestedImpl;
+}
+
+/// @nodoc
+abstract class _$$DeleteAccountRequestedImplCopyWith<$Res> {
+  factory _$$DeleteAccountRequestedImplCopyWith(
+    _$DeleteAccountRequestedImpl value,
+    $Res Function(_$DeleteAccountRequestedImpl) then,
+  ) = __$$DeleteAccountRequestedImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({String password});
+}
+
+/// @nodoc
+class __$$DeleteAccountRequestedImplCopyWithImpl<$Res>
+    extends _$UserDetailsEventCopyWithImpl<$Res, _$DeleteAccountRequestedImpl>
+    implements _$$DeleteAccountRequestedImplCopyWith<$Res> {
+  __$$DeleteAccountRequestedImplCopyWithImpl(
+    _$DeleteAccountRequestedImpl _value,
+    $Res Function(_$DeleteAccountRequestedImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of UserDetailsEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? password = null}) {
+    return _then(
+      _$DeleteAccountRequestedImpl(
+        null == password
+            ? _value.password
+            : password // ignore: cast_nullable_to_non_nullable
+                as String,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+
+class _$DeleteAccountRequestedImpl implements DeleteAccountRequested {
+  const _$DeleteAccountRequestedImpl(this.password);
+
+  @override
+  final String password;
+
+  @override
+  String toString() {
+    return 'UserDetailsEvent.deleteAccountRequested(password: $password)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$DeleteAccountRequestedImpl &&
+            (identical(other.password, password) ||
+                other.password == password));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, password);
+
+  /// Create a copy of UserDetailsEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$DeleteAccountRequestedImplCopyWith<_$DeleteAccountRequestedImpl>
+  get copyWith =>
+      __$$DeleteAccountRequestedImplCopyWithImpl<_$DeleteAccountRequestedImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() userDetailsRequested,
+    required TResult Function(UpdateUserRequestModel updateUserRequestModel)
+    updateUserDetailsRequested,
+    required TResult Function() logoutRequested,
+    required TResult Function(String password) deleteAccountRequested,
+  }) {
+    return deleteAccountRequested(password);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? userDetailsRequested,
+    TResult? Function(UpdateUserRequestModel updateUserRequestModel)?
+    updateUserDetailsRequested,
+    TResult? Function()? logoutRequested,
+    TResult? Function(String password)? deleteAccountRequested,
+  }) {
+    return deleteAccountRequested?.call(password);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? userDetailsRequested,
+    TResult Function(UpdateUserRequestModel updateUserRequestModel)?
+    updateUserDetailsRequested,
+    TResult Function()? logoutRequested,
+    TResult Function(String password)? deleteAccountRequested,
+    required TResult orElse(),
+  }) {
+    if (deleteAccountRequested != null) {
+      return deleteAccountRequested(password);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(UserDetailsRequested value) userDetailsRequested,
+    required TResult Function(UpdateUserDetailsRequested value)
+    updateUserDetailsRequested,
+    required TResult Function(LogoutRequested value) logoutRequested,
+    required TResult Function(DeleteAccountRequested value)
+    deleteAccountRequested,
+  }) {
+    return deleteAccountRequested(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(UserDetailsRequested value)? userDetailsRequested,
+    TResult? Function(UpdateUserDetailsRequested value)?
+    updateUserDetailsRequested,
+    TResult? Function(LogoutRequested value)? logoutRequested,
+    TResult? Function(DeleteAccountRequested value)? deleteAccountRequested,
+  }) {
+    return deleteAccountRequested?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(UserDetailsRequested value)? userDetailsRequested,
+    TResult Function(UpdateUserDetailsRequested value)?
+    updateUserDetailsRequested,
+    TResult Function(LogoutRequested value)? logoutRequested,
+    TResult Function(DeleteAccountRequested value)? deleteAccountRequested,
+    required TResult orElse(),
+  }) {
+    if (deleteAccountRequested != null) {
+      return deleteAccountRequested(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class DeleteAccountRequested implements UserDetailsEvent {
+  const factory DeleteAccountRequested(final String password) =
+      _$DeleteAccountRequestedImpl;
+
+  String get password;
+
+  /// Create a copy of UserDetailsEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$DeleteAccountRequestedImplCopyWith<_$DeleteAccountRequestedImpl>
+  get copyWith => throw _privateConstructorUsedError;
 }
