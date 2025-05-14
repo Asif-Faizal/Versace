@@ -13,11 +13,16 @@ import '../../features/login/data/login/login_repo_impl.dart';
 import '../../features/login/domain/login/login.dart';
 import '../../features/login/domain/login/login_repo.dart';
 import '../../features/register/bloc/email_verification/email_verification_bloc.dart';
+import '../../features/register/bloc/register/register_bloc.dart';
 import '../../features/register/data/email_verification/email_verification_datasource.dart';
 import '../../features/register/data/email_verification/email_verification_repo_impl.dart';
+import '../../features/register/data/register/register_datasource.dart';
+import '../../features/register/data/register/register_repo_impl.dart';
 import '../../features/register/domain/email_verification/email_verification_repo.dart';
 import '../../features/register/domain/email_verification/usecases/sent_email_otp.dart';
 import '../../features/register/domain/email_verification/usecases/verify_email_otp.dart';
+import '../../features/register/domain/register/register.dart';
+import '../../features/register/domain/register/register_repo.dart';
 import '../../features/register/presentation/cubits/password_visibility_cubit.dart';
 import '../../features/splash/cubit/splash/splash_cubit.dart';
 
@@ -50,6 +55,12 @@ Future<void> init() async {
 
   // HTTP Client
   getIt.registerLazySingleton<http.Client>(() => http.Client());
+
+  // Register
+  getIt.registerLazySingleton<RegisterDatasource>(() => RegisterDatasourceImpl(client: getIt<http.Client>()));
+  getIt.registerLazySingleton<RegisterRepository>(() => RegisterRepoImpl(datasource: getIt<RegisterDatasource>()));
+  getIt.registerLazySingleton<RegisterUsecase>(() => RegisterUsecase(repository: getIt<RegisterRepository>()));
+  getIt.registerLazySingleton<RegisterBloc>(() => RegisterBloc(registerUsecase: getIt<RegisterUsecase>()));
 
   // Email Verification
   getIt.registerLazySingleton<EmailVerificationRepository>(() => EmailVerificationRepositoryImpl(dataSource: getIt<EmailVerificationDataSource>()));

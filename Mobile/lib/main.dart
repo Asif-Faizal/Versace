@@ -18,6 +18,7 @@ import 'features/dashboard/cubit/bottom_nav_cubit.dart';
 import 'features/login/bloc/login/login_bloc.dart';
 import 'features/login/cubit/password_visibility/password_visibility_login_cubit.dart';
 import 'features/register/bloc/email_verification/email_verification_bloc.dart';
+import 'features/register/bloc/register/register_bloc.dart';
 import 'features/register/presentation/cubits/password_visibility_cubit.dart';
 
 void main() async {
@@ -63,6 +64,9 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider(
             create: (_) => di.getIt<LoginBloc>(),
+          ),
+          BlocProvider(
+            create: (_) => di.getIt<RegisterBloc>(),
           ),
         ],
         child: BlocBuilder<ThemeCubit, ThemeState>(

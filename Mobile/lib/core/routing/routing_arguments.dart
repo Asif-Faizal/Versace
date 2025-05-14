@@ -18,3 +18,12 @@ class EnterPasswordArguments extends RouteArguments {
   @override
   List<Object?> get props => [email, firstName, lastName];
 }
+
+class VerifyOtpArguments extends RouteArguments {
+  final String email;
+
+  const VerifyOtpArguments({required this.email});
+
+  @override
+  List<Object?> get props => [email];
+}

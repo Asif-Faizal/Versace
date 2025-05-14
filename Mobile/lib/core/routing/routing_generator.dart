@@ -9,6 +9,7 @@ import '../../features/dashboard/cubit/bottom_nav_state.dart';
 import '../../features/login/presentation/screens/login_screen.dart';
 import '../../features/register/presentation/screens/enter_password_screen.dart';
 import '../../features/register/presentation/screens/register_user_screen.dart';
+import '../../features/register/presentation/screens/verify_otp_screen.dart';
 import '../../features/splash/presentation/screens/initial_screen.dart';
 import 'routing_arguments.dart';
 
@@ -49,6 +50,11 @@ class RouteGenerator {
       case RouteConstants.enterPassword:
         if (args is EnterPasswordArguments) {
           return _buildRoute(EnterPasswordScreen(arguments: args), settings);
+        }
+        return _errorRoute('Error', context);
+      case RouteConstants.verifyOtp:
+        if (args is VerifyOtpArguments) {
+          return _buildRoute(VerifyOtpScreen(arguments: args), settings);
         }
         return _errorRoute('Error', context);
       case RouteConstants.login:

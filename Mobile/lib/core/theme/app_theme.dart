@@ -189,6 +189,9 @@ class AppTheme {
           color: Colors.black,
         ),
       ),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: Colors.white,
+      ),
     );
   }
 
@@ -381,6 +384,9 @@ class AppTheme {
           fontWeight: FontWeight.bold,
           color: Colors.white,
         ),
+      ),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: Colors.black,
       ),
     );
   }

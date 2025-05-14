@@ -18,6 +18,19 @@ class LoginResponseModel with _$LoginResponseModel {
 
   factory LoginResponseModel.fromJson(Map<String, dynamic> json) => _$LoginResponseModelFromJson(json);
 
+  static LoginResponseModel fromApiJson(Map<String, dynamic> json) {
+    final user = json['user'] as Map<String, dynamic>;
+    return LoginResponseModel(
+      id: user['_id'] as String,
+      email: user['email'] as String,
+      firstName: user['firstName'] as String,
+      lastName: user['lastName'] as String,
+      role: user['role'] as String,
+      accessToken: json['accessToken'] as String,
+      refreshToken: json['refreshToken'] as String,
+    );
+  }
+
   factory LoginResponseModel.fromEntity(LoginEntity entity) => LoginResponseModel(
     id: entity.id,
     email: entity.email,

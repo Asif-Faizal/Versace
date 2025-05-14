@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:versace/core/routing/routing_extension.dart';
 import 'package:versace/features/login/cubit/password_visibility/password_visibility_login_cubit.dart';
 
+import '../../../../core/routing/routing_constants.dart';
 import '../../../../core/util/validate_email.dart';
 import '../../../../core/widgets/error_snackbar.dart';
 import '../../bloc/login/login_bloc.dart';
@@ -28,7 +30,7 @@ class LoginScreen extends StatelessWidget {
               showErrorSnackBar(context, error.toString());
             },
             success: (success) {
-              
+              context.navigateToAndRemoveUntil(RouteConstants.home);
             },
             orElse: () {},
           );
@@ -110,7 +112,14 @@ class LoginScreen extends StatelessWidget {
                         );
                       }
                     },
-                    child: const Text('Login'),
+                    child: BlocBuilder<LoginBloc, LoginState>(
+                      builder: (context, state) {
+                        return state.maybeWhen(
+                          loading: () => const CircularProgressIndicator(),
+                          orElse: () => const Text('Login'),
+                        );
+                      },
+                    ),
                   ),
                 ),
                 const SizedBox(height: 30),

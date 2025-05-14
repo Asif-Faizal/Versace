@@ -19,6 +19,19 @@ class RegisterResponseModel with _$RegisterResponseModel {
 
   factory RegisterResponseModel.fromJson(Map<String, dynamic> json) => _$RegisterResponseModelFromJson(json);
 
+  static RegisterResponseModel fromApiJson(Map<String, dynamic> json) {
+    final user = json['user'] as Map<String, dynamic>;
+    return RegisterResponseModel(
+      id: user['_id'] as String,
+      email: user['email'] as String,
+      firstName: user['firstName'] as String,
+      lastName: user['lastName'] as String,
+      role: user['role'] as String,
+      accessToken: json['accessToken'] as String,
+      refreshToken: json['refreshToken'] as String,
+    );
+  }
+
   factory RegisterResponseModel.fromEntity(RegisterEntity entity) => RegisterResponseModel(
     id: entity.id,
     email: entity.email,
