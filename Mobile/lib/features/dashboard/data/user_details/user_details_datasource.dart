@@ -31,7 +31,7 @@ class UserDetailsDatasourceImpl implements UserDetailsDatasource {
     final token = await storageHelper.accessToken ?? '';
     return await ExceptionHandler.handleApiCall(() async {
       final response = await client.get(
-        Uri.parse('${ApiConfig.baseUrl}/api/auth/login'),
+        Uri.parse('${ApiConfig.baseUrl}/api/auth/me'),
         headers: {'Content-Type': 'application/json', 'deviceid': deviceId, 'devicemodel': deviceModel, 'deviceos': deviceOs+deviceOsVersion, 'Authorization': 'Bearer $token'},
       );
       debugPrint('Response: ${response.body}');

@@ -19,15 +19,14 @@ class UserDetailsModel with _$UserDetailsModel {
   factory UserDetailsModel.fromJson(Map<String, dynamic> json) => _$UserDetailsModelFromJson(json);
 
   static UserDetailsModel fromApiJson(Map<String, dynamic> json) {
-    final user = json['user'] as Map<String, dynamic>;
     return UserDetailsModel(
-      id: user['_id'] as String,
-      email: user['email'] as String,
-      firstName: user['firstName'] as String,
-      lastName: user['lastName'] as String,
-      role: user['role'] as String,
-      isActive: user['isActive'] as bool,
-      isEmailVerified: user['isEmailVerified'] as bool,
+      id: json['_id'] as String,
+      email: json['email'] as String,
+      firstName: json['firstName'] as String,
+      lastName: json['lastName'] as String,
+      role: json['role'] as String,
+      isActive: json['isActive'] as bool,
+      isEmailVerified: json['isEmailVerified'] as bool,
     );
   }
 
