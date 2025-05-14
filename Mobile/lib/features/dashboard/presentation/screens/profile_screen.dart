@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:versace/core/routing/routing_constants.dart';
 import 'package:versace/core/routing/routing_extension.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:versace/features/register/bloc/email_verification/email_verification_bloc.dart';
 
 import '../../../../core/injection/injection_container.dart';
 import '../../../../core/routing/routing_arguments.dart';
@@ -10,7 +11,10 @@ import 'package:versace/features/dashboard/bloc/user_details/user_details_bloc.d
 import 'package:versace/features/dashboard/bloc/user_details/user_details_event.dart';
 import 'package:versace/features/dashboard/bloc/user_details/user_details_state.dart';
 import '../../../../core/widgets/error_snackbar.dart';
+import '../../../../core/widgets/loading_snackbar.dart';
 import '../../../../core/widgets/success_snackbar.dart';
+import '../../../register/bloc/email_verification/email_verification_event.dart';
+import '../../../register/bloc/email_verification/email_verification_state.dart';
 import '../../cubit/bottom_nav_cubit.dart';
 import '../../cubit/bottom_nav_state.dart';
 import 'package:versace/features/dashboard/presentation/screens/dashboard_screen.dart';
@@ -50,21 +54,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final textTheme = Theme.of(context).textTheme;
     return Scaffold(
       appBar: AppBar(),
-      body: BlocListener<UserDetailsBloc, UserDetailsState>(
-        listener: (context, state) {
-          state.maybeWhen(
-            logoutSuccess: () {
-              StorageHelper storageHelper = getIt<StorageHelper>();
-              storageHelper.clearAuthData();
-              showSuccessSnackBar(context, 'Logged out successfully');
-              context.navigateToAndRemoveUntil(RouteConstants.initial);
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<UserDetailsBloc, UserDetailsState>(
+            listener: (context, state) {
+              state.maybeWhen(
+                logoutSuccess: () {
+                  StorageHelper storageHelper = getIt<StorageHelper>();
+                  storageHelper.clearAuthData();
+                  showSuccessSnackBar(context, 'Logged out successfully');
+                  context.navigateToAndRemoveUntil(RouteConstants.initial);
+                },
+                logoutFailure: (message) {
+                  showErrorSnackBar(context, message);
+                },
+                orElse: () {},
+              );
             },
-            logoutFailure: (message) {
-              showErrorSnackBar(context, message);
+          ),
+          BlocListener<EmailVerificationBloc, EmailVerificationState>(
+            listener: (context, state) {
+              state.maybeWhen(
+                loading: () {
+                  showLoadingSnackBar(context, 'Sending OTP...');
+                },
+                otpSent: (message) {
+                  final userState = context.read<UserDetailsBloc>().state;
+                  String? email;
+                  userState.maybeWhen(
+                    success: (user) => email = user.email,
+                    orElse: () {},
+                  );
+                  if (email != null) {
+                    context.navigateTo(RouteConstants.verifyOtp, arguments: VerifyOtpArguments(email: email!));
+                  }
+                },
+                error: (message) {
+                  showErrorSnackBar(context, message);
+                },
+                orElse: () {},
+              );
             },
-            orElse: () {},
-          );
-        },
+          ),
+        ],
         child: Center(
           child:
               isLoggedIn
@@ -127,19 +159,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             user.email,
                                             style: textTheme.bodyMedium,
                                           ),
-                                          Chip(
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(2),
-                                            ),
-                                            padding: EdgeInsets.symmetric(
-                                              horizontal: 10,
-                                            ),
-                                            label: Text(
-                                              user.isEmailVerified
-                                                  ? 'Verified'
-                                                  : 'Not Verified',
-                                              style: textTheme.labelSmall,
+                                          InkWell(
+                                            onTap: () {
+                                              context
+                                                  .read<EmailVerificationBloc>()
+                                                  .add(
+                                                    EmailVerificationEvent.sendOtpRequested(
+                                                      email: user.email,
+                                                    ),
+                                                  );
+                                            },
+                                            child: Chip(
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(2),
+                                              ),
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 10,
+                                              ),
+                                              label: Text(
+                                                user.isEmailVerified
+                                                    ? 'Verified'
+                                                    : 'Not Verified',
+                                                style: textTheme.labelSmall,
+                                              ),
                                             ),
                                           ),
                                         ],
