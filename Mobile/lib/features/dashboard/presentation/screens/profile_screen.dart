@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:versace/core/routing/routing_constants.dart';
 import 'package:versace/core/routing/routing_extension.dart';
 
-import '../../../../core/routing/routing_arguments.dart';
-
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
@@ -15,7 +13,7 @@ class ProfileScreen extends StatelessWidget {
       ),
       body: Center(
         child: ElevatedButton(onPressed: (){
-          context.navigateToAndRemoveUntil(RouteConstants.verifyOtp, arguments: VerifyOtpArguments(email: 'test@test.com'));
+          context.navigateToAndRemoveUntil(RouteConstants.initial);
         }, child: Text('Login')),
       ),
     );
