@@ -96,6 +96,12 @@ class EnterPasswordScreen extends StatelessWidget {
                           labelText: 'Password*',
                           prefixIcon: const Icon(Icons.lock_outline),
                           suffixIcon: IconButton(
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide.none,
+                            ),
+                          ),
                             onPressed: () {
                               context
                                   .read<PasswordVisibilityCubit>()
@@ -133,6 +139,12 @@ class EnterPasswordScreen extends StatelessWidget {
                           labelText: 'Confirm Password*',
                           prefixIcon: const Icon(Icons.lock_outline),
                           suffixIcon: IconButton(
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide.none,
+                            ),
+                          ),
                             onPressed: () {
                               context
                                   .read<PasswordVisibilityCubit>()

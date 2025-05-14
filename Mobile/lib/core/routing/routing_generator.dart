@@ -40,11 +40,35 @@ class RouteGenerator {
       case RouteConstants.profile:
         final navCubit = context.read<BottomNavCubit>();
         navCubit.select(const BottomNavState.profile());
-        return _buildRoute(const DashboardScreen(), settings);
+        return _buildRouteWithPopHandler(
+          const DashboardScreen(), 
+          settings,
+          (didPop, result) {
+            navCubit.select(const BottomNavState.profile());
+          }
+        );
       case RouteConstants.search:
         final navCubit = context.read<BottomNavCubit>();
         navCubit.select(const BottomNavState.search());
-        return _buildRoute(const DashboardScreen(), settings);
+        // Set PopScope to navigate back correctly
+        return _buildRouteWithPopHandler(
+          const DashboardScreen(), 
+          settings,
+          (didPop, result) {
+            navCubit.select(const BottomNavState.home());
+          }
+        );
+      case RouteConstants.editProfile:
+        // EditProfile is now handled internally by the cubit, not as a separate route
+        final navCubit = context.read<BottomNavCubit>();
+        navCubit.select(const BottomNavState.profile());
+        return _buildRouteWithPopHandler(
+          const DashboardScreen(), 
+          settings,
+          (didPop, result) {
+            navCubit.select(const BottomNavState.profile());
+          }
+        );
       case RouteConstants.registerUser:
         return _buildRoute(const RegisterUserScreen(), settings);
       case RouteConstants.enterPassword:
@@ -63,6 +87,35 @@ class RouteGenerator {
         return _errorRoute('Error', context);
     }
   }
+  
+  static Route<dynamic> _buildRouteWithPopHandler(
+    Widget page, 
+    RouteSettings settings,
+    void Function(bool, dynamic) onPopInvoked
+  ) {
+    return PageRouteBuilder(
+      settings: settings,
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: onPopInvoked,
+          child: page,
+        );
+      },
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(1.0, 0.0);
+        const end = Offset.zero;
+        const curve = Curves.ease;
+        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: child,
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    );
+  }
+  
   static Route<dynamic> _buildRoute(Widget page, RouteSettings settings) {
     return PageRouteBuilder(
       settings: settings,

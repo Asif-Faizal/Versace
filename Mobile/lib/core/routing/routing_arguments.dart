@@ -27,3 +27,13 @@ class VerifyOtpArguments extends RouteArguments {
   @override
   List<Object?> get props => [email];
 }
+
+class EditProfileArguments extends RouteArguments {
+  final String firstName;
+  final String lastName;
+
+  const EditProfileArguments({required this.firstName, required this.lastName});
+
+  @override
+  List<Object?> get props => [firstName, lastName];
+}

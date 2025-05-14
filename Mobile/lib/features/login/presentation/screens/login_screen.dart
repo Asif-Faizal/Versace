@@ -81,6 +81,12 @@ class LoginScreen extends StatelessWidget {
                         labelText: 'Password*',
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide.none,
+                            ),
+                          ),
                           onPressed: () {
                             context
                                 .read<PasswordVisibilityLoginCubit>()

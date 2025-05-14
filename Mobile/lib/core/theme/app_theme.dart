@@ -99,6 +99,20 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         ),
       ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          foregroundColor: Colors.black,
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(3),
+            side: const BorderSide(color: Colors.black),
+          ),
+          iconSize: 15,
+          padding: EdgeInsets.all(5),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+      ),
       // Card Theme
       cardTheme: CardTheme(
         color: Colors.grey[100],
@@ -292,6 +306,21 @@ class AppTheme {
         style: TextButton.styleFrom(
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        ),
+      ),
+      
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          foregroundColor: Colors.white,
+          backgroundColor: Colors.black,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(3),
+            side: const BorderSide(color: Colors.white),
+          ),
+          iconSize: 15,
+          padding: EdgeInsets.all(5),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
       ),
       // Card Theme

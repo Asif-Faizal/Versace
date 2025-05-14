@@ -7,10 +7,19 @@ class BottomNavCubit extends Cubit<BottomNavState> {
   BottomNavState? _previousState;
 
   void select(BottomNavState state) {
-    if (state is SearchNav) {
-      _previousState = this.state is SearchNav ? _previousState : this.state;
+    if (state is SearchNav || state is EditProfileNav) {
+      _previousState = this.state is SearchNav || this.state is EditProfileNav ? _previousState : this.state;
     }
     emit(state);
+  }
+  
+  void goHome() {
+    if (_previousState != null) {
+      emit(_previousState!);
+      _previousState = null;
+    } else {
+      emit(const BottomNavState.home());
+    }
   }
   
   BottomNavState? get previousState => _previousState;
