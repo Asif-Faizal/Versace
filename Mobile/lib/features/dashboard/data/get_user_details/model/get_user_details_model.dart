@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../domain/get_user_details/entity/get_user_details_entity.dart';
+import '../../../domain/get_user_details/entity/get_user_details_entity.dart';
 
 part 'get_user_details_model.freezed.dart';
 part 'get_user_details_model.g.dart';
