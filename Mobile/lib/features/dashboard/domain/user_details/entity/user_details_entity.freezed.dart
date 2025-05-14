@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'get_user_details_model.dart';
+part of 'user_details_entity.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -15,12 +15,8 @@ final _privateConstructorUsedError = UnsupportedError(
   'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
 );
 
-GetUserDetailsModel _$GetUserDetailsModelFromJson(Map<String, dynamic> json) {
-  return _GetUserDetailsModel.fromJson(json);
-}
-
 /// @nodoc
-mixin _$GetUserDetailsModel {
+mixin _$UserDetailsEntity {
   String get id => throw _privateConstructorUsedError;
   String get email => throw _privateConstructorUsedError;
   String get firstName => throw _privateConstructorUsedError;
@@ -29,22 +25,19 @@ mixin _$GetUserDetailsModel {
   bool get isActive => throw _privateConstructorUsedError;
   bool get isEmailVerified => throw _privateConstructorUsedError;
 
-  /// Serializes this GetUserDetailsModel to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of GetUserDetailsModel
+  /// Create a copy of UserDetailsEntity
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $GetUserDetailsModelCopyWith<GetUserDetailsModel> get copyWith =>
+  $UserDetailsEntityCopyWith<UserDetailsEntity> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $GetUserDetailsModelCopyWith<$Res> {
-  factory $GetUserDetailsModelCopyWith(
-    GetUserDetailsModel value,
-    $Res Function(GetUserDetailsModel) then,
-  ) = _$GetUserDetailsModelCopyWithImpl<$Res, GetUserDetailsModel>;
+abstract class $UserDetailsEntityCopyWith<$Res> {
+  factory $UserDetailsEntityCopyWith(
+    UserDetailsEntity value,
+    $Res Function(UserDetailsEntity) then,
+  ) = _$UserDetailsEntityCopyWithImpl<$Res, UserDetailsEntity>;
   @useResult
   $Res call({
     String id,
@@ -58,16 +51,16 @@ abstract class $GetUserDetailsModelCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$GetUserDetailsModelCopyWithImpl<$Res, $Val extends GetUserDetailsModel>
-    implements $GetUserDetailsModelCopyWith<$Res> {
-  _$GetUserDetailsModelCopyWithImpl(this._value, this._then);
+class _$UserDetailsEntityCopyWithImpl<$Res, $Val extends UserDetailsEntity>
+    implements $UserDetailsEntityCopyWith<$Res> {
+  _$UserDetailsEntityCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of GetUserDetailsModel
+  /// Create a copy of UserDetailsEntity
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -124,12 +117,12 @@ class _$GetUserDetailsModelCopyWithImpl<$Res, $Val extends GetUserDetailsModel>
 }
 
 /// @nodoc
-abstract class _$$GetUserDetailsModelImplCopyWith<$Res>
-    implements $GetUserDetailsModelCopyWith<$Res> {
-  factory _$$GetUserDetailsModelImplCopyWith(
-    _$GetUserDetailsModelImpl value,
-    $Res Function(_$GetUserDetailsModelImpl) then,
-  ) = __$$GetUserDetailsModelImplCopyWithImpl<$Res>;
+abstract class _$$UserDetailsEntityImplCopyWith<$Res>
+    implements $UserDetailsEntityCopyWith<$Res> {
+  factory _$$UserDetailsEntityImplCopyWith(
+    _$UserDetailsEntityImpl value,
+    $Res Function(_$UserDetailsEntityImpl) then,
+  ) = __$$UserDetailsEntityImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({
@@ -144,15 +137,15 @@ abstract class _$$GetUserDetailsModelImplCopyWith<$Res>
 }
 
 /// @nodoc
-class __$$GetUserDetailsModelImplCopyWithImpl<$Res>
-    extends _$GetUserDetailsModelCopyWithImpl<$Res, _$GetUserDetailsModelImpl>
-    implements _$$GetUserDetailsModelImplCopyWith<$Res> {
-  __$$GetUserDetailsModelImplCopyWithImpl(
-    _$GetUserDetailsModelImpl _value,
-    $Res Function(_$GetUserDetailsModelImpl) _then,
+class __$$UserDetailsEntityImplCopyWithImpl<$Res>
+    extends _$UserDetailsEntityCopyWithImpl<$Res, _$UserDetailsEntityImpl>
+    implements _$$UserDetailsEntityImplCopyWith<$Res> {
+  __$$UserDetailsEntityImplCopyWithImpl(
+    _$UserDetailsEntityImpl _value,
+    $Res Function(_$UserDetailsEntityImpl) _then,
   ) : super(_value, _then);
 
-  /// Create a copy of GetUserDetailsModel
+  /// Create a copy of UserDetailsEntity
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -166,7 +159,7 @@ class __$$GetUserDetailsModelImplCopyWithImpl<$Res>
     Object? isEmailVerified = null,
   }) {
     return _then(
-      _$GetUserDetailsModelImpl(
+      _$UserDetailsEntityImpl(
         id:
             null == id
                 ? _value.id
@@ -208,9 +201,9 @@ class __$$GetUserDetailsModelImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
-class _$GetUserDetailsModelImpl implements _GetUserDetailsModel {
-  const _$GetUserDetailsModelImpl({
+
+class _$UserDetailsEntityImpl implements _UserDetailsEntity {
+  const _$UserDetailsEntityImpl({
     required this.id,
     required this.email,
     required this.firstName,
@@ -219,9 +212,6 @@ class _$GetUserDetailsModelImpl implements _GetUserDetailsModel {
     this.isActive = false,
     this.isEmailVerified = false,
   });
-
-  factory _$GetUserDetailsModelImpl.fromJson(Map<String, dynamic> json) =>
-      _$$GetUserDetailsModelImplFromJson(json);
 
   @override
   final String id;
@@ -242,14 +232,14 @@ class _$GetUserDetailsModelImpl implements _GetUserDetailsModel {
 
   @override
   String toString() {
-    return 'GetUserDetailsModel(id: $id, email: $email, firstName: $firstName, lastName: $lastName, role: $role, isActive: $isActive, isEmailVerified: $isEmailVerified)';
+    return 'UserDetailsEntity(id: $id, email: $email, firstName: $firstName, lastName: $lastName, role: $role, isActive: $isActive, isEmailVerified: $isEmailVerified)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$GetUserDetailsModelImpl &&
+            other is _$UserDetailsEntityImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.email, email) || other.email == email) &&
             (identical(other.firstName, firstName) ||
@@ -263,7 +253,6 @@ class _$GetUserDetailsModelImpl implements _GetUserDetailsModel {
                 other.isEmailVerified == isEmailVerified));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
     runtimeType,
@@ -276,25 +265,20 @@ class _$GetUserDetailsModelImpl implements _GetUserDetailsModel {
     isEmailVerified,
   );
 
-  /// Create a copy of GetUserDetailsModel
+  /// Create a copy of UserDetailsEntity
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$GetUserDetailsModelImplCopyWith<_$GetUserDetailsModelImpl> get copyWith =>
-      __$$GetUserDetailsModelImplCopyWithImpl<_$GetUserDetailsModelImpl>(
+  _$$UserDetailsEntityImplCopyWith<_$UserDetailsEntityImpl> get copyWith =>
+      __$$UserDetailsEntityImplCopyWithImpl<_$UserDetailsEntityImpl>(
         this,
         _$identity,
       );
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$GetUserDetailsModelImplToJson(this);
-  }
 }
 
-abstract class _GetUserDetailsModel implements GetUserDetailsModel {
-  const factory _GetUserDetailsModel({
+abstract class _UserDetailsEntity implements UserDetailsEntity {
+  const factory _UserDetailsEntity({
     required final String id,
     required final String email,
     required final String firstName,
@@ -302,10 +286,7 @@ abstract class _GetUserDetailsModel implements GetUserDetailsModel {
     required final String role,
     final bool isActive,
     final bool isEmailVerified,
-  }) = _$GetUserDetailsModelImpl;
-
-  factory _GetUserDetailsModel.fromJson(Map<String, dynamic> json) =
-      _$GetUserDetailsModelImpl.fromJson;
+  }) = _$UserDetailsEntityImpl;
 
   @override
   String get id;
@@ -322,10 +303,10 @@ abstract class _GetUserDetailsModel implements GetUserDetailsModel {
   @override
   bool get isEmailVerified;
 
-  /// Create a copy of GetUserDetailsModel
+  /// Create a copy of UserDetailsEntity
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$GetUserDetailsModelImplCopyWith<_$GetUserDetailsModelImpl> get copyWith =>
+  _$$UserDetailsEntityImplCopyWith<_$UserDetailsEntityImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

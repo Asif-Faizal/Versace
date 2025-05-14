@@ -1,10 +1,10 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'get_user_details_entity.freezed.dart';
+part 'user_details_entity.freezed.dart';
 
 @freezed
-class GetUserDetailsEntity with _$GetUserDetailsEntity {
-  const factory GetUserDetailsEntity({
+class UserDetailsEntity with _$UserDetailsEntity {
+  const factory UserDetailsEntity({
     required String id,
     required String email,
     required String firstName,
@@ -12,5 +12,5 @@ class GetUserDetailsEntity with _$GetUserDetailsEntity {
     required String role,
     @Default(false) bool isActive,
     @Default(false) bool isEmailVerified,
-  }) = _GetUserDetailsEntity;
+  }) = _UserDetailsEntity;
 }

@@ -14,6 +14,7 @@ import 'package:versace/features/splash/cubit/splash/splash_cubit.dart';
 
 import 'core/api/enviornment_config.dart';
 import 'core/api/api_config.dart';
+import 'features/dashboard/bloc/user_details/user_details_bloc.dart';
 import 'features/dashboard/cubit/bottom_nav_cubit.dart';
 import 'features/login/bloc/login/login_bloc.dart';
 import 'features/login/cubit/password_visibility/password_visibility_login_cubit.dart';
@@ -67,6 +68,9 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider(
             create: (_) => di.getIt<RegisterBloc>(),
+          ),
+          BlocProvider(
+            create: (_) => di.getIt<UserDetailsBloc>(),
           ),
         ],
         child: BlocBuilder<ThemeCubit, ThemeState>(

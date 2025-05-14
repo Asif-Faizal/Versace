@@ -6,6 +6,11 @@ import 'package:versace/features/dashboard/cubit/auto_scroll_cubit.dart';
 import 'package:versace/features/dashboard/cubit/bottom_nav_cubit.dart';
 import 'package:http/http.dart' as http;
 
+import '../../features/dashboard/bloc/user_details/user_details_bloc.dart';
+import '../../features/dashboard/data/user_details/user_details_datasource.dart';
+import '../../features/dashboard/data/user_details/user_details_repo_impl.dart';
+import '../../features/dashboard/domain/user_details/usecases/get_user_details.dart';
+import '../../features/dashboard/domain/user_details/user_details_repo.dart';
 import '../../features/login/bloc/login/login_bloc.dart';
 import '../../features/login/cubit/password_visibility/password_visibility_login_cubit.dart';
 import '../../features/login/data/login/login_datasource.dart';
@@ -72,10 +77,15 @@ Future<void> init() async {
     verifyEmailOtpUsecase: getIt<VerifyEmailOtpUsecase>(),
   ));
 
-
   // Login
   getIt.registerLazySingleton<LoginRemoteDataSource>(() => LoginRemoteDataSourceImpl(client: getIt<http.Client>()));
   getIt.registerLazySingleton<LoginRepository>(() => LoginRepositoryImpl(remoteDataSource: getIt<LoginRemoteDataSource>()));
   getIt.registerLazySingleton<LoginUsecase>(() => LoginUsecase(repository: getIt<LoginRepository>()));
   getIt.registerLazySingleton<LoginBloc>(() => LoginBloc(loginUsecase: getIt<LoginUsecase>()));
+
+  // User Details
+  getIt.registerLazySingleton<UserDetailsDatasource>(() => UserDetailsDatasourceImpl(client: getIt<http.Client>()));
+  getIt.registerLazySingleton<UserDetailsRepo>(() => UserDetailsRepoImpl(datasource: getIt<UserDetailsDatasource>()));
+  getIt.registerLazySingleton<GetUserDetailsUsecase>(() => GetUserDetailsUsecase(repository: getIt<UserDetailsRepo>()));
+  getIt.registerLazySingleton<UserDetailsBloc>(() => UserDetailsBloc(getUserDetailsUsecase: getIt<GetUserDetailsUsecase>()));
 }

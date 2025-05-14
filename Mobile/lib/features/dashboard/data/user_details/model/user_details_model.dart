@@ -1,12 +1,12 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../../domain/get_user_details/entity/get_user_details_entity.dart';
+import '../../../domain/user_details/entity/user_details_entity.dart';
 
-part 'get_user_details_model.freezed.dart';
-part 'get_user_details_model.g.dart';
+part 'user_details_model.freezed.dart';
+part 'user_details_model.g.dart';
 
 @freezed
-class GetUserDetailsModel with _$GetUserDetailsModel {
-  const factory GetUserDetailsModel({
+class UserDetailsModel with _$UserDetailsModel {
+  const factory UserDetailsModel({
     required String id,
     required String email,
     required String firstName,
@@ -16,11 +16,11 @@ class GetUserDetailsModel with _$GetUserDetailsModel {
     @Default(false) bool isEmailVerified,
   }) = _GetUserDetailsModel;
 
-  factory GetUserDetailsModel.fromJson(Map<String, dynamic> json) => _$GetUserDetailsModelFromJson(json);
+  factory UserDetailsModel.fromJson(Map<String, dynamic> json) => _$UserDetailsModelFromJson(json);
 
-  static GetUserDetailsModel fromApiJson(Map<String, dynamic> json) {
+  static UserDetailsModel fromApiJson(Map<String, dynamic> json) {
     final user = json['user'] as Map<String, dynamic>;
-    return GetUserDetailsModel(
+    return UserDetailsModel(
       id: user['_id'] as String,
       email: user['email'] as String,
       firstName: user['firstName'] as String,
@@ -31,7 +31,7 @@ class GetUserDetailsModel with _$GetUserDetailsModel {
     );
   }
 
-  factory GetUserDetailsModel.fromEntity(GetUserDetailsEntity entity) => GetUserDetailsModel(
+  factory UserDetailsModel.fromEntity(UserDetailsEntity entity) => UserDetailsModel(
     id: entity.id,
     email: entity.email,
     firstName: entity.firstName,
@@ -42,8 +42,8 @@ class GetUserDetailsModel with _$GetUserDetailsModel {
   );
 }
 
-extension GetUserDetailsModelX on GetUserDetailsModel {
-  GetUserDetailsEntity toEntity() => GetUserDetailsEntity(
+extension UserDetailsModelX on UserDetailsModel {
+  UserDetailsEntity toEntity() => UserDetailsEntity(
     id: id,
     email: email,
     firstName: firstName,
