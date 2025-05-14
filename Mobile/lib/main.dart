@@ -24,7 +24,7 @@ import 'features/register/presentation/cubits/password_visibility_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  EnvironmentConfig.setEnvironment(Environment.simulator);
+  EnvironmentConfig.setEnvironment(Environment.development);
   await ApiConfig.loadEnv();
   await di.init();
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(

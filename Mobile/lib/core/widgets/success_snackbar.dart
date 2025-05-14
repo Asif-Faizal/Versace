@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-void showErrorSnackBar(BuildContext context, String message) {
-  debugPrint("______________ERROR SNACKBAR____________");
-  debugPrint("Error Message: $message");
+void showSuccessSnackBar(BuildContext context, String message) {
+  debugPrint("______________SUCCESS SNACKBAR____________");
+  debugPrint("Success Message: $message");
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       hitTestBehavior: HitTestBehavior.opaque,
@@ -12,7 +12,7 @@ void showErrorSnackBar(BuildContext context, String message) {
         child: Row(
           children: [
             Icon(
-              Icons.error_outline,
+              Icons.check_circle,
               color: Colors.white,
               size: 24,
             ),
@@ -42,7 +42,7 @@ void showErrorSnackBar(BuildContext context, String message) {
           ],
         ),
       ),
-      backgroundColor: Colors.red.shade800,
+      backgroundColor: Colors.green.shade400,
       behavior: SnackBarBehavior.floating,
       elevation: 0,
       margin: const EdgeInsets.only(bottom: 80, left: 20, right: 20),

@@ -27,4 +27,13 @@ class UserDetailsRepoImpl implements UserDetailsRepo {
       (entity) => Right(entity),
     );
   }
+
+  @override
+  Future<Either<Failure, void>> logout() async {
+    final response = await datasource.logout();
+    return response.fold(
+      (failure) => Left(failure),
+      (entity) => Right(entity),
+    );
+  }
 }

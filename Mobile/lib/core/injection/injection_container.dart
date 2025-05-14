@@ -11,6 +11,7 @@ import '../../features/dashboard/data/user_details/user_details_datasource.dart'
 import '../../features/dashboard/data/user_details/user_details_repo_impl.dart';
 import '../../features/dashboard/domain/user_details/usecases/get_user_details.dart';
 import '../../features/dashboard/domain/user_details/usecases/update_user_details.dart';
+import '../../features/dashboard/domain/user_details/usecases/user_logout.dart';
 import '../../features/dashboard/domain/user_details/user_details_repo.dart';
 import '../../features/login/bloc/login/login_bloc.dart';
 import '../../features/login/cubit/password_visibility/password_visibility_login_cubit.dart';
@@ -89,5 +90,6 @@ Future<void> init() async {
   getIt.registerLazySingleton<UserDetailsRepo>(() => UserDetailsRepoImpl(datasource: getIt<UserDetailsDatasource>()));
   getIt.registerLazySingleton<GetUserDetailsUsecase>(() => GetUserDetailsUsecase(repository: getIt<UserDetailsRepo>()));
   getIt.registerLazySingleton<UpdateUserDetailsUsecase>(() => UpdateUserDetailsUsecase(repository: getIt<UserDetailsRepo>()));
-  getIt.registerLazySingleton<UserDetailsBloc>(() => UserDetailsBloc(getUserDetailsUsecase: getIt<GetUserDetailsUsecase>(), updateUserDetailsUsecase: getIt<UpdateUserDetailsUsecase>()));
+  getIt.registerLazySingleton<UserLogoutUsecase>(() => UserLogoutUsecase(repository: getIt<UserDetailsRepo>()));
+  getIt.registerLazySingleton<UserDetailsBloc>(() => UserDetailsBloc(getUserDetailsUsecase: getIt<GetUserDetailsUsecase>(), updateUserDetailsUsecase: getIt<UpdateUserDetailsUsecase>(), userLogoutUsecase: getIt<UserLogoutUsecase>()));
 }

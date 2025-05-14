@@ -93,7 +93,7 @@ class _CartItemState extends State<CartItem> {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: 4),
+                      SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -136,6 +136,12 @@ class _CartItemState extends State<CartItem> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
+                                style: IconButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  shape: RoundedRectangleBorder(
+                                    side: BorderSide.none
+                                  ),
+                                ),
                                 onPressed: decrementQuantity,
                                 icon: Icon(
                                   Icons.remove_circle_outline,
@@ -153,6 +159,12 @@ class _CartItemState extends State<CartItem> {
                                 ),
                               ),
                               IconButton(
+                                style: IconButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  shape: RoundedRectangleBorder(
+                                    side: BorderSide.none
+                                  ),
+                                ),
                                 onPressed: incrementQuantity,
                                 icon: Icon(
                                   Icons.add_circle_outline,
@@ -166,6 +178,7 @@ class _CartItemState extends State<CartItem> {
                           ),
                         ],
                       ),
+                      SizedBox(height: 6),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -181,7 +194,7 @@ class _CartItemState extends State<CartItem> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 2),
+                      SizedBox(height: 4),
                       Divider(
                         color: widget.isDark ? Colors.white : Colors.black,
                         height: 0.5,
@@ -203,8 +216,8 @@ class _CartItemState extends State<CartItem> {
           ),
         ),
         Positioned(
-          top: 0,
-          right: 0,
+        top: 10,
+        right: 10,
           child: IconButton(
             onPressed: widget.onDelete,
             icon: Icon(Icons.close, size: 20),

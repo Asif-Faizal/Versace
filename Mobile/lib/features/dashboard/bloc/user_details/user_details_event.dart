@@ -8,4 +8,5 @@ part 'user_details_event.freezed.dart';
 class UserDetailsEvent with _$UserDetailsEvent {
   const factory UserDetailsEvent.userDetailsRequested() = UserDetailsRequested;
   const factory UserDetailsEvent.updateUserDetailsRequested(UpdateUserRequestModel updateUserRequestModel) = UpdateUserDetailsRequested;
+  const factory UserDetailsEvent.logoutRequested() = LogoutRequested;
 }

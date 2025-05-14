@@ -22,18 +22,21 @@ mixin _$UserDetailsEvent {
     required TResult Function() userDetailsRequested,
     required TResult Function(UpdateUserRequestModel updateUserRequestModel)
     updateUserDetailsRequested,
+    required TResult Function() logoutRequested,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? userDetailsRequested,
     TResult? Function(UpdateUserRequestModel updateUserRequestModel)?
     updateUserDetailsRequested,
+    TResult? Function()? logoutRequested,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? userDetailsRequested,
     TResult Function(UpdateUserRequestModel updateUserRequestModel)?
     updateUserDetailsRequested,
+    TResult Function()? logoutRequested,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -41,18 +44,21 @@ mixin _$UserDetailsEvent {
     required TResult Function(UserDetailsRequested value) userDetailsRequested,
     required TResult Function(UpdateUserDetailsRequested value)
     updateUserDetailsRequested,
+    required TResult Function(LogoutRequested value) logoutRequested,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(UserDetailsRequested value)? userDetailsRequested,
     TResult? Function(UpdateUserDetailsRequested value)?
     updateUserDetailsRequested,
+    TResult? Function(LogoutRequested value)? logoutRequested,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(UserDetailsRequested value)? userDetailsRequested,
     TResult Function(UpdateUserDetailsRequested value)?
     updateUserDetailsRequested,
+    TResult Function(LogoutRequested value)? logoutRequested,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
 }
@@ -126,6 +132,7 @@ class _$UserDetailsRequestedImpl implements UserDetailsRequested {
     required TResult Function() userDetailsRequested,
     required TResult Function(UpdateUserRequestModel updateUserRequestModel)
     updateUserDetailsRequested,
+    required TResult Function() logoutRequested,
   }) {
     return userDetailsRequested();
   }
@@ -136,6 +143,7 @@ class _$UserDetailsRequestedImpl implements UserDetailsRequested {
     TResult? Function()? userDetailsRequested,
     TResult? Function(UpdateUserRequestModel updateUserRequestModel)?
     updateUserDetailsRequested,
+    TResult? Function()? logoutRequested,
   }) {
     return userDetailsRequested?.call();
   }
@@ -146,6 +154,7 @@ class _$UserDetailsRequestedImpl implements UserDetailsRequested {
     TResult Function()? userDetailsRequested,
     TResult Function(UpdateUserRequestModel updateUserRequestModel)?
     updateUserDetailsRequested,
+    TResult Function()? logoutRequested,
     required TResult orElse(),
   }) {
     if (userDetailsRequested != null) {
@@ -160,6 +169,7 @@ class _$UserDetailsRequestedImpl implements UserDetailsRequested {
     required TResult Function(UserDetailsRequested value) userDetailsRequested,
     required TResult Function(UpdateUserDetailsRequested value)
     updateUserDetailsRequested,
+    required TResult Function(LogoutRequested value) logoutRequested,
   }) {
     return userDetailsRequested(this);
   }
@@ -170,6 +180,7 @@ class _$UserDetailsRequestedImpl implements UserDetailsRequested {
     TResult? Function(UserDetailsRequested value)? userDetailsRequested,
     TResult? Function(UpdateUserDetailsRequested value)?
     updateUserDetailsRequested,
+    TResult? Function(LogoutRequested value)? logoutRequested,
   }) {
     return userDetailsRequested?.call(this);
   }
@@ -180,6 +191,7 @@ class _$UserDetailsRequestedImpl implements UserDetailsRequested {
     TResult Function(UserDetailsRequested value)? userDetailsRequested,
     TResult Function(UpdateUserDetailsRequested value)?
     updateUserDetailsRequested,
+    TResult Function(LogoutRequested value)? logoutRequested,
     required TResult orElse(),
   }) {
     if (userDetailsRequested != null) {
@@ -285,6 +297,7 @@ class _$UpdateUserDetailsRequestedImpl implements UpdateUserDetailsRequested {
     required TResult Function() userDetailsRequested,
     required TResult Function(UpdateUserRequestModel updateUserRequestModel)
     updateUserDetailsRequested,
+    required TResult Function() logoutRequested,
   }) {
     return updateUserDetailsRequested(updateUserRequestModel);
   }
@@ -295,6 +308,7 @@ class _$UpdateUserDetailsRequestedImpl implements UpdateUserDetailsRequested {
     TResult? Function()? userDetailsRequested,
     TResult? Function(UpdateUserRequestModel updateUserRequestModel)?
     updateUserDetailsRequested,
+    TResult? Function()? logoutRequested,
   }) {
     return updateUserDetailsRequested?.call(updateUserRequestModel);
   }
@@ -305,6 +319,7 @@ class _$UpdateUserDetailsRequestedImpl implements UpdateUserDetailsRequested {
     TResult Function()? userDetailsRequested,
     TResult Function(UpdateUserRequestModel updateUserRequestModel)?
     updateUserDetailsRequested,
+    TResult Function()? logoutRequested,
     required TResult orElse(),
   }) {
     if (updateUserDetailsRequested != null) {
@@ -319,6 +334,7 @@ class _$UpdateUserDetailsRequestedImpl implements UpdateUserDetailsRequested {
     required TResult Function(UserDetailsRequested value) userDetailsRequested,
     required TResult Function(UpdateUserDetailsRequested value)
     updateUserDetailsRequested,
+    required TResult Function(LogoutRequested value) logoutRequested,
   }) {
     return updateUserDetailsRequested(this);
   }
@@ -329,6 +345,7 @@ class _$UpdateUserDetailsRequestedImpl implements UpdateUserDetailsRequested {
     TResult? Function(UserDetailsRequested value)? userDetailsRequested,
     TResult? Function(UpdateUserDetailsRequested value)?
     updateUserDetailsRequested,
+    TResult? Function(LogoutRequested value)? logoutRequested,
   }) {
     return updateUserDetailsRequested?.call(this);
   }
@@ -339,6 +356,7 @@ class _$UpdateUserDetailsRequestedImpl implements UpdateUserDetailsRequested {
     TResult Function(UserDetailsRequested value)? userDetailsRequested,
     TResult Function(UpdateUserDetailsRequested value)?
     updateUserDetailsRequested,
+    TResult Function(LogoutRequested value)? logoutRequested,
     required TResult orElse(),
   }) {
     if (updateUserDetailsRequested != null) {
@@ -360,4 +378,123 @@ abstract class UpdateUserDetailsRequested implements UserDetailsEvent {
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$UpdateUserDetailsRequestedImplCopyWith<_$UpdateUserDetailsRequestedImpl>
   get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$LogoutRequestedImplCopyWith<$Res> {
+  factory _$$LogoutRequestedImplCopyWith(
+    _$LogoutRequestedImpl value,
+    $Res Function(_$LogoutRequestedImpl) then,
+  ) = __$$LogoutRequestedImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$LogoutRequestedImplCopyWithImpl<$Res>
+    extends _$UserDetailsEventCopyWithImpl<$Res, _$LogoutRequestedImpl>
+    implements _$$LogoutRequestedImplCopyWith<$Res> {
+  __$$LogoutRequestedImplCopyWithImpl(
+    _$LogoutRequestedImpl _value,
+    $Res Function(_$LogoutRequestedImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of UserDetailsEvent
+  /// with the given fields replaced by the non-null parameter values.
+}
+
+/// @nodoc
+
+class _$LogoutRequestedImpl implements LogoutRequested {
+  const _$LogoutRequestedImpl();
+
+  @override
+  String toString() {
+    return 'UserDetailsEvent.logoutRequested()';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$LogoutRequestedImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() userDetailsRequested,
+    required TResult Function(UpdateUserRequestModel updateUserRequestModel)
+    updateUserDetailsRequested,
+    required TResult Function() logoutRequested,
+  }) {
+    return logoutRequested();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? userDetailsRequested,
+    TResult? Function(UpdateUserRequestModel updateUserRequestModel)?
+    updateUserDetailsRequested,
+    TResult? Function()? logoutRequested,
+  }) {
+    return logoutRequested?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? userDetailsRequested,
+    TResult Function(UpdateUserRequestModel updateUserRequestModel)?
+    updateUserDetailsRequested,
+    TResult Function()? logoutRequested,
+    required TResult orElse(),
+  }) {
+    if (logoutRequested != null) {
+      return logoutRequested();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(UserDetailsRequested value) userDetailsRequested,
+    required TResult Function(UpdateUserDetailsRequested value)
+    updateUserDetailsRequested,
+    required TResult Function(LogoutRequested value) logoutRequested,
+  }) {
+    return logoutRequested(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(UserDetailsRequested value)? userDetailsRequested,
+    TResult? Function(UpdateUserDetailsRequested value)?
+    updateUserDetailsRequested,
+    TResult? Function(LogoutRequested value)? logoutRequested,
+  }) {
+    return logoutRequested?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(UserDetailsRequested value)? userDetailsRequested,
+    TResult Function(UpdateUserDetailsRequested value)?
+    updateUserDetailsRequested,
+    TResult Function(LogoutRequested value)? logoutRequested,
+    required TResult orElse(),
+  }) {
+    if (logoutRequested != null) {
+      return logoutRequested(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class LogoutRequested implements UserDetailsEvent {
+  const factory LogoutRequested() = _$LogoutRequestedImpl;
 }

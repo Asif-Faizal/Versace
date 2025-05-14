@@ -11,5 +11,8 @@ class UserDetailsState with _$UserDetailsState {
   const factory UserDetailsState.loading() = _Loading;
   const factory UserDetailsState.success(UserDetailsEntity userDetailsEntity) = _Success;
   const factory UserDetailsState.updateSuccess(UpdateUserDetailsEntity updateUserDetailsEntity) = _UpdateSuccess;
+  const factory UserDetailsState.logoutLoading() = _LogoutLoading;
+  const factory UserDetailsState.logoutSuccess() = _LogoutSuccess;
+  const factory UserDetailsState.logoutFailure(String message) = _LogoutFailure;
   const factory UserDetailsState.error(String message) = _Error;
 }

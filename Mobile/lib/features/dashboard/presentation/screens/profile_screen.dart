@@ -9,6 +9,8 @@ import '../../../../core/storage/storage_helper.dart';
 import 'package:versace/features/dashboard/bloc/user_details/user_details_bloc.dart';
 import 'package:versace/features/dashboard/bloc/user_details/user_details_event.dart';
 import 'package:versace/features/dashboard/bloc/user_details/user_details_state.dart';
+import '../../../../core/widgets/error_snackbar.dart';
+import '../../../../core/widgets/success_snackbar.dart';
 import '../../cubit/bottom_nav_cubit.dart';
 import '../../cubit/bottom_nav_state.dart';
 import 'package:versace/features/dashboard/presentation/screens/dashboard_screen.dart';
@@ -48,155 +50,198 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final textTheme = Theme.of(context).textTheme;
     return Scaffold(
       appBar: AppBar(),
-      body: Center(
-        child:
-            isLoggedIn
-                ? BlocBuilder<UserDetailsBloc, UserDetailsState>(
-                  builder: (context, state) {
-                    return state.maybeWhen(
-                      initial: () => const Text('Welcome!'),
-                      loading: () => const CircularProgressIndicator(),
-                      success:
-                          (user) => Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Stack(
-                                      children: [
-                                        CircleAvatar(
-                                          radius: 60,
-                                          child: Text(
-                                            user.firstName[0].toUpperCase() +
-                                                user.lastName[0].toUpperCase(),
-                                            style: textTheme.displayMedium
-                                                ?.copyWith(color: Colors.white),
-                                          ),
-                                        ),
-                                        Positioned(
-                                          right: 7,
-                                          bottom: 7,
-                                          child: IconButton(
-                                            onPressed: () {},
-                                            icon: const Icon(Icons.add_a_photo),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(width: 15),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          user.firstName + ' ' + user.lastName,
-                                          style: textTheme.titleLarge,
-                                        ),
-                                        Text(
-                                          user.email,
-                                          style: textTheme.bodyMedium,
-                                        ),
-                                        Chip(
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              2,
+      body: BlocListener<UserDetailsBloc, UserDetailsState>(
+        listener: (context, state) {
+          state.maybeWhen(
+            logoutSuccess: () {
+              StorageHelper storageHelper = getIt<StorageHelper>();
+              storageHelper.clearAuthData();
+              showSuccessSnackBar(context, 'Logged out successfully');
+              context.navigateToAndRemoveUntil(RouteConstants.initial);
+            },
+            logoutFailure: (message) {
+              showErrorSnackBar(context, message);
+            },
+            orElse: () {},
+          );
+        },
+        child: Center(
+          child:
+              isLoggedIn
+                  ? BlocBuilder<UserDetailsBloc, UserDetailsState>(
+                    builder: (context, state) {
+                      return state.maybeWhen(
+                        initial: () => const Text('Welcome!'),
+                        loading: () => const CircularProgressIndicator(),
+                        success:
+                            (user) => Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Stack(
+                                        children: [
+                                          CircleAvatar(
+                                            radius: 60,
+                                            child: Text(
+                                              user.firstName[0].toUpperCase() +
+                                                  user.lastName[0]
+                                                      .toUpperCase(),
+                                              style: textTheme.displayMedium
+                                                  ?.copyWith(
+                                                    color: Colors.white,
+                                                  ),
                                             ),
                                           ),
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: 10,
+                                          Positioned(
+                                            right: 7,
+                                            bottom: 7,
+                                            child: IconButton(
+                                              onPressed: () {},
+                                              icon: const Icon(
+                                                Icons.add_a_photo,
+                                              ),
+                                            ),
                                           ),
-                                          label: Text(
-                                            user.isEmailVerified
-                                                ? 'Verified'
-                                                : 'Verified',
-                                            style: textTheme.labelSmall,
+                                        ],
+                                      ),
+                                      const SizedBox(width: 15),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            user.firstName +
+                                                ' ' +
+                                                user.lastName,
+                                            style: textTheme.titleLarge,
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-                                Divider(),
-                                const SizedBox(height: 10),
-                                Expanded(
-                                  child: ListView(
-                                    shrinkWrap: true,
-                                    children: [
-                                      ListTile(
-                                        onTap: () {
-                                          final editProfileArgs = EditProfileArguments(
-                                            firstName: user.firstName,
-                                            lastName: user.lastName
-                                          );
-                                          
-                                          // Pass the arguments via the dashboard screen
-                                          final dashboardWidget = context.findAncestorWidgetOfExactType<DashboardScreen>();
-                                          if (dashboardWidget != null) {
-                                            // Store the arguments
-                                            if (getIt.isRegistered<EditProfileArguments>()) {
-                                              getIt.unregister<EditProfileArguments>();
-                                            }
-                                            getIt.registerSingleton<EditProfileArguments>(editProfileArgs);
-                                          }
-                                          
-                                          // Navigate to edit profile
-                                          context.read<BottomNavCubit>().select(
-                                            const BottomNavState.editProfile()
-                                          );
-                                        },
-                                        title: Text('Edit Profile'),
-                                        trailing: Icon(Icons.person),
-                                      ),
-                                      ListTile(
-                                        title: Text('Change Password'),
-                                        trailing: Icon(Icons.lock),
-                                      ),
-                                      ListTile(
-                                        title: Text('Order History'),
-                                        trailing: Icon(Icons.history),
-                                      ),
-                                      ListTile(
-                                        title: Text('Address Book'),
-                                        trailing: Icon(Icons.book),
-                                      ),
-                                      ListTile(
-                                        title: Text('Notifications'),
-                                        trailing: Icon(Icons.notifications),
-                                      ),
-                                      ListTile(
-                                        title: Text('Logout'),
-                                        trailing: Icon(Icons.logout),
+                                          Text(
+                                            user.email,
+                                            style: textTheme.bodyMedium,
+                                          ),
+                                          Chip(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(2),
+                                            ),
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 10,
+                                            ),
+                                            label: Text(
+                                              user.isEmailVerified
+                                                  ? 'Verified'
+                                                  : 'Not Verified',
+                                              style: textTheme.labelSmall,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(height: 10),
+                                  Divider(),
+                                  const SizedBox(height: 10),
+                                  Expanded(
+                                    child: ListView(
+                                      shrinkWrap: true,
+                                      children: [
+                                        ListTile(
+                                          onTap: () {
+                                            final editProfileArgs =
+                                                EditProfileArguments(
+                                                  firstName: user.firstName,
+                                                  lastName: user.lastName,
+                                                );
+
+                                            // Pass the arguments via the dashboard screen
+                                            final dashboardWidget =
+                                                context
+                                                    .findAncestorWidgetOfExactType<
+                                                      DashboardScreen
+                                                    >();
+                                            if (dashboardWidget != null) {
+                                              // Store the arguments
+                                              if (getIt
+                                                  .isRegistered<
+                                                    EditProfileArguments
+                                                  >()) {
+                                                getIt
+                                                    .unregister<
+                                                      EditProfileArguments
+                                                    >();
+                                              }
+                                              getIt.registerSingleton<
+                                                EditProfileArguments
+                                              >(editProfileArgs);
+                                            }
+
+                                            // Navigate to edit profile
+                                            context.read<BottomNavCubit>().select(
+                                              const BottomNavState.editProfile(),
+                                            );
+                                          },
+                                          title: Text('Edit Profile'),
+                                          trailing: Icon(Icons.person),
+                                        ),
+                                        ListTile(
+                                          title: Text('Change Password'),
+                                          trailing: Icon(Icons.lock),
+                                        ),
+                                        ListTile(
+                                          title: Text('Order History'),
+                                          trailing: Icon(Icons.history),
+                                        ),
+                                        ListTile(
+                                          title: Text('Address Book'),
+                                          trailing: Icon(Icons.book),
+                                        ),
+                                        ListTile(
+                                          title: Text('Notifications'),
+                                          trailing: Icon(Icons.notifications),
+                                        ),
+                                        ListTile(
+                                          onTap: () {
+                                            context.read<UserDetailsBloc>().add(
+                                              const UserDetailsEvent.logoutRequested(),
+                                            );
+                                          },
+                                          title: Text('Logout'),
+                                          trailing: Icon(Icons.logout),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                      error:
-                          (msg) => ElevatedButton(
-                            onPressed: () {
-                              context.navigateToAndRemoveUntil(
-                                RouteConstants.initial,
-                              );
-                            },
-                            child: Text('Login'),
-                          ),
-                      orElse: () => const SizedBox.shrink(),
-                    );
-                  },
-                )
-                : ElevatedButton(
-                  onPressed: () {
-                    context.navigateToAndRemoveUntil(RouteConstants.initial);
-                  },
-                  child: Text('Login'),
-                ),
+                        error:
+                            (msg) => ElevatedButton(
+                              onPressed: () {
+                                context.navigateToAndRemoveUntil(
+                                  RouteConstants.initial,
+                                );
+                              },
+                              child: Text('Login'),
+                            ),
+                        orElse: () => const SizedBox.shrink(),
+                      );
+                    },
+                  )
+                  : ElevatedButton(
+                    onPressed: () {
+                      context.navigateToAndRemoveUntil(RouteConstants.initial);
+                    },
+                    child: Text('Login'),
+                  ),
+        ),
       ),
     );
   }

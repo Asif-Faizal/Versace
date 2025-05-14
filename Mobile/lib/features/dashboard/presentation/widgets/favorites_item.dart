@@ -81,8 +81,8 @@ class FavoritesItem extends StatelessWidget {
         ),
       ),
       Positioned(
-        top: 0,
-        right: 0,
+        top: 10,
+        right: 10,
         child: IconButton(onPressed: onDelete, icon: Icon(Icons.close,size: 20,)),
       ),
       ],
