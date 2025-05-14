@@ -20,27 +20,39 @@ mixin _$UserDetailsEvent {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() userDetailsRequested,
+    required TResult Function(UpdateUserRequestModel updateUserRequestModel)
+    updateUserDetailsRequested,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? userDetailsRequested,
+    TResult? Function(UpdateUserRequestModel updateUserRequestModel)?
+    updateUserDetailsRequested,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? userDetailsRequested,
+    TResult Function(UpdateUserRequestModel updateUserRequestModel)?
+    updateUserDetailsRequested,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(UserDetailsRequested value) userDetailsRequested,
+    required TResult Function(UpdateUserDetailsRequested value)
+    updateUserDetailsRequested,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(UserDetailsRequested value)? userDetailsRequested,
+    TResult? Function(UpdateUserDetailsRequested value)?
+    updateUserDetailsRequested,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(UserDetailsRequested value)? userDetailsRequested,
+    TResult Function(UpdateUserDetailsRequested value)?
+    updateUserDetailsRequested,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
 }
@@ -112,6 +124,8 @@ class _$UserDetailsRequestedImpl implements UserDetailsRequested {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() userDetailsRequested,
+    required TResult Function(UpdateUserRequestModel updateUserRequestModel)
+    updateUserDetailsRequested,
   }) {
     return userDetailsRequested();
   }
@@ -120,6 +134,8 @@ class _$UserDetailsRequestedImpl implements UserDetailsRequested {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? userDetailsRequested,
+    TResult? Function(UpdateUserRequestModel updateUserRequestModel)?
+    updateUserDetailsRequested,
   }) {
     return userDetailsRequested?.call();
   }
@@ -128,6 +144,8 @@ class _$UserDetailsRequestedImpl implements UserDetailsRequested {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? userDetailsRequested,
+    TResult Function(UpdateUserRequestModel updateUserRequestModel)?
+    updateUserDetailsRequested,
     required TResult orElse(),
   }) {
     if (userDetailsRequested != null) {
@@ -140,6 +158,8 @@ class _$UserDetailsRequestedImpl implements UserDetailsRequested {
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(UserDetailsRequested value) userDetailsRequested,
+    required TResult Function(UpdateUserDetailsRequested value)
+    updateUserDetailsRequested,
   }) {
     return userDetailsRequested(this);
   }
@@ -148,6 +168,8 @@ class _$UserDetailsRequestedImpl implements UserDetailsRequested {
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(UserDetailsRequested value)? userDetailsRequested,
+    TResult? Function(UpdateUserDetailsRequested value)?
+    updateUserDetailsRequested,
   }) {
     return userDetailsRequested?.call(this);
   }
@@ -156,6 +178,8 @@ class _$UserDetailsRequestedImpl implements UserDetailsRequested {
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(UserDetailsRequested value)? userDetailsRequested,
+    TResult Function(UpdateUserDetailsRequested value)?
+    updateUserDetailsRequested,
     required TResult orElse(),
   }) {
     if (userDetailsRequested != null) {
@@ -167,4 +191,173 @@ class _$UserDetailsRequestedImpl implements UserDetailsRequested {
 
 abstract class UserDetailsRequested implements UserDetailsEvent {
   const factory UserDetailsRequested() = _$UserDetailsRequestedImpl;
+}
+
+/// @nodoc
+abstract class _$$UpdateUserDetailsRequestedImplCopyWith<$Res> {
+  factory _$$UpdateUserDetailsRequestedImplCopyWith(
+    _$UpdateUserDetailsRequestedImpl value,
+    $Res Function(_$UpdateUserDetailsRequestedImpl) then,
+  ) = __$$UpdateUserDetailsRequestedImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({UpdateUserRequestModel updateUserRequestModel});
+
+  $UpdateUserRequestModelCopyWith<$Res> get updateUserRequestModel;
+}
+
+/// @nodoc
+class __$$UpdateUserDetailsRequestedImplCopyWithImpl<$Res>
+    extends
+        _$UserDetailsEventCopyWithImpl<$Res, _$UpdateUserDetailsRequestedImpl>
+    implements _$$UpdateUserDetailsRequestedImplCopyWith<$Res> {
+  __$$UpdateUserDetailsRequestedImplCopyWithImpl(
+    _$UpdateUserDetailsRequestedImpl _value,
+    $Res Function(_$UpdateUserDetailsRequestedImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of UserDetailsEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? updateUserRequestModel = null}) {
+    return _then(
+      _$UpdateUserDetailsRequestedImpl(
+        null == updateUserRequestModel
+            ? _value.updateUserRequestModel
+            : updateUserRequestModel // ignore: cast_nullable_to_non_nullable
+                as UpdateUserRequestModel,
+      ),
+    );
+  }
+
+  /// Create a copy of UserDetailsEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $UpdateUserRequestModelCopyWith<$Res> get updateUserRequestModel {
+    return $UpdateUserRequestModelCopyWith<$Res>(
+      _value.updateUserRequestModel,
+      (value) {
+        return _then(_value.copyWith(updateUserRequestModel: value));
+      },
+    );
+  }
+}
+
+/// @nodoc
+
+class _$UpdateUserDetailsRequestedImpl implements UpdateUserDetailsRequested {
+  const _$UpdateUserDetailsRequestedImpl(this.updateUserRequestModel);
+
+  @override
+  final UpdateUserRequestModel updateUserRequestModel;
+
+  @override
+  String toString() {
+    return 'UserDetailsEvent.updateUserDetailsRequested(updateUserRequestModel: $updateUserRequestModel)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$UpdateUserDetailsRequestedImpl &&
+            (identical(other.updateUserRequestModel, updateUserRequestModel) ||
+                other.updateUserRequestModel == updateUserRequestModel));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, updateUserRequestModel);
+
+  /// Create a copy of UserDetailsEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$UpdateUserDetailsRequestedImplCopyWith<_$UpdateUserDetailsRequestedImpl>
+  get copyWith => __$$UpdateUserDetailsRequestedImplCopyWithImpl<
+    _$UpdateUserDetailsRequestedImpl
+  >(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() userDetailsRequested,
+    required TResult Function(UpdateUserRequestModel updateUserRequestModel)
+    updateUserDetailsRequested,
+  }) {
+    return updateUserDetailsRequested(updateUserRequestModel);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? userDetailsRequested,
+    TResult? Function(UpdateUserRequestModel updateUserRequestModel)?
+    updateUserDetailsRequested,
+  }) {
+    return updateUserDetailsRequested?.call(updateUserRequestModel);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? userDetailsRequested,
+    TResult Function(UpdateUserRequestModel updateUserRequestModel)?
+    updateUserDetailsRequested,
+    required TResult orElse(),
+  }) {
+    if (updateUserDetailsRequested != null) {
+      return updateUserDetailsRequested(updateUserRequestModel);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(UserDetailsRequested value) userDetailsRequested,
+    required TResult Function(UpdateUserDetailsRequested value)
+    updateUserDetailsRequested,
+  }) {
+    return updateUserDetailsRequested(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(UserDetailsRequested value)? userDetailsRequested,
+    TResult? Function(UpdateUserDetailsRequested value)?
+    updateUserDetailsRequested,
+  }) {
+    return updateUserDetailsRequested?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(UserDetailsRequested value)? userDetailsRequested,
+    TResult Function(UpdateUserDetailsRequested value)?
+    updateUserDetailsRequested,
+    required TResult orElse(),
+  }) {
+    if (updateUserDetailsRequested != null) {
+      return updateUserDetailsRequested(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class UpdateUserDetailsRequested implements UserDetailsEvent {
+  const factory UpdateUserDetailsRequested(
+    final UpdateUserRequestModel updateUserRequestModel,
+  ) = _$UpdateUserDetailsRequestedImpl;
+
+  UpdateUserRequestModel get updateUserRequestModel;
+
+  /// Create a copy of UserDetailsEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$UpdateUserDetailsRequestedImplCopyWith<_$UpdateUserDetailsRequestedImpl>
+  get copyWith => throw _privateConstructorUsedError;
 }

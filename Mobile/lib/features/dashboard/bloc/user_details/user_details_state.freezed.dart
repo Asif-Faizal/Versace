@@ -22,6 +22,8 @@ mixin _$UserDetailsState {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(UserDetailsEntity userDetailsEntity) success,
+    required TResult Function(UpdateUserDetailsEntity updateUserDetailsEntity)
+    updateSuccess,
     required TResult Function(String message) error,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -29,6 +31,8 @@ mixin _$UserDetailsState {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(UserDetailsEntity userDetailsEntity)? success,
+    TResult? Function(UpdateUserDetailsEntity updateUserDetailsEntity)?
+    updateSuccess,
     TResult? Function(String message)? error,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -36,6 +40,8 @@ mixin _$UserDetailsState {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(UserDetailsEntity userDetailsEntity)? success,
+    TResult Function(UpdateUserDetailsEntity updateUserDetailsEntity)?
+    updateSuccess,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
@@ -44,6 +50,7 @@ mixin _$UserDetailsState {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Success value) success,
+    required TResult Function(_UpdateSuccess value) updateSuccess,
     required TResult Function(_Error value) error,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -51,6 +58,7 @@ mixin _$UserDetailsState {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Success value)? success,
+    TResult? Function(_UpdateSuccess value)? updateSuccess,
     TResult? Function(_Error value)? error,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -58,6 +66,7 @@ mixin _$UserDetailsState {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Success value)? success,
+    TResult Function(_UpdateSuccess value)? updateSuccess,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
@@ -131,6 +140,8 @@ class _$InitialImpl implements _Initial {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(UserDetailsEntity userDetailsEntity) success,
+    required TResult Function(UpdateUserDetailsEntity updateUserDetailsEntity)
+    updateSuccess,
     required TResult Function(String message) error,
   }) {
     return initial();
@@ -142,6 +153,8 @@ class _$InitialImpl implements _Initial {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(UserDetailsEntity userDetailsEntity)? success,
+    TResult? Function(UpdateUserDetailsEntity updateUserDetailsEntity)?
+    updateSuccess,
     TResult? Function(String message)? error,
   }) {
     return initial?.call();
@@ -153,6 +166,8 @@ class _$InitialImpl implements _Initial {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(UserDetailsEntity userDetailsEntity)? success,
+    TResult Function(UpdateUserDetailsEntity updateUserDetailsEntity)?
+    updateSuccess,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -168,6 +183,7 @@ class _$InitialImpl implements _Initial {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Success value) success,
+    required TResult Function(_UpdateSuccess value) updateSuccess,
     required TResult Function(_Error value) error,
   }) {
     return initial(this);
@@ -179,6 +195,7 @@ class _$InitialImpl implements _Initial {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Success value)? success,
+    TResult? Function(_UpdateSuccess value)? updateSuccess,
     TResult? Function(_Error value)? error,
   }) {
     return initial?.call(this);
@@ -190,6 +207,7 @@ class _$InitialImpl implements _Initial {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Success value)? success,
+    TResult Function(_UpdateSuccess value)? updateSuccess,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) {
@@ -250,6 +268,8 @@ class _$LoadingImpl implements _Loading {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(UserDetailsEntity userDetailsEntity) success,
+    required TResult Function(UpdateUserDetailsEntity updateUserDetailsEntity)
+    updateSuccess,
     required TResult Function(String message) error,
   }) {
     return loading();
@@ -261,6 +281,8 @@ class _$LoadingImpl implements _Loading {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(UserDetailsEntity userDetailsEntity)? success,
+    TResult? Function(UpdateUserDetailsEntity updateUserDetailsEntity)?
+    updateSuccess,
     TResult? Function(String message)? error,
   }) {
     return loading?.call();
@@ -272,6 +294,8 @@ class _$LoadingImpl implements _Loading {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(UserDetailsEntity userDetailsEntity)? success,
+    TResult Function(UpdateUserDetailsEntity updateUserDetailsEntity)?
+    updateSuccess,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -287,6 +311,7 @@ class _$LoadingImpl implements _Loading {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Success value) success,
+    required TResult Function(_UpdateSuccess value) updateSuccess,
     required TResult Function(_Error value) error,
   }) {
     return loading(this);
@@ -298,6 +323,7 @@ class _$LoadingImpl implements _Loading {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Success value)? success,
+    TResult? Function(_UpdateSuccess value)? updateSuccess,
     TResult? Function(_Error value)? error,
   }) {
     return loading?.call(this);
@@ -309,6 +335,7 @@ class _$LoadingImpl implements _Loading {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Success value)? success,
+    TResult Function(_UpdateSuccess value)? updateSuccess,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) {
@@ -409,6 +436,8 @@ class _$SuccessImpl implements _Success {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(UserDetailsEntity userDetailsEntity) success,
+    required TResult Function(UpdateUserDetailsEntity updateUserDetailsEntity)
+    updateSuccess,
     required TResult Function(String message) error,
   }) {
     return success(userDetailsEntity);
@@ -420,6 +449,8 @@ class _$SuccessImpl implements _Success {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(UserDetailsEntity userDetailsEntity)? success,
+    TResult? Function(UpdateUserDetailsEntity updateUserDetailsEntity)?
+    updateSuccess,
     TResult? Function(String message)? error,
   }) {
     return success?.call(userDetailsEntity);
@@ -431,6 +462,8 @@ class _$SuccessImpl implements _Success {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(UserDetailsEntity userDetailsEntity)? success,
+    TResult Function(UpdateUserDetailsEntity updateUserDetailsEntity)?
+    updateSuccess,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -446,6 +479,7 @@ class _$SuccessImpl implements _Success {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Success value) success,
+    required TResult Function(_UpdateSuccess value) updateSuccess,
     required TResult Function(_Error value) error,
   }) {
     return success(this);
@@ -457,6 +491,7 @@ class _$SuccessImpl implements _Success {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Success value)? success,
+    TResult? Function(_UpdateSuccess value)? updateSuccess,
     TResult? Function(_Error value)? error,
   }) {
     return success?.call(this);
@@ -468,6 +503,7 @@ class _$SuccessImpl implements _Success {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Success value)? success,
+    TResult Function(_UpdateSuccess value)? updateSuccess,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) {
@@ -488,6 +524,190 @@ abstract class _Success implements UserDetailsState {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$SuccessImplCopyWith<_$SuccessImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$UpdateSuccessImplCopyWith<$Res> {
+  factory _$$UpdateSuccessImplCopyWith(
+    _$UpdateSuccessImpl value,
+    $Res Function(_$UpdateSuccessImpl) then,
+  ) = __$$UpdateSuccessImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({UpdateUserDetailsEntity updateUserDetailsEntity});
+
+  $UpdateUserDetailsEntityCopyWith<$Res> get updateUserDetailsEntity;
+}
+
+/// @nodoc
+class __$$UpdateSuccessImplCopyWithImpl<$Res>
+    extends _$UserDetailsStateCopyWithImpl<$Res, _$UpdateSuccessImpl>
+    implements _$$UpdateSuccessImplCopyWith<$Res> {
+  __$$UpdateSuccessImplCopyWithImpl(
+    _$UpdateSuccessImpl _value,
+    $Res Function(_$UpdateSuccessImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of UserDetailsState
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? updateUserDetailsEntity = null}) {
+    return _then(
+      _$UpdateSuccessImpl(
+        null == updateUserDetailsEntity
+            ? _value.updateUserDetailsEntity
+            : updateUserDetailsEntity // ignore: cast_nullable_to_non_nullable
+                as UpdateUserDetailsEntity,
+      ),
+    );
+  }
+
+  /// Create a copy of UserDetailsState
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $UpdateUserDetailsEntityCopyWith<$Res> get updateUserDetailsEntity {
+    return $UpdateUserDetailsEntityCopyWith<$Res>(
+      _value.updateUserDetailsEntity,
+      (value) {
+        return _then(_value.copyWith(updateUserDetailsEntity: value));
+      },
+    );
+  }
+}
+
+/// @nodoc
+
+class _$UpdateSuccessImpl implements _UpdateSuccess {
+  const _$UpdateSuccessImpl(this.updateUserDetailsEntity);
+
+  @override
+  final UpdateUserDetailsEntity updateUserDetailsEntity;
+
+  @override
+  String toString() {
+    return 'UserDetailsState.updateSuccess(updateUserDetailsEntity: $updateUserDetailsEntity)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$UpdateSuccessImpl &&
+            (identical(
+                  other.updateUserDetailsEntity,
+                  updateUserDetailsEntity,
+                ) ||
+                other.updateUserDetailsEntity == updateUserDetailsEntity));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, updateUserDetailsEntity);
+
+  /// Create a copy of UserDetailsState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$UpdateSuccessImplCopyWith<_$UpdateSuccessImpl> get copyWith =>
+      __$$UpdateSuccessImplCopyWithImpl<_$UpdateSuccessImpl>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function() loading,
+    required TResult Function(UserDetailsEntity userDetailsEntity) success,
+    required TResult Function(UpdateUserDetailsEntity updateUserDetailsEntity)
+    updateSuccess,
+    required TResult Function(String message) error,
+  }) {
+    return updateSuccess(updateUserDetailsEntity);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function()? loading,
+    TResult? Function(UserDetailsEntity userDetailsEntity)? success,
+    TResult? Function(UpdateUserDetailsEntity updateUserDetailsEntity)?
+    updateSuccess,
+    TResult? Function(String message)? error,
+  }) {
+    return updateSuccess?.call(updateUserDetailsEntity);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function()? loading,
+    TResult Function(UserDetailsEntity userDetailsEntity)? success,
+    TResult Function(UpdateUserDetailsEntity updateUserDetailsEntity)?
+    updateSuccess,
+    TResult Function(String message)? error,
+    required TResult orElse(),
+  }) {
+    if (updateSuccess != null) {
+      return updateSuccess(updateUserDetailsEntity);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_Initial value) initial,
+    required TResult Function(_Loading value) loading,
+    required TResult Function(_Success value) success,
+    required TResult Function(_UpdateSuccess value) updateSuccess,
+    required TResult Function(_Error value) error,
+  }) {
+    return updateSuccess(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Initial value)? initial,
+    TResult? Function(_Loading value)? loading,
+    TResult? Function(_Success value)? success,
+    TResult? Function(_UpdateSuccess value)? updateSuccess,
+    TResult? Function(_Error value)? error,
+  }) {
+    return updateSuccess?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Initial value)? initial,
+    TResult Function(_Loading value)? loading,
+    TResult Function(_Success value)? success,
+    TResult Function(_UpdateSuccess value)? updateSuccess,
+    TResult Function(_Error value)? error,
+    required TResult orElse(),
+  }) {
+    if (updateSuccess != null) {
+      return updateSuccess(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _UpdateSuccess implements UserDetailsState {
+  const factory _UpdateSuccess(
+    final UpdateUserDetailsEntity updateUserDetailsEntity,
+  ) = _$UpdateSuccessImpl;
+
+  UpdateUserDetailsEntity get updateUserDetailsEntity;
+
+  /// Create a copy of UserDetailsState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$UpdateSuccessImplCopyWith<_$UpdateSuccessImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
@@ -564,6 +784,8 @@ class _$ErrorImpl implements _Error {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(UserDetailsEntity userDetailsEntity) success,
+    required TResult Function(UpdateUserDetailsEntity updateUserDetailsEntity)
+    updateSuccess,
     required TResult Function(String message) error,
   }) {
     return error(message);
@@ -575,6 +797,8 @@ class _$ErrorImpl implements _Error {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(UserDetailsEntity userDetailsEntity)? success,
+    TResult? Function(UpdateUserDetailsEntity updateUserDetailsEntity)?
+    updateSuccess,
     TResult? Function(String message)? error,
   }) {
     return error?.call(message);
@@ -586,6 +810,8 @@ class _$ErrorImpl implements _Error {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(UserDetailsEntity userDetailsEntity)? success,
+    TResult Function(UpdateUserDetailsEntity updateUserDetailsEntity)?
+    updateSuccess,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -601,6 +827,7 @@ class _$ErrorImpl implements _Error {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Success value) success,
+    required TResult Function(_UpdateSuccess value) updateSuccess,
     required TResult Function(_Error value) error,
   }) {
     return error(this);
@@ -612,6 +839,7 @@ class _$ErrorImpl implements _Error {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Success value)? success,
+    TResult? Function(_UpdateSuccess value)? updateSuccess,
     TResult? Function(_Error value)? error,
   }) {
     return error?.call(this);
@@ -623,6 +851,7 @@ class _$ErrorImpl implements _Error {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Success value)? success,
+    TResult Function(_UpdateSuccess value)? updateSuccess,
     TResult Function(_Error value)? error,
     required TResult orElse(),
   }) {

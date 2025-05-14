@@ -41,46 +41,49 @@ class DashboardScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(3),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
           content: Padding(
             padding: const EdgeInsets.only(top: 20),
-            child: Text('Are you sure you want to close the app?',style: Theme.of(context).textTheme.labelLarge,),
+            child: Text(
+              'Are you sure you want to close the app?',
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
           ),
           actions: <Widget>[
             Row(
               children: [
                 Expanded(
                   child: SizedBox(
-                                height: 55,
-                                width: double.infinity,
-                                child: OutlinedButton(
-                  child: const Text('Cancel'),
-                  onPressed: () {
-                    Navigator.of(dialogContext).pop(); // Close the dialog
-                  },
-                                ),
-                              ),
+                    height: 55,
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      child: const Text('Cancel'),
+                      onPressed: () {
+                        Navigator.of(dialogContext).pop(); // Close the dialog
+                      },
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 10),
-            Expanded(
-              child: SizedBox(
-                height: 55,
-                width: double.infinity,
-                child: ElevatedButton(
-                  child: const Text('Close'),
-                  onPressed: () {
-                    Navigator.of(dialogContext).pop(); // Close the dialog
-                    // Actually exit the app by allowing the pop to proceed
-                    Navigator.of(context).popUntil((route) => route.isFirst);
-                    Navigator.of(context).pop(true);
-                  },
+                Expanded(
+                  child: SizedBox(
+                    height: 55,
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      child: const Text('Close'),
+                      onPressed: () {
+                        Navigator.of(dialogContext).pop(); // Close the dialog
+                        // Actually exit the app by allowing the pop to proceed
+                        Navigator.of(
+                          context,
+                        ).popUntil((route) => route.isFirst);
+                        Navigator.of(context).pop(true);
+                      },
+                    ),
+                  ),
                 ),
-              ),
-            ),
               ],
-            )
+            ),
           ],
         );
       },
@@ -95,13 +98,14 @@ class DashboardScreen extends StatelessWidget {
       profile: () => const ProfileScreen(),
       search: () => const SearchScreen(),
       editProfile: () {
-        EditProfileArguments arguments = editProfileArguments ?? 
-          (getIt.isRegistered<EditProfileArguments>() 
-            ? getIt<EditProfileArguments>() 
-            : const EditProfileArguments(firstName: '', lastName: ''));
-        
+        EditProfileArguments arguments =
+            editProfileArguments ??
+            (getIt.isRegistered<EditProfileArguments>()
+                ? getIt<EditProfileArguments>()
+                : const EditProfileArguments(firstName: '', lastName: ''));
+
         return EditProfileScreen(arguments: arguments);
       },
     );
   }
-} 
+}

@@ -53,7 +53,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             isLoggedIn
                 ? BlocBuilder<UserDetailsBloc, UserDetailsState>(
                   builder: (context, state) {
-                    return state.when(
+                    return state.maybeWhen(
                       initial: () => const Text('Welcome!'),
                       loading: () => const CircularProgressIndicator(),
                       success:
@@ -187,6 +187,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             },
                             child: Text('Login'),
                           ),
+                      orElse: () => const SizedBox.shrink(),
                     );
                   },
                 )
