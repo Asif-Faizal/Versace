@@ -312,25 +312,28 @@ export class ProductService {
       throw new AppError(StatusCodes.BAD_REQUEST, 'Insufficient stock');
     }
 
+    // Check if the same variant combination is already in cart
+    const existingCartItem = await CartItem.findOne({
+      user: userId,
+      product: productId,
+      variantCombinationId: new mongoose.Types.ObjectId(variantCombinationId)
+    });
+
+    if (existingCartItem) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'This product variant is already in your cart');
+    }
+
     // Calculate total price
     const totalPrice = (product.basePrice + combination.additionalPrice) * quantity;
 
-    // Create or update cart item
-    const cartItem = await CartItem.findOneAndUpdate(
-      {
-        user: userId,
-        product: productId,
-        variantCombinationId
-      },
-      {
-        quantity,
-        price: totalPrice
-      },
-      {
-        new: true,
-        upsert: true
-      }
-    );
+    // Create cart item
+    const cartItem = await CartItem.create({
+      user: userId,
+      product: productId,
+      variantCombinationId: new mongoose.Types.ObjectId(variantCombinationId),
+      quantity,
+      price: totalPrice
+    });
 
     return cartItem;
   }
@@ -353,14 +356,16 @@ export class ProductService {
 
   static async getCartItems(userId: string): Promise<ICartItem[]> {
     return CartItem.find({ user: userId })
-      .populate('product', 'name description basePrice images')
       .populate({
         path: 'product',
+        select: 'name basePrice images',
         populate: {
           path: 'variantCombinations',
-          match: { _id: { $eq: '$variantCombinationId' } }
+          match: { _id: { $eq: '$variantCombinationId' } },
+          select: 'variant color size additionalPrice stock'
         }
       })
+      .select('quantity price variantCombinationId')
       .sort({ createdAt: -1 });
   }
 

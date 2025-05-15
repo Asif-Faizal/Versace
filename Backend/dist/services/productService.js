@@ -241,19 +241,24 @@ class ProductService {
         if (combination.stock < quantity) {
             throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Insufficient stock');
         }
-        // Calculate total price
-        const totalPrice = (product.basePrice + combination.additionalPrice) * quantity;
-        // Create or update cart item
-        const cartItem = await CartItem_1.CartItem.findOneAndUpdate({
+        // Check if the same variant combination is already in cart
+        const existingCartItem = await CartItem_1.CartItem.findOne({
             user: userId,
             product: productId,
-            variantCombinationId
-        }, {
+            variantCombinationId: new mongoose_1.default.Types.ObjectId(variantCombinationId)
+        });
+        if (existingCartItem) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'This product variant is already in your cart');
+        }
+        // Calculate total price
+        const totalPrice = (product.basePrice + combination.additionalPrice) * quantity;
+        // Create cart item
+        const cartItem = await CartItem_1.CartItem.create({
+            user: userId,
+            product: productId,
+            variantCombinationId: new mongoose_1.default.Types.ObjectId(variantCombinationId),
             quantity,
             price: totalPrice
-        }, {
-            new: true,
-            upsert: true
         });
         return cartItem;
     }
@@ -269,14 +274,16 @@ class ProductService {
     }
     static async getCartItems(userId) {
         return CartItem_1.CartItem.find({ user: userId })
-            .populate('product', 'name description basePrice images')
             .populate({
             path: 'product',
+            select: 'name basePrice images',
             populate: {
                 path: 'variantCombinations',
-                match: { _id: { $eq: '$variantCombinationId' } }
+                match: { _id: { $eq: '$variantCombinationId' } },
+                select: 'variant color size additionalPrice stock'
             }
         })
+            .select('quantity price variantCombinationId')
             .sort({ createdAt: -1 });
     }
     static async getWishlistItems(userId) {

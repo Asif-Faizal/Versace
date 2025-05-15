@@ -44,6 +44,6 @@ const cartItemSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
-// Compound index to ensure unique product-variant combination per user
+// Only use the new compound index
 cartItemSchema.index({ user: 1, product: 1, variantCombinationId: 1 }, { unique: true });
 exports.CartItem = mongoose_1.default.model('CartItem', cartItemSchema);
