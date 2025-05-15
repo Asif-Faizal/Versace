@@ -15,8 +15,7 @@ const productValidation = [
 ];
 const variantValidation = [
     (0, express_validator_1.body)('name').notEmpty().withMessage('Variant name is required'),
-    (0, express_validator_1.body)('price').isNumeric().withMessage('Price must be a number'),
-    (0, express_validator_1.body)('stock').isInt({ min: 0 }).withMessage('Stock must be a non-negative integer')
+    (0, express_validator_1.body)('price').isNumeric().withMessage('Price must be a number')
 ];
 const queryValidation = [
     (0, express_validator_1.query)('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),

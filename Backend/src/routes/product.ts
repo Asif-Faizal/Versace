@@ -16,8 +16,7 @@ const productValidation = [
 
 const variantValidation = [
   body('name').notEmpty().withMessage('Variant name is required'),
-  body('price').isNumeric().withMessage('Price must be a number'),
-  body('stock').isInt({ min: 0 }).withMessage('Stock must be a non-negative integer')
+  body('price').isNumeric().withMessage('Price must be a number')
 ];
 
 const queryValidation = [

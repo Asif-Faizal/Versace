@@ -38,7 +38,7 @@ const mongoose_1 = __importStar(require("mongoose"));
 const variantSchema = new mongoose_1.Schema({
     name: { type: String, required: true },
     price: { type: Number, required: true },
-    stock: { type: Number, required: true, default: 0 }
+    stock: { type: Number, default: 0 }
 });
 const productSchema = new mongoose_1.Schema({
     name: { type: String, required: true },
