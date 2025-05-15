@@ -149,6 +149,18 @@ class ProductController {
             next(error);
         }
     }
+    static async clearCart(req, res, next) {
+        try {
+            if (!req.user?._id) {
+                throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.UNAUTHORIZED, 'Not authenticated');
+            }
+            await productService_1.ProductService.clearCart(req.user._id);
+            res.status(statusCodes_1.StatusCodes.OK).json({ message: 'Cart cleared successfully' });
+        }
+        catch (error) {
+            next(error);
+        }
+    }
     static async getCartItems(req, res, next) {
         try {
             if (!req.user?._id) {

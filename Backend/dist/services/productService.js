@@ -266,10 +266,16 @@ class ProductService {
         const result = await CartItem_1.CartItem.deleteOne({
             user: userId,
             product: productId,
-            variantCombinationId
+            variantCombinationId: new mongoose_1.default.Types.ObjectId(variantCombinationId)
         });
         if (result.deletedCount === 0) {
             throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.NOT_FOUND, 'Cart item not found');
+        }
+    }
+    static async clearCart(userId) {
+        const result = await CartItem_1.CartItem.deleteMany({ user: userId });
+        if (result.deletedCount === 0) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.NOT_FOUND, 'No items found in cart');
         }
     }
     static async getCartItems(userId) {

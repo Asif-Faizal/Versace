@@ -33,6 +33,7 @@ const queryValidation = [
 // User-specific routes (require authentication)
 router.get('/wishlist', auth_1.authenticate, productController_1.ProductController.getWishlistItems);
 router.get('/cart', auth_1.authenticate, productController_1.ProductController.getCartItems);
+router.delete('/cart', auth_1.authenticate, productController_1.ProductController.clearCart);
 // Protected routes - Both users and admins
 router.get('/', auth_1.authenticate, queryValidation, productController_1.ProductController.getAllProducts);
 router.get('/new', auth_1.authenticate, queryValidation, productController_1.ProductController.getNewProducts);

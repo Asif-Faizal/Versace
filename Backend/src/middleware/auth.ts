@@ -82,6 +82,11 @@ export const authorize = (roles: string | string[]) => {
       throw new AppError(StatusCodes.UNAUTHORIZED, 'Not authenticated');
     }
 
+    // Allow all authenticated users to access cart operations
+    if (req.path.includes('/cart')) {
+      return next();
+    }
+
     const userRole = req.user.role;
     const allowedRoles = Array.isArray(roles) ? roles : [roles];
 

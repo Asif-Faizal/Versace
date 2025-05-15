@@ -60,6 +60,10 @@ const authorize = (roles) => {
         if (!req.user) {
             throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.UNAUTHORIZED, 'Not authenticated');
         }
+        // Allow all authenticated users to access cart operations
+        if (req.path.includes('/cart')) {
+            return next();
+        }
         const userRole = req.user.role;
         const allowedRoles = Array.isArray(roles) ? roles : [roles];
         if (!allowedRoles.includes(userRole)) {

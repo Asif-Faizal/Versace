@@ -36,6 +36,7 @@ const queryValidation = [
 // User-specific routes (require authentication)
 router.get('/wishlist', authenticate, ProductController.getWishlistItems);
 router.get('/cart', authenticate, ProductController.getCartItems);
+router.delete('/cart', authenticate, ProductController.clearCart);
 
 // Protected routes - Both users and admins
 router.get('/', authenticate, queryValidation, ProductController.getAllProducts);
@@ -82,4 +83,4 @@ router.delete('/:id/variant', authenticate, authorize(['admin']), ProductControl
 router.delete('/:id/color', authenticate, authorize(['admin']), ProductController.deleteColor);
 router.delete('/:id/size', authenticate, authorize(['admin']), ProductController.deleteSize);
 
-export default router; 
+export default router;

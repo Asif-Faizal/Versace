@@ -346,11 +346,18 @@ export class ProductService {
     const result = await CartItem.deleteOne({
       user: userId,
       product: productId,
-      variantCombinationId
+      variantCombinationId: new mongoose.Types.ObjectId(variantCombinationId)
     });
 
     if (result.deletedCount === 0) {
       throw new AppError(StatusCodes.NOT_FOUND, 'Cart item not found');
+    }
+  }
+
+  static async clearCart(userId: string): Promise<void> {
+    const result = await CartItem.deleteMany({ user: userId });
+    if (result.deletedCount === 0) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'No items found in cart');
     }
   }
 
