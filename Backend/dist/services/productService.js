@@ -39,7 +39,8 @@ class ProductService {
     }
     static async getAllProducts(query = {}) {
         const { page = 1, limit = 10, category, subcategory, minPrice, maxPrice, isNewProduct, isTrending, search, sortBy = 'createdAt', sortOrder = 'desc' } = query;
-        console.log('Query parameters:', { minPrice, maxPrice, isNewProduct, isTrending });
+        console.log('Raw query parameters:', query);
+        console.log('Parsed parameters:', { minPrice, maxPrice, isNewProduct, isTrending });
         // Build filter object
         const filter = {};
         // Category and subcategory filters

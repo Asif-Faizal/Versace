@@ -25,8 +25,21 @@ class ProductController {
     }
     static async getAllProducts(req, res, next) {
         try {
-            const products = await productService_1.ProductService.getAllProducts();
-            res.status(statusCodes_1.StatusCodes.OK).json(products);
+            const { page, limit, minPrice, maxPrice, isNewProduct, isTrending, category, subcategory, search, sortBy, sortOrder } = req.query;
+            const result = await productService_1.ProductService.getAllProducts({
+                page,
+                limit,
+                minPrice,
+                maxPrice,
+                isNewProduct,
+                isTrending,
+                category,
+                subcategory,
+                search,
+                sortBy,
+                sortOrder
+            });
+            res.status(statusCodes_1.StatusCodes.OK).json(result);
         }
         catch (error) {
             next(error);
