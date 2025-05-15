@@ -30,13 +30,13 @@ const queryValidation = [
     (0, express_validator_1.query)('sortBy').optional().isIn(['createdAt', 'basePrice', 'rating', 'name']).withMessage('Invalid sort field'),
     (0, express_validator_1.query)('sortOrder').optional().isIn(['asc', 'desc']).withMessage('Sort order must be either asc or desc')
 ];
-// Public routes
-router.get('/', queryValidation, productController_1.ProductController.getAllProducts);
-router.get('/new', queryValidation, productController_1.ProductController.getNewProducts);
-router.get('/trending', queryValidation, productController_1.ProductController.getTrendingProducts);
-router.get('/:id', productController_1.ProductController.getProduct);
-router.get('/category/:categoryId', productController_1.ProductController.getProductsByCategory);
-router.get('/subcategory/:subCategoryId', productController_1.ProductController.getProductsBySubCategory);
+// Protected routes - Both users and admins
+router.get('/', auth_1.authenticate, queryValidation, productController_1.ProductController.getAllProducts);
+router.get('/new', auth_1.authenticate, queryValidation, productController_1.ProductController.getNewProducts);
+router.get('/trending', auth_1.authenticate, queryValidation, productController_1.ProductController.getTrendingProducts);
+router.get('/:id', auth_1.authenticate, productController_1.ProductController.getProduct);
+router.get('/category/:categoryId', auth_1.authenticate, productController_1.ProductController.getProductsByCategory);
+router.get('/subcategory/:subCategoryId', auth_1.authenticate, productController_1.ProductController.getProductsBySubCategory);
 // Protected routes - Admin only
 router.post('/', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productValidation, productController_1.ProductController.createProduct);
 router.put('/:id', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productValidation, productController_1.ProductController.updateProduct);
@@ -57,13 +57,13 @@ router.post('/:id/variant-combinations/bulk', auth_1.authenticate, (0, auth_1.au
 router.delete('/:id/variant-combinations/bulk', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productController_1.ProductController.deleteMultipleVariantCombinations);
 router.put('/:id/variant-combinations/:combinationId', auth_1.authenticate, (0, auth_1.authorize)(['admin']), variantCombinationValidation, productController_1.ProductController.updateVariantCombination);
 router.delete('/:id/variant-combinations/:combinationId', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productController_1.ProductController.deleteVariantCombination);
-router.get('/:id/variant-combinations', productController_1.ProductController.getVariantCombinations);
+router.get('/:id/variant-combinations', auth_1.authenticate, productController_1.ProductController.getVariantCombinations);
 // User-specific routes (require authentication)
 router.post('/:id/wishlist', auth_1.authenticate, productController_1.ProductController.addToWishlist);
 router.delete('/:id/wishlist', auth_1.authenticate, productController_1.ProductController.removeFromWishlist);
 router.post('/:id/cart', auth_1.authenticate, productController_1.ProductController.addToCart);
 router.delete('/:id/cart', auth_1.authenticate, productController_1.ProductController.removeFromCart);
-// Single deletion routes
+// Single deletion routes - Admin only
 router.delete('/:id/variant', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productController_1.ProductController.deleteVariant);
 router.delete('/:id/color', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productController_1.ProductController.deleteColor);
 router.delete('/:id/size', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productController_1.ProductController.deleteSize);

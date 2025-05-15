@@ -33,13 +33,13 @@ const queryValidation = [
   query('sortOrder').optional().isIn(['asc', 'desc']).withMessage('Sort order must be either asc or desc')
 ];
 
-// Public routes
-router.get('/', queryValidation, ProductController.getAllProducts);
-router.get('/new', queryValidation, ProductController.getNewProducts);
-router.get('/trending', queryValidation, ProductController.getTrendingProducts);
-router.get('/:id', ProductController.getProduct);
-router.get('/category/:categoryId', ProductController.getProductsByCategory);
-router.get('/subcategory/:subCategoryId', ProductController.getProductsBySubCategory);
+// Protected routes - Both users and admins
+router.get('/', authenticate, queryValidation, ProductController.getAllProducts);
+router.get('/new', authenticate, queryValidation, ProductController.getNewProducts);
+router.get('/trending', authenticate, queryValidation, ProductController.getTrendingProducts);
+router.get('/:id', authenticate, ProductController.getProduct);
+router.get('/category/:categoryId', authenticate, ProductController.getProductsByCategory);
+router.get('/subcategory/:subCategoryId', authenticate, ProductController.getProductsBySubCategory);
 
 // Protected routes - Admin only
 router.post('/', authenticate, authorize(['admin']), productValidation, ProductController.createProduct);
@@ -65,7 +65,7 @@ router.post('/:id/variant-combinations/bulk', authenticate, authorize(['admin'])
 router.delete('/:id/variant-combinations/bulk', authenticate, authorize(['admin']), ProductController.deleteMultipleVariantCombinations);
 router.put('/:id/variant-combinations/:combinationId', authenticate, authorize(['admin']), variantCombinationValidation, ProductController.updateVariantCombination);
 router.delete('/:id/variant-combinations/:combinationId', authenticate, authorize(['admin']), ProductController.deleteVariantCombination);
-router.get('/:id/variant-combinations', ProductController.getVariantCombinations);
+router.get('/:id/variant-combinations', authenticate, ProductController.getVariantCombinations);
 
 // User-specific routes (require authentication)
 router.post('/:id/wishlist', authenticate, ProductController.addToWishlist);
@@ -73,7 +73,7 @@ router.delete('/:id/wishlist', authenticate, ProductController.removeFromWishlis
 router.post('/:id/cart', authenticate, ProductController.addToCart);
 router.delete('/:id/cart', authenticate, ProductController.removeFromCart);
 
-// Single deletion routes
+// Single deletion routes - Admin only
 router.delete('/:id/variant', authenticate, authorize(['admin']), ProductController.deleteVariant);
 router.delete('/:id/color', authenticate, authorize(['admin']), ProductController.deleteColor);
 router.delete('/:id/size', authenticate, authorize(['admin']), ProductController.deleteSize);
