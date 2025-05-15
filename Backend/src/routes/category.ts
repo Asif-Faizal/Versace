@@ -11,9 +11,9 @@ const categoryValidation = [
   body('description').notEmpty().withMessage('Category description is required')
 ];
 
-// Public routes
-router.get('/', CategoryController.getAllCategories);
-router.get('/:id', CategoryController.getCategory);
+// Protected routes - Both users and admins
+router.get('/', authenticate, CategoryController.getAllCategories);
+router.get('/:id', authenticate, CategoryController.getCategory);
 
 // Protected routes - Admin only
 router.post('/', authenticate, authorize(['admin']), categoryValidation, CategoryController.createCategory);

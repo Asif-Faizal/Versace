@@ -11,9 +11,9 @@ const subCategoryValidation = [
     (0, express_validator_1.body)('description').notEmpty().withMessage('SubCategory description is required'),
     (0, express_validator_1.body)('category').isMongoId().withMessage('Valid category ID is required')
 ];
-// Public routes
-router.get('/', subCategoryController_1.SubCategoryController.getAllSubCategories);
-router.get('/:id', subCategoryController_1.SubCategoryController.getSubCategory);
+// Protected routes - Both users and admins
+router.get('/', auth_1.authenticate, subCategoryController_1.SubCategoryController.getAllSubCategories);
+router.get('/:id', auth_1.authenticate, subCategoryController_1.SubCategoryController.getSubCategory);
 // Protected routes - Admin only
 router.post('/', auth_1.authenticate, (0, auth_1.authorize)(['admin']), subCategoryValidation, subCategoryController_1.SubCategoryController.createSubCategory);
 router.put('/:id', auth_1.authenticate, (0, auth_1.authorize)(['admin']), subCategoryValidation, subCategoryController_1.SubCategoryController.updateSubCategory);

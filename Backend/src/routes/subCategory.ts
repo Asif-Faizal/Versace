@@ -12,9 +12,9 @@ const subCategoryValidation = [
   body('category').isMongoId().withMessage('Valid category ID is required')
 ];
 
-// Public routes
-router.get('/', SubCategoryController.getAllSubCategories);
-router.get('/:id', SubCategoryController.getSubCategory);
+// Protected routes - Both users and admins
+router.get('/', authenticate, SubCategoryController.getAllSubCategories);
+router.get('/:id', authenticate, SubCategoryController.getSubCategory);
 
 // Protected routes - Admin only
 router.post('/', authenticate, authorize(['admin']), subCategoryValidation, SubCategoryController.createSubCategory);
