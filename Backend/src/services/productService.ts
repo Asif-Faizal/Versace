@@ -4,6 +4,7 @@ import { SubCategory } from '../models/SubCategory';
 import { StatusCodes } from '../utils/statusCodes';
 import { AppError } from '../middleware/errorHandler';
 import mongoose from 'mongoose';
+import { CartItem, ICartItem } from '../models/CartItem';
 
 interface PaginatedResponse<T> {
   products: T[];
@@ -266,11 +267,12 @@ export class ProductService {
     }
 
     const userIdObj = new mongoose.Types.ObjectId(userId);
-    if (!product.wishlist.some(id => id.equals(userIdObj))) {
-      product.wishlist.push(userIdObj);
-      await product.save();
+    if (product.wishlist.some(id => id.equals(userIdObj))) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Product is already in wishlist');
     }
 
+    product.wishlist.push(userIdObj);
+    await product.save();
     return product;
   }
 
@@ -286,31 +288,87 @@ export class ProductService {
     return product;
   }
 
-  static async addToCart(productId: string, userId: string): Promise<IProduct> {
+  static async addToCart(
+    productId: string, 
+    userId: string, 
+    variantCombinationId: string,
+    quantity: number = 1
+  ): Promise<ICartItem> {
     const product = await Product.findById(productId);
     if (!product) {
       throw new AppError(StatusCodes.NOT_FOUND, 'Product not found');
     }
 
-    const userIdObj = new mongoose.Types.ObjectId(userId);
-    if (!product.cart.some(id => id.equals(userIdObj))) {
-      product.cart.push(userIdObj);
-      await product.save();
+    // Find the variant combination
+    const combination = product.variantCombinations.find(
+      combo => combo._id.toString() === variantCombinationId
+    );
+
+    if (!combination) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Invalid variant combination');
     }
 
-    return product;
+    if (combination.stock < quantity) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Insufficient stock');
+    }
+
+    // Calculate total price
+    const totalPrice = (product.basePrice + combination.additionalPrice) * quantity;
+
+    // Create or update cart item
+    const cartItem = await CartItem.findOneAndUpdate(
+      {
+        user: userId,
+        product: productId,
+        variantCombinationId
+      },
+      {
+        quantity,
+        price: totalPrice
+      },
+      {
+        new: true,
+        upsert: true
+      }
+    );
+
+    return cartItem;
   }
 
-  static async removeFromCart(productId: string, userId: string): Promise<IProduct> {
-    const product = await Product.findById(productId);
-    if (!product) {
-      throw new AppError(StatusCodes.NOT_FOUND, 'Product not found');
-    }
+  static async removeFromCart(
+    productId: string, 
+    userId: string,
+    variantCombinationId: string
+  ): Promise<void> {
+    const result = await CartItem.deleteOne({
+      user: userId,
+      product: productId,
+      variantCombinationId
+    });
 
-    const userIdObj = new mongoose.Types.ObjectId(userId);
-    product.cart = product.cart.filter(id => !id.equals(userIdObj));
-    await product.save();
-    return product;
+    if (result.deletedCount === 0) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'Cart item not found');
+    }
+  }
+
+  static async getCartItems(userId: string): Promise<ICartItem[]> {
+    return CartItem.find({ user: userId })
+      .populate('product', 'name description basePrice images')
+      .populate({
+        path: 'product',
+        populate: {
+          path: 'variantCombinations',
+          match: { _id: { $eq: '$variantCombinationId' } }
+        }
+      })
+      .sort({ createdAt: -1 });
+  }
+
+  static async getWishlistItems(userId: string): Promise<IProduct[]> {
+    return Product.find({ wishlist: userId })
+      .populate('category', 'name')
+      .populate('subcategory', 'name')
+      .sort({ createdAt: -1 });
   }
 
   // Product attribute management methods

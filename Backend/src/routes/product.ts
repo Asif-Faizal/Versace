@@ -33,13 +33,23 @@ const queryValidation = [
   query('sortOrder').optional().isIn(['asc', 'desc']).withMessage('Sort order must be either asc or desc')
 ];
 
+// User-specific routes (require authentication)
+router.get('/wishlist', authenticate, ProductController.getWishlistItems);
+router.get('/cart', authenticate, ProductController.getCartItems);
+
 // Protected routes - Both users and admins
 router.get('/', authenticate, queryValidation, ProductController.getAllProducts);
 router.get('/new', authenticate, queryValidation, ProductController.getNewProducts);
 router.get('/trending', authenticate, queryValidation, ProductController.getTrendingProducts);
-router.get('/:id', authenticate, ProductController.getProduct);
 router.get('/category/:categoryId', authenticate, ProductController.getProductsByCategory);
 router.get('/subcategory/:subCategoryId', authenticate, ProductController.getProductsBySubCategory);
+
+// Product-specific routes
+router.get('/:id', authenticate, ProductController.getProduct);
+router.post('/:id/wishlist', authenticate, ProductController.addToWishlist);
+router.delete('/:id/wishlist', authenticate, ProductController.removeFromWishlist);
+router.post('/:id/cart', authenticate, ProductController.addToCart);
+router.delete('/:id/cart', authenticate, ProductController.removeFromCart);
 
 // Protected routes - Admin only
 router.post('/', authenticate, authorize(['admin']), productValidation, ProductController.createProduct);
@@ -66,12 +76,6 @@ router.delete('/:id/variant-combinations/bulk', authenticate, authorize(['admin'
 router.put('/:id/variant-combinations/:combinationId', authenticate, authorize(['admin']), variantCombinationValidation, ProductController.updateVariantCombination);
 router.delete('/:id/variant-combinations/:combinationId', authenticate, authorize(['admin']), ProductController.deleteVariantCombination);
 router.get('/:id/variant-combinations', authenticate, ProductController.getVariantCombinations);
-
-// User-specific routes (require authentication)
-router.post('/:id/wishlist', authenticate, ProductController.addToWishlist);
-router.delete('/:id/wishlist', authenticate, ProductController.removeFromWishlist);
-router.post('/:id/cart', authenticate, ProductController.addToCart);
-router.delete('/:id/cart', authenticate, ProductController.removeFromCart);
 
 // Single deletion routes - Admin only
 router.delete('/:id/variant', authenticate, authorize(['admin']), ProductController.deleteVariant);

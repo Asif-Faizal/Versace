@@ -10,6 +10,7 @@ const SubCategory_1 = require("../models/SubCategory");
 const statusCodes_1 = require("../utils/statusCodes");
 const errorHandler_1 = require("../middleware/errorHandler");
 const mongoose_1 = __importDefault(require("mongoose"));
+const CartItem_1 = require("../models/CartItem");
 class ProductService {
     static async createProduct(productData) {
         // Verify category exists
@@ -210,10 +211,11 @@ class ProductService {
             throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.NOT_FOUND, 'Product not found');
         }
         const userIdObj = new mongoose_1.default.Types.ObjectId(userId);
-        if (!product.wishlist.some(id => id.equals(userIdObj))) {
-            product.wishlist.push(userIdObj);
-            await product.save();
+        if (product.wishlist.some(id => id.equals(userIdObj))) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Product is already in wishlist');
         }
+        product.wishlist.push(userIdObj);
+        await product.save();
         return product;
     }
     static async removeFromWishlist(productId, userId) {
@@ -226,27 +228,62 @@ class ProductService {
         await product.save();
         return product;
     }
-    static async addToCart(productId, userId) {
+    static async addToCart(productId, userId, variantCombinationId, quantity = 1) {
         const product = await Product_1.Product.findById(productId);
         if (!product) {
             throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.NOT_FOUND, 'Product not found');
         }
-        const userIdObj = new mongoose_1.default.Types.ObjectId(userId);
-        if (!product.cart.some(id => id.equals(userIdObj))) {
-            product.cart.push(userIdObj);
-            await product.save();
+        // Find the variant combination
+        const combination = product.variantCombinations.find(combo => combo._id.toString() === variantCombinationId);
+        if (!combination) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Invalid variant combination');
         }
-        return product;
+        if (combination.stock < quantity) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Insufficient stock');
+        }
+        // Calculate total price
+        const totalPrice = (product.basePrice + combination.additionalPrice) * quantity;
+        // Create or update cart item
+        const cartItem = await CartItem_1.CartItem.findOneAndUpdate({
+            user: userId,
+            product: productId,
+            variantCombinationId
+        }, {
+            quantity,
+            price: totalPrice
+        }, {
+            new: true,
+            upsert: true
+        });
+        return cartItem;
     }
-    static async removeFromCart(productId, userId) {
-        const product = await Product_1.Product.findById(productId);
-        if (!product) {
-            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.NOT_FOUND, 'Product not found');
+    static async removeFromCart(productId, userId, variantCombinationId) {
+        const result = await CartItem_1.CartItem.deleteOne({
+            user: userId,
+            product: productId,
+            variantCombinationId
+        });
+        if (result.deletedCount === 0) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.NOT_FOUND, 'Cart item not found');
         }
-        const userIdObj = new mongoose_1.default.Types.ObjectId(userId);
-        product.cart = product.cart.filter(id => !id.equals(userIdObj));
-        await product.save();
-        return product;
+    }
+    static async getCartItems(userId) {
+        return CartItem_1.CartItem.find({ user: userId })
+            .populate('product', 'name description basePrice images')
+            .populate({
+            path: 'product',
+            populate: {
+                path: 'variantCombinations',
+                match: { _id: { $eq: '$variantCombinationId' } }
+            }
+        })
+            .sort({ createdAt: -1 });
+    }
+    static async getWishlistItems(userId) {
+        return Product_1.Product.find({ wishlist: userId })
+            .populate('category', 'name')
+            .populate('subcategory', 'name')
+            .sort({ createdAt: -1 });
     }
     // Product attribute management methods
     static async addProductVariant(productId, variant) {

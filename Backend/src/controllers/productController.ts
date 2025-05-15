@@ -118,13 +118,36 @@ export class ProductController {
     }
   }
 
+  static async getWishlistItems(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user?._id) {
+        throw new AppError(StatusCodes.UNAUTHORIZED, 'Not authenticated');
+      }
+      const products = await ProductService.getWishlistItems(req.user._id);
+      res.status(StatusCodes.OK).json(products);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async addToCart(req: Request, res: Response, next: NextFunction) {
     try {
       if (!req.user?._id) {
         throw new AppError(StatusCodes.UNAUTHORIZED, 'Not authenticated');
       }
-      const product = await ProductService.addToCart(req.params.id, req.user._id);
-      res.status(StatusCodes.OK).json(product);
+
+      const { variantCombinationId, quantity } = req.body;
+      if (!variantCombinationId) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'Variant combination ID is required');
+      }
+
+      const cartItem = await ProductService.addToCart(
+        req.params.id,
+        req.user._id,
+        variantCombinationId,
+        quantity
+      );
+      res.status(StatusCodes.OK).json(cartItem);
     } catch (error) {
       next(error);
     }
@@ -135,8 +158,30 @@ export class ProductController {
       if (!req.user?._id) {
         throw new AppError(StatusCodes.UNAUTHORIZED, 'Not authenticated');
       }
-      const product = await ProductService.removeFromCart(req.params.id, req.user._id);
-      res.status(StatusCodes.OK).json(product);
+
+      const { variantCombinationId } = req.body;
+      if (!variantCombinationId) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'Variant combination ID is required');
+      }
+
+      await ProductService.removeFromCart(
+        req.params.id,
+        req.user._id,
+        variantCombinationId
+      );
+      res.status(StatusCodes.OK).json({ message: 'Item removed from cart' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async getCartItems(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user?._id) {
+        throw new AppError(StatusCodes.UNAUTHORIZED, 'Not authenticated');
+      }
+      const cartItems = await ProductService.getCartItems(req.user._id);
+      res.status(StatusCodes.OK).json(cartItems);
     } catch (error) {
       next(error);
     }

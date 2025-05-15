@@ -105,13 +105,29 @@ class ProductController {
             next(error);
         }
     }
+    static async getWishlistItems(req, res, next) {
+        try {
+            if (!req.user?._id) {
+                throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.UNAUTHORIZED, 'Not authenticated');
+            }
+            const products = await productService_1.ProductService.getWishlistItems(req.user._id);
+            res.status(statusCodes_1.StatusCodes.OK).json(products);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
     static async addToCart(req, res, next) {
         try {
             if (!req.user?._id) {
                 throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.UNAUTHORIZED, 'Not authenticated');
             }
-            const product = await productService_1.ProductService.addToCart(req.params.id, req.user._id);
-            res.status(statusCodes_1.StatusCodes.OK).json(product);
+            const { variantCombinationId, quantity } = req.body;
+            if (!variantCombinationId) {
+                throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Variant combination ID is required');
+            }
+            const cartItem = await productService_1.ProductService.addToCart(req.params.id, req.user._id, variantCombinationId, quantity);
+            res.status(statusCodes_1.StatusCodes.OK).json(cartItem);
         }
         catch (error) {
             next(error);
@@ -122,8 +138,24 @@ class ProductController {
             if (!req.user?._id) {
                 throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.UNAUTHORIZED, 'Not authenticated');
             }
-            const product = await productService_1.ProductService.removeFromCart(req.params.id, req.user._id);
-            res.status(statusCodes_1.StatusCodes.OK).json(product);
+            const { variantCombinationId } = req.body;
+            if (!variantCombinationId) {
+                throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Variant combination ID is required');
+            }
+            await productService_1.ProductService.removeFromCart(req.params.id, req.user._id, variantCombinationId);
+            res.status(statusCodes_1.StatusCodes.OK).json({ message: 'Item removed from cart' });
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    static async getCartItems(req, res, next) {
+        try {
+            if (!req.user?._id) {
+                throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.UNAUTHORIZED, 'Not authenticated');
+            }
+            const cartItems = await productService_1.ProductService.getCartItems(req.user._id);
+            res.status(statusCodes_1.StatusCodes.OK).json(cartItems);
         }
         catch (error) {
             next(error);
