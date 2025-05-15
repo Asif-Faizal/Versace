@@ -961,4 +961,54 @@ export class ProductService {
     await product.save();
     return product;
   }
+
+  static async updateCartItemQuantity(
+    productId: string,
+    userId: string,
+    variantCombinationId: string,
+    quantity: number
+  ): Promise<ICartItem> {
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'Product not found');
+    }
+
+    // Find the variant combination
+    const combination = product.variantCombinations.find(
+      combo => combo._id.toString() === variantCombinationId
+    );
+
+    if (!combination) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Invalid variant combination');
+    }
+
+    if (quantity < 1) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Quantity must be at least 1');
+    }
+
+    if (combination.stock < quantity) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Insufficient stock');
+    }
+
+    // Find and update the cart item
+    const cartItem = await CartItem.findOne({
+      user: userId,
+      product: productId,
+      variantCombinationId: new mongoose.Types.ObjectId(variantCombinationId)
+    });
+
+    if (!cartItem) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'Cart item not found');
+    }
+
+    // Calculate new total price
+    const totalPrice = (product.basePrice + combination.additionalPrice) * quantity;
+
+    // Update the cart item
+    cartItem.quantity = quantity;
+    cartItem.price = totalPrice;
+    await cartItem.save();
+
+    return cartItem;
+  }
 } 

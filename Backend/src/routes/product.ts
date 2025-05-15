@@ -51,6 +51,7 @@ router.post('/:id/wishlist', authenticate, ProductController.addToWishlist);
 router.delete('/:id/wishlist', authenticate, ProductController.removeFromWishlist);
 router.post('/:id/cart', authenticate, ProductController.addToCart);
 router.delete('/:id/cart', authenticate, ProductController.removeFromCart);
+router.patch('/:id/cart/quantity', authenticate, ProductController.updateCartItemQuantity);
 
 // Protected routes - Admin only
 router.post('/', authenticate, authorize(['admin']), productValidation, ProductController.createProduct);

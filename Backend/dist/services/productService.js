@@ -726,5 +726,38 @@ class ProductService {
         await product.save();
         return product;
     }
+    static async updateCartItemQuantity(productId, userId, variantCombinationId, quantity) {
+        const product = await Product_1.Product.findById(productId);
+        if (!product) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.NOT_FOUND, 'Product not found');
+        }
+        // Find the variant combination
+        const combination = product.variantCombinations.find(combo => combo._id.toString() === variantCombinationId);
+        if (!combination) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Invalid variant combination');
+        }
+        if (quantity < 1) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Quantity must be at least 1');
+        }
+        if (combination.stock < quantity) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Insufficient stock');
+        }
+        // Find and update the cart item
+        const cartItem = await CartItem_1.CartItem.findOne({
+            user: userId,
+            product: productId,
+            variantCombinationId: new mongoose_1.default.Types.ObjectId(variantCombinationId)
+        });
+        if (!cartItem) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.NOT_FOUND, 'Cart item not found');
+        }
+        // Calculate new total price
+        const totalPrice = (product.basePrice + combination.additionalPrice) * quantity;
+        // Update the cart item
+        cartItem.quantity = quantity;
+        cartItem.price = totalPrice;
+        await cartItem.save();
+        return cartItem;
+    }
 }
 exports.ProductService = ProductService;

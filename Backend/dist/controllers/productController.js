@@ -438,5 +438,24 @@ class ProductController {
             next(error);
         }
     }
+    static async updateCartItemQuantity(req, res, next) {
+        try {
+            if (!req.user?._id) {
+                throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.UNAUTHORIZED, 'Not authenticated');
+            }
+            const { variantCombinationId, quantity } = req.body;
+            if (!variantCombinationId) {
+                throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Variant combination ID is required');
+            }
+            if (typeof quantity !== 'number') {
+                throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Quantity must be a number');
+            }
+            const cartItem = await productService_1.ProductService.updateCartItemQuantity(req.params.id, req.user._id, variantCombinationId, quantity);
+            res.status(statusCodes_1.StatusCodes.OK).json(cartItem);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
 }
 exports.ProductController = ProductController;
