@@ -147,4 +147,14 @@ export class AuthController {
       next(error);
     }
   }
+
+  static async createAdmin(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { adminCreationToken, ...userData } = req.body;
+      const result = await AuthService.createAdmin(userData, adminCreationToken);
+      res.status(StatusCodes.CREATED).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
 }

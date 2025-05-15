@@ -256,5 +256,36 @@ class AuthService {
         user.emailOtpExpiry = undefined;
         await user.save();
     }
+    static async createAdmin(userData, adminCreationToken) {
+        // Verify admin creation token
+        if (adminCreationToken !== config_1.default.adminCreationToken) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.UNAUTHORIZED, 'Invalid admin creation token');
+        }
+        // Check if user already exists
+        const existingUser = await User_1.User.findOne({ email: userData.email });
+        if (existingUser) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.CONFLICT, 'Email already registered');
+        }
+        // Create admin user
+        const user = await User_1.User.create({
+            ...userData,
+            role: 'admin',
+            isEmailVerified: true // Auto-verify admin emails
+        });
+        const tokens = this.generateTokens(user);
+        user.refreshToken = tokens.refreshToken;
+        user.tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
+        await user.save();
+        return {
+            user: {
+                _id: user._id.toString(),
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                role: user.role
+            },
+            ...tokens
+        };
+    }
 }
 exports.AuthService = AuthService;

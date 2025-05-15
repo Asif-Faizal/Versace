@@ -14,7 +14,7 @@ const tokenBlacklist = new Set();
 const authenticate = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
-        if (!authHeader?.startsWith('Bearer ')) {
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
             throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.UNAUTHORIZED, 'No token provided');
         }
         const token = authHeader.split(' ')[1];
@@ -30,19 +30,14 @@ const authenticate = async (req, res, next) => {
         if (decoded.exp * 1000 < Date.now()) {
             throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.UNAUTHORIZED, 'Token has expired');
         }
-        const user = await User_1.User.findById(decoded.userId).select('-password -refreshToken');
+        const user = await User_1.User.findById(decoded.userId).select('-password');
         if (!user) {
             throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.UNAUTHORIZED, 'User not found');
         }
-        // Check if user's token expiry is set to epoch (logged out)
-        if (user.tokenExpiry && user.tokenExpiry.getTime() === 0) {
-            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.UNAUTHORIZED, 'User has been logged out');
+        if (!user.isActive) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.FORBIDDEN, 'User account is deactivated');
         }
-        req.user = {
-            _id: user._id.toString(),
-            email: user.email,
-            role: user.role
-        };
+        req.user = user;
         next();
     }
     catch (error) {
@@ -60,13 +55,15 @@ const blacklistToken = (token) => {
     tokenBlacklist.add(token);
 };
 exports.blacklistToken = blacklistToken;
-const authorize = (...roles) => {
+const authorize = (roles) => {
     return (req, res, next) => {
         if (!req.user) {
-            return next(new errorHandler_1.AppError(statusCodes_1.StatusCodes.UNAUTHORIZED, 'Not authenticated'));
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.UNAUTHORIZED, 'Not authenticated');
         }
-        if (!roles.includes(req.user.role)) {
-            return next(new errorHandler_1.AppError(statusCodes_1.StatusCodes.FORBIDDEN, 'Not authorized'));
+        const userRole = req.user.role;
+        const allowedRoles = Array.isArray(roles) ? roles : [roles];
+        if (!allowedRoles.includes(userRole)) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.FORBIDDEN, 'Not authorized to perform this action');
         }
         next();
     };

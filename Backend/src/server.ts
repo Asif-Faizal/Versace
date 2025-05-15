@@ -8,6 +8,9 @@ import rateLimit from 'express-rate-limit';
 import config from './config/config';
 import logger, { requestLogger } from './utils/logger';
 import authRoutes from './routes/auth';
+import productRoutes from './routes/product';
+import categoryRoutes from './routes/category';
+import subCategoryRoutes from './routes/subCategory';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -33,6 +36,9 @@ app.use(cors({
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/subcategories', subCategoryRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {

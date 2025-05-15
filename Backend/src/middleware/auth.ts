@@ -19,11 +19,7 @@ const tokenBlacklist = new Set<string>();
 declare global {
   namespace Express {
     interface Request {
-      user?: {
-        _id: string;
-        email: string;
-        role: string;
-      };
+      user?: any;
     }
   }
 }
@@ -31,7 +27,7 @@ declare global {
 export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers.authorization;
-    if (!authHeader?.startsWith('Bearer ')) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw new AppError(StatusCodes.UNAUTHORIZED, 'No token provided');
     }
 
@@ -46,29 +42,24 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
       throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR, 'JWT secret is not configured');
     }
 
-    const decoded = jwt.verify(token, config.jwtSecret) as JwtPayload;
+    const decoded = jwt.verify(token, config.jwtSecret) as any;
     
     // Check if token has expired
     if (decoded.exp * 1000 < Date.now()) {
       throw new AppError(StatusCodes.UNAUTHORIZED, 'Token has expired');
     }
 
-    const user = await User.findById(decoded.userId).select('-password -refreshToken');
+    const user = await User.findById(decoded.userId).select('-password');
 
     if (!user) {
       throw new AppError(StatusCodes.UNAUTHORIZED, 'User not found');
     }
 
-    // Check if user's token expiry is set to epoch (logged out)
-    if (user.tokenExpiry && user.tokenExpiry.getTime() === 0) {
-      throw new AppError(StatusCodes.UNAUTHORIZED, 'User has been logged out');
+    if (!user.isActive) {
+      throw new AppError(StatusCodes.FORBIDDEN, 'User account is deactivated');
     }
 
-    req.user = {
-      _id: user._id.toString(),
-      email: user.email,
-      role: user.role
-    };
+    req.user = user;
 
     next();
   } catch (error) {
@@ -85,14 +76,17 @@ export const blacklistToken = (token: string) => {
   tokenBlacklist.add(token);
 };
 
-export const authorize = (...roles: string[]) => {
+export const authorize = (roles: string | string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
-      return next(new AppError(StatusCodes.UNAUTHORIZED, 'Not authenticated'));
+      throw new AppError(StatusCodes.UNAUTHORIZED, 'Not authenticated');
     }
 
-    if (!roles.includes(req.user.role)) {
-      return next(new AppError(StatusCodes.FORBIDDEN, 'Not authorized'));
+    const userRole = req.user.role;
+    const allowedRoles = Array.isArray(roles) ? roles : [roles];
+
+    if (!allowedRoles.includes(userRole)) {
+      throw new AppError(StatusCodes.FORBIDDEN, 'Not authorized to perform this action');
     }
 
     next();

@@ -46,6 +46,9 @@ const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const config_1 = __importDefault(require("./config/config"));
 const logger_1 = __importStar(require("./utils/logger"));
 const auth_1 = __importDefault(require("./routes/auth"));
+const product_1 = __importDefault(require("./routes/product"));
+const category_1 = __importDefault(require("./routes/category"));
+const subCategory_1 = __importDefault(require("./routes/subCategory"));
 const errorHandler_1 = require("./middleware/errorHandler");
 const app = (0, express_1.default)();
 // Security middleware
@@ -65,6 +68,9 @@ app.use((0, cors_1.default)({
 }));
 // Routes
 app.use('/api/auth', auth_1.default);
+app.use('/api/products', product_1.default);
+app.use('/api/categories', category_1.default);
+app.use('/api/subcategories', subCategory_1.default);
 // Health check route
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'ok' });

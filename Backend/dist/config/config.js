@@ -23,7 +23,8 @@ const requiredEnvVars = [
     'EMAIL_PORT',
     'EMAIL_USER',
     'EMAIL_PASSWORD',
-    'EMAIL_FROM'
+    'EMAIL_FROM',
+    'ADMIN_CREATION_TOKEN'
 ];
 // Check for missing variables
 requiredEnvVars.forEach((name) => {
@@ -57,5 +58,6 @@ exports.default = {
     otp: {
         expiryMs: 60 * 1000,
         resendIntervalMs: 60 * 1000
-    }
+    },
+    adminCreationToken: process.env.ADMIN_CREATION_TOKEN
 };

@@ -13,6 +13,14 @@ const registerValidation = [
   body('lastName').notEmpty().withMessage('Last name is required')
 ];
 
+const adminCreationValidation = [
+  body('email').isEmail().withMessage('Please enter a valid email'),
+  body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long'),
+  body('firstName').notEmpty().withMessage('First name is required'),
+  body('lastName').notEmpty().withMessage('Last name is required'),
+  body('adminCreationToken').notEmpty().withMessage('Admin creation token is required')
+];
+
 const loginValidation = [
   body('email').isEmail().withMessage('Please enter a valid email'),
   body('password').notEmpty().withMessage('Password is required')
@@ -41,6 +49,7 @@ router.post('/login', loginValidation, AuthController.login);
 router.post('/refresh-token', refreshTokenValidation, AuthController.refreshToken);
 router.post('/send-otp', otpValidation, AuthController.sendOtp);
 router.post('/verify-otp', verifyOtpValidation, AuthController.verifyOtp);
+router.post('/create-admin', adminCreationValidation, AuthController.createAdmin);
 
 // Protected routes
 router.post('/logout', authenticate, AuthController.logout);

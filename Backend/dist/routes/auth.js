@@ -12,6 +12,13 @@ const registerValidation = [
     (0, express_validator_1.body)('firstName').notEmpty().withMessage('First name is required'),
     (0, express_validator_1.body)('lastName').notEmpty().withMessage('Last name is required')
 ];
+const adminCreationValidation = [
+    (0, express_validator_1.body)('email').isEmail().withMessage('Please enter a valid email'),
+    (0, express_validator_1.body)('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long'),
+    (0, express_validator_1.body)('firstName').notEmpty().withMessage('First name is required'),
+    (0, express_validator_1.body)('lastName').notEmpty().withMessage('Last name is required'),
+    (0, express_validator_1.body)('adminCreationToken').notEmpty().withMessage('Admin creation token is required')
+];
 const loginValidation = [
     (0, express_validator_1.body)('email').isEmail().withMessage('Please enter a valid email'),
     (0, express_validator_1.body)('password').notEmpty().withMessage('Password is required')
@@ -35,6 +42,7 @@ router.post('/login', loginValidation, authController_1.AuthController.login);
 router.post('/refresh-token', refreshTokenValidation, authController_1.AuthController.refreshToken);
 router.post('/send-otp', otpValidation, authController_1.AuthController.sendOtp);
 router.post('/verify-otp', verifyOtpValidation, authController_1.AuthController.verifyOtp);
+router.post('/create-admin', adminCreationValidation, authController_1.AuthController.createAdmin);
 // Protected routes
 router.post('/logout', auth_1.authenticate, authController_1.AuthController.logout);
 router.put('/profile', auth_1.authenticate, authController_1.AuthController.updateProfile);

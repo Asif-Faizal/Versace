@@ -181,5 +181,15 @@ class AuthController {
             next(error);
         }
     }
+    static async createAdmin(req, res, next) {
+        try {
+            const { adminCreationToken, ...userData } = req.body;
+            const result = await authService_1.AuthService.createAdmin(userData, adminCreationToken);
+            res.status(statusCodes_1.StatusCodes.CREATED).json(result);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
 }
 exports.AuthController = AuthController;
