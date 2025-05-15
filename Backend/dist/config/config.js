@@ -24,7 +24,8 @@ const requiredEnvVars = [
     'EMAIL_USER',
     'EMAIL_PASSWORD',
     'EMAIL_FROM',
-    'ADMIN_CREATION_TOKEN'
+    'ADMIN_CREATION_TOKEN',
+    'REDIS_URL'
 ];
 // Check for missing variables
 requiredEnvVars.forEach((name) => {
@@ -58,6 +59,14 @@ exports.default = {
     otp: {
         expiryMs: 60 * 1000,
         resendIntervalMs: 60 * 1000
+    },
+    redis: {
+        url: process.env.REDIS_URL,
+        cacheExpiry: {
+            products: parseInt(process.env.REDIS_CACHE_PRODUCTS || '3600', 10), // 1 hour default
+            categories: parseInt(process.env.REDIS_CACHE_CATEGORIES || '7200', 10), // 2 hours default
+            cart: parseInt(process.env.REDIS_CACHE_CART || '86400', 10), // 24 hours default
+        }
     },
     adminCreationToken: process.env.ADMIN_CREATION_TOKEN
 };

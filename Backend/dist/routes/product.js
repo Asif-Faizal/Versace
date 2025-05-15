@@ -4,6 +4,7 @@ const express_1 = require("express");
 const productController_1 = require("../controllers/productController");
 const auth_1 = require("../middleware/auth");
 const express_validator_1 = require("express-validator");
+const cache_1 = require("../middleware/cache");
 const router = (0, express_1.Router)();
 // Validation middleware
 const productValidation = [
@@ -34,14 +35,14 @@ const queryValidation = [
 router.get('/wishlist', auth_1.authenticate, productController_1.ProductController.getWishlistItems);
 router.get('/cart', auth_1.authenticate, productController_1.ProductController.getCartItems);
 router.delete('/cart', auth_1.authenticate, productController_1.ProductController.clearCart);
-// Protected routes - Both users and admins
-router.get('/', auth_1.authenticate, queryValidation, productController_1.ProductController.getAllProducts);
-router.get('/new', auth_1.authenticate, queryValidation, productController_1.ProductController.getNewProducts);
-router.get('/trending', auth_1.authenticate, queryValidation, productController_1.ProductController.getTrendingProducts);
-router.get('/category/:categoryId', auth_1.authenticate, productController_1.ProductController.getProductsByCategory);
-router.get('/subcategory/:subCategoryId', auth_1.authenticate, productController_1.ProductController.getProductsBySubCategory);
-// Product-specific routes
-router.get('/:id', auth_1.authenticate, productController_1.ProductController.getProduct);
+// Protected routes - Both users and admins - Use caching
+router.get('/', auth_1.authenticate, queryValidation, (0, cache_1.cacheMiddleware)('products'), productController_1.ProductController.getAllProducts);
+router.get('/new', auth_1.authenticate, queryValidation, (0, cache_1.cacheMiddleware)('products'), productController_1.ProductController.getNewProducts);
+router.get('/trending', auth_1.authenticate, queryValidation, (0, cache_1.cacheMiddleware)('products'), productController_1.ProductController.getTrendingProducts);
+router.get('/category/:categoryId', auth_1.authenticate, (0, cache_1.cacheMiddleware)('products'), productController_1.ProductController.getProductsByCategory);
+router.get('/subcategory/:subCategoryId', auth_1.authenticate, (0, cache_1.cacheMiddleware)('products'), productController_1.ProductController.getProductsBySubCategory);
+// Product-specific routes - Use caching for GET requests
+router.get('/:id', auth_1.authenticate, (0, cache_1.cacheMiddleware)('products'), productController_1.ProductController.getProduct);
 router.post('/:id/wishlist', auth_1.authenticate, productController_1.ProductController.addToWishlist);
 router.delete('/:id/wishlist', auth_1.authenticate, productController_1.ProductController.removeFromWishlist);
 router.post('/:id/cart', auth_1.authenticate, productController_1.ProductController.addToCart);

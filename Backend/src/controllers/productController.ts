@@ -2,11 +2,14 @@ import { Request, Response, NextFunction } from 'express';
 import { ProductService } from '../services/productService';
 import { StatusCodes } from '../utils/statusCodes';
 import { AppError } from '../middleware/errorHandler';
+import { clearCache } from '../middleware/cache';
 
 export class ProductController {
   static async createProduct(req: Request, res: Response, next: NextFunction) {
     try {
       const product = await ProductService.createProduct(req.body);
+      // Clear product cache after creating a new product
+      await clearCache('products:*');
       res.status(StatusCodes.CREATED).json(product);
     } catch (error) {
       next(error);
@@ -79,6 +82,8 @@ export class ProductController {
   static async updateProduct(req: Request, res: Response, next: NextFunction) {
     try {
       const product = await ProductService.updateProduct(req.params.id, req.body);
+      // Clear both specific product cache and any list that might contain this product
+      await clearCache(`products:*`);
       res.status(StatusCodes.OK).json(product);
     } catch (error) {
       next(error);
@@ -88,6 +93,8 @@ export class ProductController {
   static async deleteProduct(req: Request, res: Response, next: NextFunction) {
     try {
       await ProductService.deleteProduct(req.params.id);
+      // Clear cache for all products after deletion
+      await clearCache('products:*');
       res.status(StatusCodes.NO_CONTENT).send();
     } catch (error) {
       next(error);
@@ -147,6 +154,8 @@ export class ProductController {
         variantCombinationId,
         quantity
       );
+      // Clear cart cache for this user
+      await clearCache(`cart:*${req.user._id}*`);
       res.status(StatusCodes.OK).json(cartItem);
     } catch (error) {
       next(error);
@@ -169,6 +178,8 @@ export class ProductController {
         req.user._id,
         variantCombinationId
       );
+      // Clear cart cache for this user
+      await clearCache(`cart:*${req.user._id}*`);
       res.status(StatusCodes.OK).json({ message: 'Item removed from cart' });
     } catch (error) {
       next(error);
@@ -182,6 +193,8 @@ export class ProductController {
       }
 
       await ProductService.clearCart(req.user._id);
+      // Clear cart cache for this user
+      await clearCache(`cart:*${req.user._id}*`);
       res.status(StatusCodes.OK).json({ message: 'Cart cleared successfully' });
     } catch (error) {
       next(error);
@@ -493,8 +506,9 @@ export class ProductController {
       if (!variantCombinationId) {
         throw new AppError(StatusCodes.BAD_REQUEST, 'Variant combination ID is required');
       }
-      if (typeof quantity !== 'number') {
-        throw new AppError(StatusCodes.BAD_REQUEST, 'Quantity must be a number');
+
+      if (typeof quantity !== 'number' || quantity < 1) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'Quantity must be a positive number');
       }
 
       const cartItem = await ProductService.updateCartItemQuantity(
@@ -503,6 +517,8 @@ export class ProductController {
         variantCombinationId,
         quantity
       );
+      // Clear cart cache for this user
+      await clearCache(`cart:*${req.user._id}*`);
       res.status(StatusCodes.OK).json(cartItem);
     } catch (error) {
       next(error);

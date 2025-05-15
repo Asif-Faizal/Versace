@@ -4,10 +4,13 @@ exports.ProductController = void 0;
 const productService_1 = require("../services/productService");
 const statusCodes_1 = require("../utils/statusCodes");
 const errorHandler_1 = require("../middleware/errorHandler");
+const cache_1 = require("../middleware/cache");
 class ProductController {
     static async createProduct(req, res, next) {
         try {
             const product = await productService_1.ProductService.createProduct(req.body);
+            // Clear product cache after creating a new product
+            await (0, cache_1.clearCache)('products:*');
             res.status(statusCodes_1.StatusCodes.CREATED).json(product);
         }
         catch (error) {
@@ -66,6 +69,8 @@ class ProductController {
     static async updateProduct(req, res, next) {
         try {
             const product = await productService_1.ProductService.updateProduct(req.params.id, req.body);
+            // Clear both specific product cache and any list that might contain this product
+            await (0, cache_1.clearCache)(`products:*`);
             res.status(statusCodes_1.StatusCodes.OK).json(product);
         }
         catch (error) {
@@ -75,6 +80,8 @@ class ProductController {
     static async deleteProduct(req, res, next) {
         try {
             await productService_1.ProductService.deleteProduct(req.params.id);
+            // Clear cache for all products after deletion
+            await (0, cache_1.clearCache)('products:*');
             res.status(statusCodes_1.StatusCodes.NO_CONTENT).send();
         }
         catch (error) {
@@ -127,6 +134,8 @@ class ProductController {
                 throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Variant combination ID is required');
             }
             const cartItem = await productService_1.ProductService.addToCart(req.params.id, req.user._id, variantCombinationId, quantity);
+            // Clear cart cache for this user
+            await (0, cache_1.clearCache)(`cart:*${req.user._id}*`);
             res.status(statusCodes_1.StatusCodes.OK).json(cartItem);
         }
         catch (error) {
@@ -143,6 +152,8 @@ class ProductController {
                 throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Variant combination ID is required');
             }
             await productService_1.ProductService.removeFromCart(req.params.id, req.user._id, variantCombinationId);
+            // Clear cart cache for this user
+            await (0, cache_1.clearCache)(`cart:*${req.user._id}*`);
             res.status(statusCodes_1.StatusCodes.OK).json({ message: 'Item removed from cart' });
         }
         catch (error) {
@@ -155,6 +166,8 @@ class ProductController {
                 throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.UNAUTHORIZED, 'Not authenticated');
             }
             await productService_1.ProductService.clearCart(req.user._id);
+            // Clear cart cache for this user
+            await (0, cache_1.clearCache)(`cart:*${req.user._id}*`);
             res.status(statusCodes_1.StatusCodes.OK).json({ message: 'Cart cleared successfully' });
         }
         catch (error) {
@@ -447,10 +460,12 @@ class ProductController {
             if (!variantCombinationId) {
                 throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Variant combination ID is required');
             }
-            if (typeof quantity !== 'number') {
-                throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Quantity must be a number');
+            if (typeof quantity !== 'number' || quantity < 1) {
+                throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Quantity must be a positive number');
             }
             const cartItem = await productService_1.ProductService.updateCartItemQuantity(req.params.id, req.user._id, variantCombinationId, quantity);
+            // Clear cart cache for this user
+            await (0, cache_1.clearCache)(`cart:*${req.user._id}*`);
             res.status(statusCodes_1.StatusCodes.OK).json(cartItem);
         }
         catch (error) {

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { ProductController } from '../controllers/productController';
 import { authenticate, authorize } from '../middleware/auth';
 import { body, query } from 'express-validator';
+import { cacheMiddleware } from '../middleware/cache';
 
 const router = Router();
 
@@ -38,15 +39,15 @@ router.get('/wishlist', authenticate, ProductController.getWishlistItems);
 router.get('/cart', authenticate, ProductController.getCartItems);
 router.delete('/cart', authenticate, ProductController.clearCart);
 
-// Protected routes - Both users and admins
-router.get('/', authenticate, queryValidation, ProductController.getAllProducts);
-router.get('/new', authenticate, queryValidation, ProductController.getNewProducts);
-router.get('/trending', authenticate, queryValidation, ProductController.getTrendingProducts);
-router.get('/category/:categoryId', authenticate, ProductController.getProductsByCategory);
-router.get('/subcategory/:subCategoryId', authenticate, ProductController.getProductsBySubCategory);
+// Protected routes - Both users and admins - Use caching
+router.get('/', authenticate, queryValidation, cacheMiddleware('products'), ProductController.getAllProducts);
+router.get('/new', authenticate, queryValidation, cacheMiddleware('products'), ProductController.getNewProducts);
+router.get('/trending', authenticate, queryValidation, cacheMiddleware('products'), ProductController.getTrendingProducts);
+router.get('/category/:categoryId', authenticate, cacheMiddleware('products'), ProductController.getProductsByCategory);
+router.get('/subcategory/:subCategoryId', authenticate, cacheMiddleware('products'), ProductController.getProductsBySubCategory);
 
-// Product-specific routes
-router.get('/:id', authenticate, ProductController.getProduct);
+// Product-specific routes - Use caching for GET requests
+router.get('/:id', authenticate, cacheMiddleware('products'), ProductController.getProduct);
 router.post('/:id/wishlist', authenticate, ProductController.addToWishlist);
 router.delete('/:id/wishlist', authenticate, ProductController.removeFromWishlist);
 router.post('/:id/cart', authenticate, ProductController.addToCart);

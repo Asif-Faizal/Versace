@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { CategoryController } from '../controllers/categoryController';
 import { authenticate, authorize } from '../middleware/auth';
 import { body } from 'express-validator';
+import { cacheMiddleware } from '../middleware/cache';
 
 const router = Router();
 
@@ -11,9 +12,9 @@ const categoryValidation = [
   body('description').notEmpty().withMessage('Category description is required')
 ];
 
-// Protected routes - Both users and admins
-router.get('/', authenticate, CategoryController.getAllCategories);
-router.get('/:id', authenticate, CategoryController.getCategory);
+// Protected routes - Both users and admins - with caching
+router.get('/', authenticate, cacheMiddleware('categories'), CategoryController.getAllCategories);
+router.get('/:id', authenticate, cacheMiddleware('categories'), CategoryController.getCategory);
 
 // Protected routes - Admin only
 router.post('/', authenticate, authorize(['admin']), categoryValidation, CategoryController.createCategory);

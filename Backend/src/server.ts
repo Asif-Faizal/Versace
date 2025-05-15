@@ -12,6 +12,7 @@ import productRoutes from './routes/product';
 import categoryRoutes from './routes/category';
 import subCategoryRoutes from './routes/subCategory';
 import { errorHandler } from './middleware/errorHandler';
+import './utils/redis'; // Import Redis to initialize connection
 
 const app = express();
 

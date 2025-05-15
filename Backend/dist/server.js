@@ -50,6 +50,7 @@ const product_1 = __importDefault(require("./routes/product"));
 const category_1 = __importDefault(require("./routes/category"));
 const subCategory_1 = __importDefault(require("./routes/subCategory"));
 const errorHandler_1 = require("./middleware/errorHandler");
+require("./utils/redis"); // Import Redis to initialize connection
 const app = (0, express_1.default)();
 // Security middleware
 app.use((0, helmet_1.default)());
