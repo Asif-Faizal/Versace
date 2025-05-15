@@ -73,4 +73,9 @@ router.delete('/:id/wishlist', authenticate, ProductController.removeFromWishlis
 router.post('/:id/cart', authenticate, ProductController.addToCart);
 router.delete('/:id/cart', authenticate, ProductController.removeFromCart);
 
+// Single deletion routes
+router.delete('/:id/variant', authenticate, authorize(['admin']), ProductController.deleteVariant);
+router.delete('/:id/color', authenticate, authorize(['admin']), ProductController.deleteColor);
+router.delete('/:id/size', authenticate, authorize(['admin']), ProductController.deleteSize);
+
 export default router; 

@@ -376,4 +376,52 @@ export class ProductController {
       next(error);
     }
   }
+
+  static async deleteVariant(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const { variant } = req.body;
+
+      if (!variant) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'Variant name is required');
+      }
+
+      const product = await ProductService.deleteVariant(id, variant);
+      res.status(StatusCodes.OK).json(product);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async deleteColor(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const { color } = req.body;
+
+      if (!color) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'Color name is required');
+      }
+
+      const product = await ProductService.deleteColor(id, color);
+      res.status(StatusCodes.OK).json(product);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async deleteSize(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const { size } = req.body;
+
+      if (!size) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'Size name is required');
+      }
+
+      const product = await ProductService.deleteSize(id, size);
+      res.status(StatusCodes.OK).json(product);
+    } catch (error) {
+      next(error);
+    }
+  }
 } 

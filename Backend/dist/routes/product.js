@@ -63,4 +63,8 @@ router.post('/:id/wishlist', auth_1.authenticate, productController_1.ProductCon
 router.delete('/:id/wishlist', auth_1.authenticate, productController_1.ProductController.removeFromWishlist);
 router.post('/:id/cart', auth_1.authenticate, productController_1.ProductController.addToCart);
 router.delete('/:id/cart', auth_1.authenticate, productController_1.ProductController.removeFromCart);
+// Single deletion routes
+router.delete('/:id/variant', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productController_1.ProductController.deleteVariant);
+router.delete('/:id/color', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productController_1.ProductController.deleteColor);
+router.delete('/:id/size', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productController_1.ProductController.deleteSize);
 exports.default = router;

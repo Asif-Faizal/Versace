@@ -352,5 +352,47 @@ class ProductController {
             next(error);
         }
     }
+    static async deleteVariant(req, res, next) {
+        try {
+            const { id } = req.params;
+            const { variant } = req.body;
+            if (!variant) {
+                throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Variant name is required');
+            }
+            const product = await productService_1.ProductService.deleteVariant(id, variant);
+            res.status(statusCodes_1.StatusCodes.OK).json(product);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    static async deleteColor(req, res, next) {
+        try {
+            const { id } = req.params;
+            const { color } = req.body;
+            if (!color) {
+                throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Color name is required');
+            }
+            const product = await productService_1.ProductService.deleteColor(id, color);
+            res.status(statusCodes_1.StatusCodes.OK).json(product);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    static async deleteSize(req, res, next) {
+        try {
+            const { id } = req.params;
+            const { size } = req.body;
+            if (!size) {
+                throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Size name is required');
+            }
+            const product = await productService_1.ProductService.deleteSize(id, size);
+            res.status(statusCodes_1.StatusCodes.OK).json(product);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
 }
 exports.ProductController = ProductController;

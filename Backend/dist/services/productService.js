@@ -618,5 +618,63 @@ class ProductService {
         await product.save();
         return product;
     }
+    // Single deletion methods
+    static async deleteVariant(productId, variant) {
+        const product = await Product_1.Product.findById(productId);
+        if (!product) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.NOT_FOUND, 'Product not found');
+        }
+        // Check if variant exists
+        if (!product.variants.includes(variant)) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.NOT_FOUND, 'Variant not found');
+        }
+        // Check if variant is in use
+        const isVariantInUse = product.variantCombinations.some(combo => combo.variant === variant);
+        if (isVariantInUse) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Cannot delete variant because it is used in at least one variant combination');
+        }
+        // Remove the variant
+        product.variants = product.variants.filter(v => v !== variant);
+        await product.save();
+        return product;
+    }
+    static async deleteColor(productId, color) {
+        const product = await Product_1.Product.findById(productId);
+        if (!product) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.NOT_FOUND, 'Product not found');
+        }
+        // Check if color exists
+        if (!product.colors.includes(color)) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.NOT_FOUND, 'Color not found');
+        }
+        // Check if color is in use
+        const isColorInUse = product.variantCombinations.some(combo => combo.color === color);
+        if (isColorInUse) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Cannot delete color because it is used in at least one variant combination');
+        }
+        // Remove the color
+        product.colors = product.colors.filter(c => c !== color);
+        await product.save();
+        return product;
+    }
+    static async deleteSize(productId, size) {
+        const product = await Product_1.Product.findById(productId);
+        if (!product) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.NOT_FOUND, 'Product not found');
+        }
+        // Check if size exists
+        if (!product.sizes.includes(size)) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.NOT_FOUND, 'Size not found');
+        }
+        // Check if size is in use
+        const isSizeInUse = product.variantCombinations.some(combo => combo.size === size);
+        if (isSizeInUse) {
+            throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Cannot delete size because it is used in at least one variant combination');
+        }
+        // Remove the size
+        product.sizes = product.sizes.filter(s => s !== size);
+        await product.save();
+        return product;
+    }
 }
 exports.ProductService = ProductService;
