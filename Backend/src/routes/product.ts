@@ -14,9 +14,9 @@ const productValidation = [
   body('subCategory').isMongoId().withMessage('Valid subcategory ID is required')
 ];
 
-const variantValidation = [
-  body('name').notEmpty().withMessage('Variant name is required'),
-  body('price').isNumeric().withMessage('Price must be a number')
+const variantCombinationValidation = [
+  body('additionalPrice').isNumeric().withMessage('Additional price must be a number'),
+  body('stock').isInt({ min: 0 }).withMessage('Stock must be a non-negative integer')
 ];
 
 const queryValidation = [
@@ -46,10 +46,26 @@ router.post('/', authenticate, authorize(['admin']), productValidation, ProductC
 router.put('/:id', authenticate, authorize(['admin']), productValidation, ProductController.updateProduct);
 router.delete('/:id', authenticate, authorize(['admin']), ProductController.deleteProduct);
 
-// Variant management - Admin only
-router.post('/:id/variants', authenticate, authorize(['admin']), variantValidation, ProductController.addVariant);
-router.put('/:id/variants/:variantId', authenticate, authorize(['admin']), variantValidation, ProductController.updateVariant);
-router.delete('/:id/variants/:variantId', authenticate, authorize(['admin']), ProductController.deleteVariant);
+// Product attributes management - Admin only
+router.post('/:id/variants', authenticate, authorize(['admin']), ProductController.addProductVariant);
+router.post('/:id/variants/bulk', authenticate, authorize(['admin']), ProductController.addMultipleProductVariants);
+router.delete('/:id/variants/:variantName', authenticate, authorize(['admin']), ProductController.removeProductVariant);
+
+router.post('/:id/colors', authenticate, authorize(['admin']), ProductController.addProductColor);
+router.post('/:id/colors/bulk', authenticate, authorize(['admin']), ProductController.addMultipleProductColors);
+router.delete('/:id/colors/:colorName', authenticate, authorize(['admin']), ProductController.removeProductColor);
+
+router.post('/:id/sizes', authenticate, authorize(['admin']), ProductController.addProductSize);
+router.post('/:id/sizes/bulk', authenticate, authorize(['admin']), ProductController.addMultipleProductSizes);
+router.delete('/:id/sizes/:sizeName', authenticate, authorize(['admin']), ProductController.removeProductSize);
+
+// Variant combinations - Admin only
+router.post('/:id/variant-combinations', authenticate, authorize(['admin']), variantCombinationValidation, ProductController.addVariantCombination);
+router.post('/:id/variant-combinations/bulk', authenticate, authorize(['admin']), ProductController.addMultipleVariantCombinations);
+router.delete('/:id/variant-combinations/bulk', authenticate, authorize(['admin']), ProductController.deleteMultipleVariantCombinations);
+router.put('/:id/variant-combinations/:combinationId', authenticate, authorize(['admin']), variantCombinationValidation, ProductController.updateVariantCombination);
+router.delete('/:id/variant-combinations/:combinationId', authenticate, authorize(['admin']), ProductController.deleteVariantCombination);
+router.get('/:id/variant-combinations', ProductController.getVariantCombinations);
 
 // User-specific routes (require authentication)
 router.post('/:id/wishlist', authenticate, ProductController.addToWishlist);

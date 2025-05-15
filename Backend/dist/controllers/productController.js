@@ -81,33 +81,6 @@ class ProductController {
             next(error);
         }
     }
-    static async addVariant(req, res, next) {
-        try {
-            const product = await productService_1.ProductService.addVariant(req.params.id, req.body);
-            res.status(statusCodes_1.StatusCodes.CREATED).json(product);
-        }
-        catch (error) {
-            next(error);
-        }
-    }
-    static async updateVariant(req, res, next) {
-        try {
-            const product = await productService_1.ProductService.updateVariant(req.params.id, req.params.variantId, req.body);
-            res.status(statusCodes_1.StatusCodes.OK).json(product);
-        }
-        catch (error) {
-            next(error);
-        }
-    }
-    static async deleteVariant(req, res, next) {
-        try {
-            const product = await productService_1.ProductService.deleteVariant(req.params.id, req.params.variantId);
-            res.status(statusCodes_1.StatusCodes.OK).json(product);
-        }
-        catch (error) {
-            next(error);
-        }
-    }
     static async addToWishlist(req, res, next) {
         try {
             if (!req.user?._id) {
@@ -202,6 +175,178 @@ class ProductController {
             const limit = parseInt(req.query.limit) || 10;
             const products = await productService_1.ProductService.getTrendingProducts(limit);
             res.status(statusCodes_1.StatusCodes.OK).json(products);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    // Product attribute management methods
+    static async addProductVariant(req, res, next) {
+        try {
+            const { variant } = req.body;
+            if (!variant) {
+                throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Variant name is required');
+            }
+            const product = await productService_1.ProductService.addProductVariant(req.params.id, variant);
+            res.status(statusCodes_1.StatusCodes.OK).json(product);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    static async removeProductVariant(req, res, next) {
+        try {
+            const product = await productService_1.ProductService.removeProductVariant(req.params.id, req.params.variantName);
+            res.status(statusCodes_1.StatusCodes.OK).json(product);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    static async addProductColor(req, res, next) {
+        try {
+            const { color } = req.body;
+            if (!color) {
+                throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Color name is required');
+            }
+            const product = await productService_1.ProductService.addProductColor(req.params.id, color);
+            res.status(statusCodes_1.StatusCodes.OK).json(product);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    static async removeProductColor(req, res, next) {
+        try {
+            const product = await productService_1.ProductService.removeProductColor(req.params.id, req.params.colorName);
+            res.status(statusCodes_1.StatusCodes.OK).json(product);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    static async addProductSize(req, res, next) {
+        try {
+            const { size } = req.body;
+            if (!size) {
+                throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Size name is required');
+            }
+            const product = await productService_1.ProductService.addProductSize(req.params.id, size);
+            res.status(statusCodes_1.StatusCodes.OK).json(product);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    static async removeProductSize(req, res, next) {
+        try {
+            const product = await productService_1.ProductService.removeProductSize(req.params.id, req.params.sizeName);
+            res.status(statusCodes_1.StatusCodes.OK).json(product);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    // Variant combination methods
+    static async addVariantCombination(req, res, next) {
+        try {
+            const combination = req.body;
+            const product = await productService_1.ProductService.addVariantCombination(req.params.id, combination);
+            res.status(statusCodes_1.StatusCodes.CREATED).json(product);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    static async updateVariantCombination(req, res, next) {
+        try {
+            const combination = req.body;
+            const product = await productService_1.ProductService.updateVariantCombination(req.params.id, req.params.combinationId, combination);
+            res.status(statusCodes_1.StatusCodes.OK).json(product);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    static async deleteVariantCombination(req, res, next) {
+        try {
+            const product = await productService_1.ProductService.deleteVariantCombination(req.params.id, req.params.combinationId);
+            res.status(statusCodes_1.StatusCodes.OK).json(product);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    static async deleteMultipleVariantCombinations(req, res, next) {
+        try {
+            const { combinationIds } = req.body;
+            if (!Array.isArray(combinationIds) || combinationIds.length === 0) {
+                throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Valid combinationIds array is required');
+            }
+            const product = await productService_1.ProductService.deleteMultipleVariantCombinations(req.params.id, combinationIds);
+            res.status(statusCodes_1.StatusCodes.OK).json(product);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    static async getVariantCombinations(req, res, next) {
+        try {
+            const product = await productService_1.ProductService.getProductById(req.params.id);
+            res.status(statusCodes_1.StatusCodes.OK).json(product.variantCombinations);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    // Bulk operations for product attributes
+    static async addMultipleProductVariants(req, res, next) {
+        try {
+            const { variants } = req.body;
+            if (!Array.isArray(variants) || variants.length === 0) {
+                throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Variants array is required');
+            }
+            const product = await productService_1.ProductService.addMultipleProductVariants(req.params.id, variants);
+            res.status(statusCodes_1.StatusCodes.OK).json(product);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    static async addMultipleProductColors(req, res, next) {
+        try {
+            const { colors } = req.body;
+            if (!Array.isArray(colors) || colors.length === 0) {
+                throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Colors array is required');
+            }
+            const product = await productService_1.ProductService.addMultipleProductColors(req.params.id, colors);
+            res.status(statusCodes_1.StatusCodes.OK).json(product);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    static async addMultipleProductSizes(req, res, next) {
+        try {
+            const { sizes } = req.body;
+            if (!Array.isArray(sizes) || sizes.length === 0) {
+                throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Sizes array is required');
+            }
+            const product = await productService_1.ProductService.addMultipleProductSizes(req.params.id, sizes);
+            res.status(statusCodes_1.StatusCodes.OK).json(product);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    static async addMultipleVariantCombinations(req, res, next) {
+        try {
+            const { combinations } = req.body;
+            if (!Array.isArray(combinations) || combinations.length === 0) {
+                throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.BAD_REQUEST, 'Valid combinations array is required');
+            }
+            const product = await productService_1.ProductService.addMultipleVariantCombinations(req.params.id, combinations);
+            res.status(statusCodes_1.StatusCodes.CREATED).json(product);
         }
         catch (error) {
             next(error);

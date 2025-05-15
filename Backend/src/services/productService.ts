@@ -1,4 +1,4 @@
-import { Product, IProduct, IVariant } from '../models/Product';
+import { Product, IProduct, IVariantCombination} from '../models/Product';
 import { Category } from '../models/Category';
 import { SubCategory } from '../models/SubCategory';
 import { StatusCodes } from '../utils/statusCodes';
@@ -259,55 +259,6 @@ export class ProductService {
       .limit(limit);
   }
 
-  static async addVariant(productId: string, variantData: Partial<IVariant>): Promise<IProduct> {
-    const product = await Product.findById(productId);
-    if (!product) {
-      throw new AppError(StatusCodes.NOT_FOUND, 'Product not found');
-    }
-
-    product.variants.push(variantData as IVariant);
-    await product.save();
-    return product;
-  }
-
-  static async updateVariant(productId: string, variantId: string, updateData: Partial<IVariant>): Promise<IProduct> {
-    const product = await Product.findById(productId);
-    if (!product) {
-      throw new AppError(StatusCodes.NOT_FOUND, 'Product not found');
-    }
-
-    const variantIndex = product.variants.findIndex(
-      (v) => v._id.toString() === variantId
-    );
-
-    if (variantIndex === -1) {
-      throw new AppError(StatusCodes.NOT_FOUND, 'Variant not found');
-    }
-
-    const updatedVariant = {
-      ...product.variants[variantIndex].toObject(),
-      ...updateData
-    };
-
-    product.variants[variantIndex] = updatedVariant as IVariant;
-    await product.save();
-    return product;
-  }
-
-  static async deleteVariant(productId: string, variantId: string): Promise<IProduct> {
-    const product = await Product.findById(productId);
-    if (!product) {
-      throw new AppError(StatusCodes.NOT_FOUND, 'Product not found');
-    }
-
-    product.variants = product.variants.filter(
-      (v) => v._id.toString() !== variantId
-    );
-
-    await product.save();
-    return product;
-  }
-
   static async addToWishlist(productId: string, userId: string): Promise<IProduct> {
     const product = await Product.findById(productId);
     if (!product) {
@@ -358,6 +309,506 @@ export class ProductService {
 
     const userIdObj = new mongoose.Types.ObjectId(userId);
     product.cart = product.cart.filter(id => !id.equals(userIdObj));
+    await product.save();
+    return product;
+  }
+
+  // Product attribute management methods
+  static async addProductVariant(productId: string, variant: string): Promise<IProduct> {
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'Product not found');
+    }
+
+    if (product.variants.includes(variant)) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Variant already exists');
+    }
+
+    product.variants.push(variant);
+    await product.save();
+    return product;
+  }
+
+  static async removeProductVariant(productId: string, variantName: string): Promise<IProduct> {
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'Product not found');
+    }
+
+    // Check if variant is used in any combination
+    const variantInUse = product.variantCombinations.some(combo => combo.variant === variantName);
+    if (variantInUse) {
+      throw new AppError(
+        StatusCodes.BAD_REQUEST, 
+        'Cannot remove variant because it is used in at least one variant combination'
+      );
+    }
+
+    product.variants = product.variants.filter(v => v !== variantName);
+    await product.save();
+    return product;
+  }
+
+  static async addProductColor(productId: string, color: string): Promise<IProduct> {
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'Product not found');
+    }
+
+    if (product.colors.includes(color)) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Color already exists');
+    }
+
+    product.colors.push(color);
+    await product.save();
+    return product;
+  }
+
+  static async removeProductColor(productId: string, colorName: string): Promise<IProduct> {
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'Product not found');
+    }
+
+    // Check if color is used in any combination
+    const colorInUse = product.variantCombinations.some(combo => combo.color === colorName);
+    if (colorInUse) {
+      throw new AppError(
+        StatusCodes.BAD_REQUEST, 
+        'Cannot remove color because it is used in at least one variant combination'
+      );
+    }
+
+    product.colors = product.colors.filter(c => c !== colorName);
+    await product.save();
+    return product;
+  }
+
+  static async addProductSize(productId: string, size: string): Promise<IProduct> {
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'Product not found');
+    }
+
+    if (product.sizes.includes(size)) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Size already exists');
+    }
+
+    product.sizes.push(size);
+    await product.save();
+    return product;
+  }
+
+  static async removeProductSize(productId: string, sizeName: string): Promise<IProduct> {
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'Product not found');
+    }
+
+    // Check if size is used in any combination
+    const sizeInUse = product.variantCombinations.some(combo => combo.size === sizeName);
+    if (sizeInUse) {
+      throw new AppError(
+        StatusCodes.BAD_REQUEST, 
+        'Cannot remove size because it is used in at least one variant combination'
+      );
+    }
+
+    product.sizes = product.sizes.filter(s => s !== sizeName);
+    await product.save();
+    return product;
+  }
+
+  // Variant combination methods
+  static async addVariantCombination(productId: string, combinationData: Partial<IVariantCombination>): Promise<IProduct> {
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'Product not found');
+    }
+
+    // Process indices to populate variant, color and size
+    if (combinationData.variantIndex !== undefined) {
+      if (combinationData.variantIndex < 0 || combinationData.variantIndex >= product.variants.length) {
+        throw new AppError(StatusCodes.BAD_REQUEST, `Invalid variant index: ${combinationData.variantIndex}`);
+      }
+      combinationData.variant = product.variants[combinationData.variantIndex];
+    }
+
+    if (combinationData.colorIndex !== undefined) {
+      if (combinationData.colorIndex < 0 || combinationData.colorIndex >= product.colors.length) {
+        throw new AppError(StatusCodes.BAD_REQUEST, `Invalid color index: ${combinationData.colorIndex}`);
+      }
+      combinationData.color = product.colors[combinationData.colorIndex];
+    }
+
+    if (combinationData.sizeIndex !== undefined) {
+      if (combinationData.sizeIndex < 0 || combinationData.sizeIndex >= product.sizes.length) {
+        throw new AppError(StatusCodes.BAD_REQUEST, `Invalid size index: ${combinationData.sizeIndex}`);
+      }
+      combinationData.size = product.sizes[combinationData.sizeIndex];
+    }
+
+    // Validate variant, color, and size existence
+    if (combinationData.variant && !product.variants.includes(combinationData.variant)) {
+      throw new AppError(StatusCodes.BAD_REQUEST, `Variant "${combinationData.variant}" does not exist in this product`);
+    }
+
+    if (combinationData.color && !product.colors.includes(combinationData.color)) {
+      throw new AppError(StatusCodes.BAD_REQUEST, `Color "${combinationData.color}" does not exist in this product`);
+    }
+
+    if (combinationData.size && !product.sizes.includes(combinationData.size)) {
+      throw new AppError(StatusCodes.BAD_REQUEST, `Size "${combinationData.size}" does not exist in this product`);
+    }
+
+    // Check for duplicate combination
+    const existingCombination = product.variantCombinations.find(
+      c => c.variant === (combinationData.variant || null) &&
+           c.color === (combinationData.color || null) &&
+           c.size === (combinationData.size || null)
+    );
+
+    if (existingCombination) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'This variant combination already exists');
+    }
+
+    // Ensure required fields
+    if (!combinationData.additionalPrice && combinationData.additionalPrice !== 0) {
+      combinationData.additionalPrice = 0;
+    }
+
+    if (!combinationData.stock && combinationData.stock !== 0) {
+      combinationData.stock = 0;
+    }
+
+    product.variantCombinations.push(combinationData as IVariantCombination);
+    await product.save();
+    return product;
+  }
+
+  static async updateVariantCombination(
+    productId: string, 
+    combinationId: string, 
+    updateData: Partial<IVariantCombination>
+  ): Promise<IProduct> {
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'Product not found');
+    }
+
+    const combinationIndex = product.variantCombinations.findIndex(
+      c => c._id.toString() === combinationId
+    );
+
+    if (combinationIndex === -1) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'Variant combination not found');
+    }
+
+    // Validate variant, color, and size if they are being updated
+    if (
+      updateData.variant && 
+      updateData.variant !== product.variantCombinations[combinationIndex].variant && 
+      !product.variants.includes(updateData.variant)
+    ) {
+      throw new AppError(StatusCodes.BAD_REQUEST, `Variant "${updateData.variant}" does not exist in this product`);
+    }
+
+    if (
+      updateData.color && 
+      updateData.color !== product.variantCombinations[combinationIndex].color && 
+      !product.colors.includes(updateData.color)
+    ) {
+      throw new AppError(StatusCodes.BAD_REQUEST, `Color "${updateData.color}" does not exist in this product`);
+    }
+
+    if (
+      updateData.size && 
+      updateData.size !== product.variantCombinations[combinationIndex].size && 
+      !product.sizes.includes(updateData.size)
+    ) {
+      throw new AppError(StatusCodes.BAD_REQUEST, `Size "${updateData.size}" does not exist in this product`);
+    }
+
+    // Check for duplicate combination
+    if (updateData.variant !== undefined || updateData.color !== undefined || updateData.size !== undefined) {
+      const newVariant = updateData.variant !== undefined ? updateData.variant : product.variantCombinations[combinationIndex].variant;
+      const newColor = updateData.color !== undefined ? updateData.color : product.variantCombinations[combinationIndex].color;
+      const newSize = updateData.size !== undefined ? updateData.size : product.variantCombinations[combinationIndex].size;
+
+      const duplicateExists = product.variantCombinations.some((c, index) => 
+        index !== combinationIndex &&
+        c.variant === newVariant &&
+        c.color === newColor &&
+        c.size === newSize
+      );
+
+      if (duplicateExists) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'This variant combination already exists');
+      }
+    }
+
+    // Update the combination
+    const updatedCombination = {
+      ...product.variantCombinations[combinationIndex].toObject(),
+      ...updateData
+    };
+
+    product.variantCombinations[combinationIndex] = updatedCombination as IVariantCombination;
+    await product.save();
+    return product;
+  }
+
+  static async deleteVariantCombination(productId: string, combinationId: string): Promise<IProduct> {
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'Product not found');
+    }
+
+    const combinationExists = product.variantCombinations.some(
+      c => c._id.toString() === combinationId
+    );
+
+    if (!combinationExists) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'Variant combination not found');
+    }
+
+    product.variantCombinations = product.variantCombinations.filter(
+      c => c._id.toString() !== combinationId
+    );
+
+    await product.save();
+    return product;
+  }
+
+  // Delete multiple variant combinations at once
+  static async deleteMultipleVariantCombinations(productId: string, combinationIds: string[]): Promise<IProduct> {
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'Product not found');
+    }
+
+    if (!Array.isArray(combinationIds) || combinationIds.length === 0) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Valid combination IDs array is required');
+    }
+
+    const notFoundIds: string[] = [];
+    const deletedIds: string[] = [];
+
+    // Check which IDs exist
+    for (const id of combinationIds) {
+      const exists = product.variantCombinations.some(c => c._id.toString() === id);
+      if (exists) {
+        deletedIds.push(id);
+      } else {
+        notFoundIds.push(id);
+      }
+    }
+
+    if (deletedIds.length === 0) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'None of the specified combinations were found');
+    }
+
+    // Filter out the combinations to delete
+    product.variantCombinations = product.variantCombinations.filter(
+      c => !deletedIds.includes(c._id.toString())
+    );
+
+    await product.save();
+
+    // Return warnings if some combinations weren't found
+    if (notFoundIds.length > 0) {
+      return {
+        ...product.toObject(),
+        warnings: [`The following combinations were not found: ${notFoundIds.join(', ')}`]
+      } as any;
+    }
+
+    return product;
+  }
+
+  // Create multiple variant combinations at once
+  static async addMultipleVariantCombinations(productId: string, combinations: Array<Partial<IVariantCombination>>): Promise<IProduct> {
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'Product not found');
+    }
+
+    if (!Array.isArray(combinations) || combinations.length === 0) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Valid combinations array is required');
+    }
+
+    const validCombinations: Partial<IVariantCombination>[] = [];
+    const errors: string[] = [];
+
+    // Validate all combinations first
+    for (const [index, combo] of combinations.entries()) {
+      try {
+        // Process indices to set variants, colors, and sizes
+        if (combo.variantIndex !== undefined) {
+          if (combo.variantIndex < 0 || combo.variantIndex >= product.variants.length) {
+            errors.push(`Combination ${index+1}: Invalid variant index: ${combo.variantIndex}`);
+            continue;
+          }
+          combo.variant = product.variants[combo.variantIndex];
+        }
+
+        if (combo.colorIndex !== undefined) {
+          if (combo.colorIndex < 0 || combo.colorIndex >= product.colors.length) {
+            errors.push(`Combination ${index+1}: Invalid color index: ${combo.colorIndex}`);
+            continue;
+          }
+          combo.color = product.colors[combo.colorIndex];
+        }
+
+        if (combo.sizeIndex !== undefined) {
+          if (combo.sizeIndex < 0 || combo.sizeIndex >= product.sizes.length) {
+            errors.push(`Combination ${index+1}: Invalid size index: ${combo.sizeIndex}`);
+            continue;
+          }
+          combo.size = product.sizes[combo.sizeIndex];
+        }
+
+        // Validate variant
+        if (combo.variant && !product.variants.includes(combo.variant)) {
+          errors.push(`Combination ${index+1}: Variant "${combo.variant}" does not exist in this product`);
+          continue;
+        }
+
+        // Validate color
+        if (combo.color && !product.colors.includes(combo.color)) {
+          errors.push(`Combination ${index+1}: Color "${combo.color}" does not exist in this product`);
+          continue;
+        }
+
+        // Validate size
+        if (combo.size && !product.sizes.includes(combo.size)) {
+          errors.push(`Combination ${index+1}: Size "${combo.size}" does not exist in this product`);
+          continue;
+        }
+
+        // Check for duplicates within existing combinations
+        const existingCombination = product.variantCombinations.find(
+          c => c.variant === (combo.variant || null) &&
+               c.color === (combo.color || null) &&
+               c.size === (combo.size || null)
+        );
+
+        if (existingCombination) {
+          errors.push(`Combination ${index+1}: This variant combination already exists`);
+          continue;
+        }
+
+        // Check for duplicates within the current batch
+        const duplicateInBatch = validCombinations.find(
+          c => c.variant === (combo.variant || null) &&
+               c.color === (combo.color || null) &&
+               c.size === (combo.size || null)
+        );
+
+        if (duplicateInBatch) {
+          errors.push(`Combination ${index+1}: Duplicate combination in the request`);
+          continue;
+        }
+
+        // Set defaults
+        if (!combo.additionalPrice && combo.additionalPrice !== 0) {
+          combo.additionalPrice = 0;
+        }
+
+        if (!combo.stock && combo.stock !== 0) {
+          combo.stock = 0;
+        }
+
+        validCombinations.push(combo);
+      } catch (error) {
+        errors.push(`Combination ${index+1}: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
+
+    if (validCombinations.length === 0) {
+      throw new AppError(
+        StatusCodes.BAD_REQUEST, 
+        `No valid combinations to add. Errors: ${errors.join('; ')}`
+      );
+    }
+
+    // Add all valid combinations
+    product.variantCombinations.push(...validCombinations as IVariantCombination[]);
+    await product.save();
+
+    // Return warnings if some combinations had errors
+    if (errors.length > 0) {
+      return {
+        ...product.toObject(),
+        warnings: errors
+      } as any;
+    }
+
+    return product;
+  }
+
+  // Calculate final price for a specific variant combination
+  static calculateFinalPrice(basePrice: number, additionalPrice: number): number {
+    return basePrice + additionalPrice;
+  }
+
+  // Bulk operations for product attributes
+  static async addMultipleProductVariants(productId: string, variants: string[]): Promise<IProduct> {
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'Product not found');
+    }
+
+    // Filter out duplicates
+    const uniqueVariants = variants.filter(
+      variant => !product.variants.includes(variant)
+    );
+
+    if (uniqueVariants.length === 0) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'All variants already exist');
+    }
+
+    product.variants.push(...uniqueVariants);
+    await product.save();
+    return product;
+  }
+
+  static async addMultipleProductColors(productId: string, colors: string[]): Promise<IProduct> {
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'Product not found');
+    }
+
+    // Filter out duplicates
+    const uniqueColors = colors.filter(
+      color => !product.colors.includes(color)
+    );
+
+    if (uniqueColors.length === 0) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'All colors already exist');
+    }
+
+    product.colors.push(...uniqueColors);
+    await product.save();
+    return product;
+  }
+
+  static async addMultipleProductSizes(productId: string, sizes: string[]): Promise<IProduct> {
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'Product not found');
+    }
+
+    // Filter out duplicates
+    const uniqueSizes = sizes.filter(
+      size => !product.sizes.includes(size)
+    );
+
+    if (uniqueSizes.length === 0) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'All sizes already exist');
+    }
+
+    product.sizes.push(...uniqueSizes);
     await product.save();
     return product;
   }

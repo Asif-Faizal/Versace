@@ -35,10 +35,15 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Product = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
-const variantSchema = new mongoose_1.Schema({
-    name: { type: String, required: true },
-    price: { type: Number, required: true },
-    stock: { type: Number, default: 0 }
+const variantCombinationSchema = new mongoose_1.Schema({
+    variant: { type: String, default: null },
+    color: { type: String, default: null },
+    size: { type: String, default: null },
+    variantIndex: { type: Number },
+    colorIndex: { type: Number },
+    sizeIndex: { type: Number },
+    additionalPrice: { type: Number, required: true, default: 0 },
+    stock: { type: Number, required: true, default: 0 }
 });
 const productSchema = new mongoose_1.Schema({
     name: { type: String, required: true },
@@ -46,7 +51,10 @@ const productSchema = new mongoose_1.Schema({
     basePrice: { type: Number, required: true },
     category: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Category', required: true },
     subcategory: { type: mongoose_1.Schema.Types.ObjectId, ref: 'SubCategory', required: true },
-    variants: [variantSchema],
+    variants: [{ type: String }],
+    colors: [{ type: String }],
+    sizes: [{ type: String }],
+    variantCombinations: [variantCombinationSchema],
     wishlist: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'User' }],
     cart: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'User' }],
     rating: { type: Number, default: 0, min: 0, max: 5 },

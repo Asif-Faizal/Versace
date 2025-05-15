@@ -1,9 +1,14 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-export interface IVariant {
+export interface IVariantCombination {
   _id: mongoose.Types.ObjectId;
-  name: string;
-  price: number;
+  variant: string | null;
+  color: string | null;
+  size: string | null;
+  variantIndex?: number;
+  colorIndex?: number;
+  sizeIndex?: number;
+  additionalPrice: number;
   stock: number;
   toObject(): any;
 }
@@ -14,7 +19,10 @@ export interface IProduct extends Document {
   basePrice: number;
   category: mongoose.Types.ObjectId;
   subcategory: mongoose.Types.ObjectId;
-  variants: IVariant[];
+  variants: string[];
+  colors: string[];
+  sizes: string[];
+  variantCombinations: IVariantCombination[];
   wishlist: mongoose.Types.ObjectId[];
   cart: mongoose.Types.ObjectId[];
   rating: number;
@@ -26,10 +34,15 @@ export interface IProduct extends Document {
   updatedAt: Date;
 }
 
-const variantSchema = new Schema({
-  name: { type: String, required: true },
-  price: { type: Number, required: true },
-  stock: { type: Number, default: 0 }
+const variantCombinationSchema = new Schema({
+  variant: { type: String, default: null },
+  color: { type: String, default: null },
+  size: { type: String, default: null },
+  variantIndex: { type: Number },
+  colorIndex: { type: Number },
+  sizeIndex: { type: Number },
+  additionalPrice: { type: Number, required: true, default: 0 },
+  stock: { type: Number, required: true, default: 0 }
 });
 
 const productSchema = new Schema({
@@ -38,7 +51,10 @@ const productSchema = new Schema({
   basePrice: { type: Number, required: true },
   category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
   subcategory: { type: Schema.Types.ObjectId, ref: 'SubCategory', required: true },
-  variants: [variantSchema],
+  variants: [{ type: String }],
+  colors: [{ type: String }],
+  sizes: [{ type: String }],
+  variantCombinations: [variantCombinationSchema],
   wishlist: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   cart: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   rating: { type: Number, default: 0, min: 0, max: 5 },
