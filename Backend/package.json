@@ -1,6 +1,6 @@
 {
   "name": "versace-backend",
-  "version": "1.0.0",
+  "version": "1.4.0",
   "description": "Versace Backend API",
   "main": "dist/server.js",
   "scripts": {

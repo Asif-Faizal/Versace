@@ -11,6 +11,7 @@ import authRoutes from './routes/auth';
 import productRoutes from './routes/product';
 import categoryRoutes from './routes/category';
 import subCategoryRoutes from './routes/subCategory';
+import listRoutes from './routes/list';
 import { errorHandler } from './middleware/errorHandler';
 import './utils/redis'; // Import Redis to initialize connection
 
@@ -40,6 +41,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/subcategories', subCategoryRoutes);
+app.use('/api/list', listRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {

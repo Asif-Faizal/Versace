@@ -49,6 +49,7 @@ const auth_1 = __importDefault(require("./routes/auth"));
 const product_1 = __importDefault(require("./routes/product"));
 const category_1 = __importDefault(require("./routes/category"));
 const subCategory_1 = __importDefault(require("./routes/subCategory"));
+const list_1 = __importDefault(require("./routes/list"));
 const errorHandler_1 = require("./middleware/errorHandler");
 require("./utils/redis"); // Import Redis to initialize connection
 const app = (0, express_1.default)();
@@ -72,6 +73,7 @@ app.use('/api/auth', auth_1.default);
 app.use('/api/products', product_1.default);
 app.use('/api/categories', category_1.default);
 app.use('/api/subcategories', subCategory_1.default);
+app.use('/api/list', list_1.default);
 // Health check route
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'ok' });

@@ -5,14 +5,6 @@ import config from '../config/config';
 import { StatusCodes } from '../utils/statusCodes';
 import { AppError } from './errorHandler';
 
-interface JwtPayload {
-  userId: string;
-  email: string;
-  role: string;
-  iat: number;
-  exp: number;
-}
-
 // In-memory token blacklist
 const tokenBlacklist = new Set<string>();
 
@@ -24,7 +16,7 @@ declare global {
   }
 }
 
-export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
+export const authenticate = async (req: Request, _res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -77,7 +69,7 @@ export const blacklistToken = (token: string) => {
 };
 
 export const authorize = (roles: string | string[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, _res: Response, next: NextFunction) => {
     if (!req.user) {
       throw new AppError(StatusCodes.UNAUTHORIZED, 'Not authenticated');
     }

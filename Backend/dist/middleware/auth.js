@@ -11,7 +11,7 @@ const statusCodes_1 = require("../utils/statusCodes");
 const errorHandler_1 = require("./errorHandler");
 // In-memory token blacklist
 const tokenBlacklist = new Set();
-const authenticate = async (req, res, next) => {
+const authenticate = async (req, _res, next) => {
     try {
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -56,7 +56,7 @@ const blacklistToken = (token) => {
 };
 exports.blacklistToken = blacklistToken;
 const authorize = (roles) => {
-    return (req, res, next) => {
+    return (req, _res, next) => {
         if (!req.user) {
             throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.UNAUTHORIZED, 'Not authenticated');
         }
