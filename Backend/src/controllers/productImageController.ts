@@ -11,25 +11,28 @@ export class ProductImageController {
     try {
       const { productId, variantId } = req.params;
       
-      // Get uploaded files from multer
-      const files: { [key: string]: Express.Multer.File | undefined } = {
-        main: req.files && Array.isArray(req.files) ? 
-          req.files.find(file => file.fieldname === 'main') : undefined,
-        thumbnail: req.files && Array.isArray(req.files) ? 
-          req.files.find(file => file.fieldname === 'thumbnail') : undefined,
-        detail1: req.files && Array.isArray(req.files) ? 
-          req.files.find(file => file.fieldname === 'detail1') : undefined,
-        detail2: req.files && Array.isArray(req.files) ? 
-          req.files.find(file => file.fieldname === 'detail2') : undefined
+      // Check for files in the request
+      if (!req.files || typeof req.files !== 'object') {
+        console.error('No files were uploaded or files is not an object:', req.files);
+        return res.status(StatusCodes.BAD_REQUEST).json({ 
+          error: 'No files were uploaded or invalid file format' 
+        });
+      }
+      
+      // With multer's upload.fields(), files are organized by field name
+      const filesObj = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+      // Extract the files from the object
+      const imageFiles = {
+        main: filesObj.main && filesObj.main.length > 0 ? filesObj.main[0] : undefined,
+        thumbnail: filesObj.thumbnail && filesObj.thumbnail.length > 0 ? filesObj.thumbnail[0] : undefined,
+        detail1: filesObj.detail1 && filesObj.detail1.length > 0 ? filesObj.detail1[0] : undefined,
+        detail2: filesObj.detail2 && filesObj.detail2.length > 0 ? filesObj.detail2[0] : undefined
       };
       
-      // Convert from object of files to object expected by service
-      const imageFiles = {
-        main: files.main,
-        thumbnail: files.thumbnail,
-        detail1: files.detail1,
-        detail2: files.detail2
-      };
+      // Log what we found for debugging
+      console.log('Files received for upload:', Object.keys(filesObj));
+      console.log('Files to process:', Object.keys(imageFiles).filter(key => !!imageFiles[key as keyof typeof imageFiles]));
       
       const productImages = await ProductImageService.uploadVariantImages(
         productId,
@@ -43,6 +46,7 @@ export class ProductImageController {
       
       res.status(StatusCodes.OK).json(productImages);
     } catch (error) {
+      console.error('Error uploading product images:', error);
       next(error);
     }
   }

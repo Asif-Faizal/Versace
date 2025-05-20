@@ -22,6 +22,10 @@ export class ProductImageService {
       detail2?: Express.Multer.File
     }
   ): Promise<IProductImage> {
+    // Start with debugging information
+    console.log(`Uploading images for product ${productId}, variant ${variantCombinationId}`);
+    console.log('Image files received:', Object.keys(imageFiles).filter(key => !!imageFiles[key as keyof typeof imageFiles]));
+
     const product = await Product.findById(productId);
     if (!product) {
       throw new AppError(StatusCodes.NOT_FOUND, 'Product not found');
@@ -46,42 +50,59 @@ export class ProductImageService {
     
     // Upload each provided image
     for (const [imageType, file] of Object.entries(imageFiles)) {
-      if (!file) continue;
-
-      // Generate a unique name for the image
-      const variant = variantCombination.variant || 'default';
-      const color = variantCombination.color || 'default';
-      const fileName = generateFileName(
-        file, 
-        `product-${productId}-${variant}-${color}-${imageType}`
-      );
-
-      // Delete existing image if there is one
-      if (currentImages[imageType as keyof IProductImage]) {
-        try {
-          const oldFileName = currentImages[imageType as keyof IProductImage].split('/').pop();
-          if (oldFileName) {
-            await fileUploadService.deleteImage(
-              config.supabase.buckets.products,
-              oldFileName
-            );
-          }
-        } catch (error) {
-          console.error(`Error deleting old ${imageType} image:`, error);
-          // Continue with the upload even if deletion fails
-        }
+      if (!file) {
+        console.log(`No file provided for ${imageType}, skipping`);
+        continue;
       }
 
-      // Upload the new image
-      const imageUrl = await fileUploadService.uploadImage(
-        file.buffer,
-        config.supabase.buckets.products,
-        fileName
-      );
+      try {
+        console.log(`Processing ${imageType} image: ${file.originalname}, size: ${file.size} bytes`);
 
-      // Update the image URL
-      updatedImages[imageType as keyof IProductImage] = imageUrl;
+        // Generate a unique name for the image
+        const variant = variantCombination.variant || 'default';
+        const color = variantCombination.color || 'default';
+        const fileName = generateFileName(
+          file, 
+          `product-${productId}-${variant}-${color}-${imageType}`
+        );
+        console.log(`Generated filename: ${fileName}`);
+
+        // Delete existing image if there is one
+        if (currentImages[imageType as keyof IProductImage]) {
+          try {
+            const oldFileName = currentImages[imageType as keyof IProductImage].split('/').pop();
+            if (oldFileName) {
+              console.log(`Deleting old image: ${oldFileName}`);
+              await fileUploadService.deleteImage(
+                config.supabase.buckets.products,
+                oldFileName
+              );
+            }
+          } catch (error) {
+            console.error(`Error deleting old ${imageType} image:`, error);
+            // Continue with the upload even if deletion fails
+          }
+        }
+
+        // Upload the new image
+        console.log(`Uploading to bucket: ${config.supabase.buckets.products}`);
+        const imageUrl = await fileUploadService.uploadImage(
+          file.buffer,
+          config.supabase.buckets.products,
+          fileName
+        );
+
+        console.log(`Upload successful, URL: ${imageUrl}`);
+
+        // Update the image URL
+        updatedImages[imageType as keyof IProductImage] = imageUrl;
+      } catch (error) {
+        console.error(`Error processing ${imageType} image:`, error);
+        // Continue with other images even if one fails
+      }
     }
+
+    console.log('Final image URLs:', updatedImages);
 
     // Update the product in the database
     await Product.updateOne(
@@ -89,6 +110,7 @@ export class ProductImageService {
       { $set: { 'variantCombinations.$.images': updatedImages } }
     );
 
+    console.log('Database updated successfully');
     return updatedImages;
   }
 

@@ -18,6 +18,9 @@ class ProductImageService {
      * @param imageFiles Object containing image files (main, thumbnail, detail1, detail2)
      */
     static async uploadVariantImages(productId, variantCombinationId, imageFiles) {
+        // Start with debugging information
+        console.log(`Uploading images for product ${productId}, variant ${variantCombinationId}`);
+        console.log('Image files received:', Object.keys(imageFiles).filter(key => !!imageFiles[key]));
         const product = await Product_1.Product.findById(productId);
         if (!product) {
             throw new errorHandler_1.AppError(statusCodes_1.StatusCodes.NOT_FOUND, 'Product not found');
@@ -37,32 +40,47 @@ class ProductImageService {
         };
         // Upload each provided image
         for (const [imageType, file] of Object.entries(imageFiles)) {
-            if (!file)
+            if (!file) {
+                console.log(`No file provided for ${imageType}, skipping`);
                 continue;
-            // Generate a unique name for the image
-            const variant = variantCombination.variant || 'default';
-            const color = variantCombination.color || 'default';
-            const fileName = (0, fileUpload_1.generateFileName)(file, `product-${productId}-${variant}-${color}-${imageType}`);
-            // Delete existing image if there is one
-            if (currentImages[imageType]) {
-                try {
-                    const oldFileName = currentImages[imageType].split('/').pop();
-                    if (oldFileName) {
-                        await fileUploadService_1.default.deleteImage(config_1.default.supabase.buckets.products, oldFileName);
+            }
+            try {
+                console.log(`Processing ${imageType} image: ${file.originalname}, size: ${file.size} bytes`);
+                // Generate a unique name for the image
+                const variant = variantCombination.variant || 'default';
+                const color = variantCombination.color || 'default';
+                const fileName = (0, fileUpload_1.generateFileName)(file, `product-${productId}-${variant}-${color}-${imageType}`);
+                console.log(`Generated filename: ${fileName}`);
+                // Delete existing image if there is one
+                if (currentImages[imageType]) {
+                    try {
+                        const oldFileName = currentImages[imageType].split('/').pop();
+                        if (oldFileName) {
+                            console.log(`Deleting old image: ${oldFileName}`);
+                            await fileUploadService_1.default.deleteImage(config_1.default.supabase.buckets.products, oldFileName);
+                        }
+                    }
+                    catch (error) {
+                        console.error(`Error deleting old ${imageType} image:`, error);
+                        // Continue with the upload even if deletion fails
                     }
                 }
-                catch (error) {
-                    console.error(`Error deleting old ${imageType} image:`, error);
-                    // Continue with the upload even if deletion fails
-                }
+                // Upload the new image
+                console.log(`Uploading to bucket: ${config_1.default.supabase.buckets.products}`);
+                const imageUrl = await fileUploadService_1.default.uploadImage(file.buffer, config_1.default.supabase.buckets.products, fileName);
+                console.log(`Upload successful, URL: ${imageUrl}`);
+                // Update the image URL
+                updatedImages[imageType] = imageUrl;
             }
-            // Upload the new image
-            const imageUrl = await fileUploadService_1.default.uploadImage(file.buffer, config_1.default.supabase.buckets.products, fileName);
-            // Update the image URL
-            updatedImages[imageType] = imageUrl;
+            catch (error) {
+                console.error(`Error processing ${imageType} image:`, error);
+                // Continue with other images even if one fails
+            }
         }
+        console.log('Final image URLs:', updatedImages);
         // Update the product in the database
         await Product_1.Product.updateOne({ _id: productId, 'variantCombinations._id': variantCombinationId }, { $set: { 'variantCombinations.$.images': updatedImages } });
+        console.log('Database updated successfully');
         return updatedImages;
     }
     /**
