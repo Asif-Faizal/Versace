@@ -35,6 +35,12 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Product = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+const productImageSchema = new mongoose_1.Schema({
+    main: { type: String, default: '' },
+    thumbnail: { type: String, default: '' },
+    detail1: { type: String, default: '' },
+    detail2: { type: String, default: '' }
+}, { _id: false });
 const variantCombinationSchema = new mongoose_1.Schema({
     variant: { type: String, default: null },
     color: { type: String, default: null },
@@ -43,7 +49,8 @@ const variantCombinationSchema = new mongoose_1.Schema({
     colorIndex: { type: Number },
     sizeIndex: { type: Number },
     additionalPrice: { type: Number, required: true, default: 0 },
-    stock: { type: Number, required: true, default: 0 }
+    stock: { type: Number, required: true, default: 0 },
+    images: { type: productImageSchema, default: () => ({}) }
 });
 const productSchema = new mongoose_1.Schema({
     name: { type: String, required: true },

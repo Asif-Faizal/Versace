@@ -4,6 +4,7 @@ import { ICategory } from './Category';
 export interface ISubCategory extends Document {
   name: string;
   description: string;
+  image: string; // URL to the image in Supabase
   category: Types.ObjectId | ICategory;
   createdAt: Date;
   updatedAt: Date;
@@ -19,6 +20,10 @@ const subCategorySchema = new Schema<ISubCategory>({
     type: String,
     required: [true, 'SubCategory description is required'],
     trim: true
+  },
+  image: {
+    type: String,
+    default: ''
   },
   category: {
     type: Schema.Types.ObjectId,

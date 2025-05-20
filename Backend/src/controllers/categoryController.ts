@@ -6,11 +6,17 @@ import { clearCache } from '../middleware/cache';
 export class CategoryController {
   static async createCategory(req: Request, res: Response, next: NextFunction) {
     try {
-      const category = await CategoryService.createCategory(req.body);
+      // Use the file from multer middleware if it exists
+      const imageFile = req.file;
+      const categoryData = req.body;
+      
+      const category = await CategoryService.createCategory(categoryData, imageFile);
+      
       // Clear categories cache after creation
       await clearCache('categories:*');
       // Also clear products cache as they may display category information
       await clearCache('products:*');
+      
       res.status(StatusCodes.CREATED).json(category);
     } catch (error) {
       next(error);
@@ -37,11 +43,17 @@ export class CategoryController {
 
   static async updateCategory(req: Request, res: Response, next: NextFunction) {
     try {
-      const category = await CategoryService.updateCategory(req.params.id, req.body);
+      // Use the file from multer middleware if it exists
+      const imageFile = req.file;
+      const categoryData = req.body;
+      
+      const category = await CategoryService.updateCategory(req.params.id, categoryData, imageFile);
+      
       // Clear categories cache after update
       await clearCache('categories:*');
       // Also clear products cache as they may display category information
       await clearCache('products:*');
+      
       res.status(StatusCodes.OK).json(category);
     } catch (error) {
       next(error);

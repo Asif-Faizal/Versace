@@ -7,7 +7,10 @@ const cache_1 = require("../middleware/cache");
 class CategoryController {
     static async createCategory(req, res, next) {
         try {
-            const category = await categoryService_1.CategoryService.createCategory(req.body);
+            // Use the file from multer middleware if it exists
+            const imageFile = req.file;
+            const categoryData = req.body;
+            const category = await categoryService_1.CategoryService.createCategory(categoryData, imageFile);
             // Clear categories cache after creation
             await (0, cache_1.clearCache)('categories:*');
             // Also clear products cache as they may display category information
@@ -38,7 +41,10 @@ class CategoryController {
     }
     static async updateCategory(req, res, next) {
         try {
-            const category = await categoryService_1.CategoryService.updateCategory(req.params.id, req.body);
+            // Use the file from multer middleware if it exists
+            const imageFile = req.file;
+            const categoryData = req.body;
+            const category = await categoryService_1.CategoryService.updateCategory(req.params.id, categoryData, imageFile);
             // Clear categories cache after update
             await (0, cache_1.clearCache)('categories:*');
             // Also clear products cache as they may display category information

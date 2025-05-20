@@ -4,6 +4,7 @@ const express_1 = require("express");
 const subCategoryController_1 = require("../controllers/subCategoryController");
 const auth_1 = require("../middleware/auth");
 const express_validator_1 = require("express-validator");
+const fileUpload_1 = require("../middleware/fileUpload");
 const router = (0, express_1.Router)();
 // Validation middleware
 const subCategoryValidation = [
@@ -15,7 +16,11 @@ const subCategoryValidation = [
 router.get('/', auth_1.authenticate, subCategoryController_1.SubCategoryController.getAllSubCategories);
 router.get('/:id', auth_1.authenticate, subCategoryController_1.SubCategoryController.getSubCategory);
 // Protected routes - Admin only
-router.post('/', auth_1.authenticate, (0, auth_1.authorize)(['admin']), subCategoryValidation, subCategoryController_1.SubCategoryController.createSubCategory);
-router.put('/:id', auth_1.authenticate, (0, auth_1.authorize)(['admin']), subCategoryValidation, subCategoryController_1.SubCategoryController.updateSubCategory);
+router.post('/', auth_1.authenticate, (0, auth_1.authorize)(['admin']), fileUpload_1.upload.single('image'), // Add multer middleware to handle file upload
+fileUpload_1.handleUploadErrors, // Handle any file upload errors
+subCategoryValidation, subCategoryController_1.SubCategoryController.createSubCategory);
+router.put('/:id', auth_1.authenticate, (0, auth_1.authorize)(['admin']), fileUpload_1.upload.single('image'), // Add multer middleware to handle file upload
+fileUpload_1.handleUploadErrors, // Handle any file upload errors
+subCategoryValidation, subCategoryController_1.SubCategoryController.updateSubCategory);
 router.delete('/:id', auth_1.authenticate, (0, auth_1.authorize)(['admin']), subCategoryController_1.SubCategoryController.deleteSubCategory);
 exports.default = router;

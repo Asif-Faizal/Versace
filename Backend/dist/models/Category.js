@@ -46,6 +46,10 @@ const categorySchema = new mongoose_1.Schema({
         type: String,
         required: [true, 'Category description is required'],
         trim: true
+    },
+    image: {
+        type: String,
+        default: ''
     }
 }, {
     timestamps: true
