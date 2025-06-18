@@ -8,6 +8,21 @@ import (
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/mattn/go-colorable"
+)
+
+var (
+	colorableOutput = colorable.NewColorableStdout()
+	logger          = log.New(colorableOutput, "", 0)
+
+	reset  = "\033[0m"
+	red    = "\033[31m"
+	green  = "\033[32m"
+	yellow = "\033[33m"
+	blue   = "\033[34m"
+	purple = "\033[35m"
+	cyan   = "\033[36m"
 )
 
 type responseWriter struct {
@@ -66,19 +81,22 @@ func logRequest(r *http.Request, body []byte) {
 		}
 	}
 
-	fmt.Println(strings.Repeat("-", 80))
-	log.Printf("--> %s %s", r.Method, r.URL.Path)
-	log.Printf("    Host: %s", r.Host)
-	log.Printf("    From: %s", r.RemoteAddr)
+	divider := cyan + strings.Repeat("-", 80) + reset
+	fmt.Fprintln(colorableOutput, divider)
+	logger.Printf("%s--> %s %s%s", yellow, r.Method, r.URL.Path, reset)
+	logger.Printf("%s    Host:%s %s", purple, reset, r.Host)
+	logger.Printf("%s    From:%s %s", purple, reset, r.RemoteAddr)
+
 	for name, headers := range r.Header {
 		for _, h := range headers {
-			log.Printf("    %s: %s", name, h)
+			logger.Printf("%s    %s:%s %s", purple, reset, name, h)
 		}
 	}
+
 	if prettyBody.Len() > 0 {
-		log.Printf("Body:\n%s", prettyBody.String())
+		logger.Printf("%sBody:%s\n%s", purple, reset, prettyBody.String())
 	}
-	fmt.Println(strings.Repeat("-", 80))
+	fmt.Fprintln(colorableOutput, divider)
 }
 
 func logResponse(rw *responseWriter) {
@@ -89,15 +107,26 @@ func logResponse(rw *responseWriter) {
 		}
 	}
 
-	fmt.Println(strings.Repeat("-", 80))
-	log.Printf("<-- %d %s", rw.statusCode, http.StatusText(rw.statusCode))
+	divider := cyan + strings.Repeat("-", 80) + reset
+	fmt.Fprintln(colorableOutput, divider)
+
+	statusColor := green
+	if rw.statusCode >= 400 && rw.statusCode < 500 {
+		statusColor = yellow
+	} else if rw.statusCode >= 500 {
+		statusColor = red
+	}
+
+	logger.Printf("%s<-- %d %s%s", statusColor, rw.statusCode, http.StatusText(rw.statusCode), reset)
+
 	for name, headers := range rw.Header() {
 		for _, h := range headers {
-			log.Printf("    %s: %s", name, h)
+			logger.Printf("%s    %s:%s %s", purple, reset, name, h)
 		}
 	}
+
 	if prettyBody.Len() > 0 {
-		log.Printf("Body:\n%s", prettyBody.String())
+		logger.Printf("%sBody:%s\n%s", purple, reset, prettyBody.String())
 	}
-	fmt.Println(strings.Repeat("-", 80))
+	fmt.Fprintln(colorableOutput, divider)
 }

@@ -8,6 +8,7 @@ import (
 	"log"
 
 	"github.com/Asif-Faizal/Versace/types"
+	"github.com/Asif-Faizal/Versace/utils"
 	"github.com/gorilla/mux"
 )
 
@@ -46,17 +47,28 @@ func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	var userReq types.UserRegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&userReq); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		return
+	}
+
+	// Check if user already exists
+	existingUser, err := h.store.GetUserByEmail(userReq.Email)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to check for existing user", err.Error())
+		return
+	}
+	if existingUser != nil {
+		utils.WriteError(w, http.StatusConflict, "User with this email already exists", "")
 		return
 	}
 
 	if userReq.Role == "admin" {
 		if userReq.AdminCreationToken == "" {
-			http.Error(w, "adminCreationToken is required for admin registration", http.StatusBadRequest)
+			utils.WriteError(w, http.StatusBadRequest, "adminCreationToken is required for admin registration", "")
 			return
 		}
 		if userReq.AdminCreationToken != h.adminCreationToken {
-			http.Error(w, "invalid adminCreationToken", http.StatusUnauthorized)
+			utils.WriteError(w, http.StatusUnauthorized, "invalid adminCreationToken", "")
 			return
 		}
 	} else {
@@ -67,7 +79,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	hashedPassword, err := h.authService.HashPassword(userReq.Password)
 	if err != nil {
 		log.Printf("failed to hash password: %v", err)
-		http.Error(w, "failed to hash password", http.StatusInternalServerError)
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to process password", err.Error())
 		return
 	}
 
@@ -84,7 +96,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	createdUser, err := h.store.CreateUser(newUser)
 	if err != nil {
 		log.Printf("failed to create user: %v", err)
-		http.Error(w, "failed to create user", http.StatusInternalServerError)
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to create user", err.Error())
 		return
 	}
 
@@ -100,7 +112,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	accessToken, refreshToken, err := h.authService.CreateToken(createdUser, deviceInfo)
 	if err != nil {
 		log.Printf("failed to create tokens: %v", err)
-		http.Error(w, "failed to create tokens", http.StatusInternalServerError)
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to create tokens", err.Error())
 		return
 	}
 

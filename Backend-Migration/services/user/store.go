@@ -15,8 +15,16 @@ func NewStore(db *sql.DB) *Store {
 }
 
 func (s *Store) GetUserByEmail(email string) (*types.User, error) {
-	// ... implementation ...
-	return nil, nil
+	row := s.db.QueryRow("SELECT id, first_name, last_name, email, password, role, created_at, updated_at FROM users WHERE email = ?", email)
+
+	user := new(types.User)
+	if err := row.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.Password, &user.Role, &user.CreatedAt, &user.UpdatedAt); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil // No user found is not an error in this context
+		}
+		return nil, err
+	}
+	return user, nil
 }
 
 func (s *Store) GetUserByID(id int) (*types.User, error) {
