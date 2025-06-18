@@ -1,6 +1,8 @@
 package types
 
-import "time"
+import (
+	"time"
+)
 
 // UserStore defines the interface for user data operations
 // Any struct that implements these methods can be used as a user store

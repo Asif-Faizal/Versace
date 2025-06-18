@@ -1,0 +1,12 @@
+-- Create token table
+CREATE TABLE IF NOT EXISTS tokens (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    access_token TEXT,
+    refresh_token TEXT NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    revoked BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);

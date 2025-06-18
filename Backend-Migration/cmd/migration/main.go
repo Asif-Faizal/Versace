@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/Asif-Faizal/Versace/config"
 	"github.com/Asif-Faizal/Versace/db"
@@ -43,13 +44,29 @@ func main() {
 		log.Fatal(err)
 	}
 
-	cdm := os.Args[(len(os.Args) - 1)]
-	if cdm == "up" {
+	cmd := os.Args[1]
+	if cmd == "up" {
 		if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 			log.Fatal(err)
 		}
-	} else if cdm == "down" {
+	} else if cmd == "down" {
 		if err := m.Down(); err != nil && err != migrate.ErrNoChange {
+			log.Fatal(err)
+		}
+	} else if cmd == "drop" {
+		if err := m.Drop(); err != nil && err != migrate.ErrNoChange {
+			log.Fatal(err)
+		}
+	} else if cmd == "force" {
+		if len(os.Args) != 3 {
+			log.Fatal("Please provide a version number for the force command")
+		}
+		version, err := strconv.Atoi(os.Args[2])
+		if err != nil {
+			log.Fatalf("Invalid version number: %s", os.Args[2])
+		}
+
+		if err := m.Force(version); err != nil {
 			log.Fatal(err)
 		}
 	}
