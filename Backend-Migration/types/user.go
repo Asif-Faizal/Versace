@@ -9,7 +9,14 @@ import (
 type UserStore interface {
 	GetUserByEmail(email string) (*User, error)
 	GetUserByID(id int) (*User, error)
-	CreateUser(user *User) error
+	CreateUser(user *User) (*User, error)
+}
+
+// Authable is an interface for objects that can be used for authentication.
+type Authable interface {
+	GetID() int
+	GetEmail() string
+	GetRole() string
 }
 
 type User struct {
@@ -17,10 +24,22 @@ type User struct {
 	FirstName string    `json:"firstName"` // User's first name
 	LastName  string    `json:"lastName"`  // User's last name
 	Email     string    `json:"email"`     // User's email address (unique)
-	Password  string    `json:"password"`  // Hashed password
+	Password  string    `json:"-"`         // Hashed password
 	Role      string    `json:"role"`      // User's role (admin, user, etc.)
 	CreatedAt time.Time `json:"createdAt"` // Timestamp when the user was created
 	UpdatedAt time.Time `json:"updatedAt"` // Timestamp when the user was updated
+}
+
+func (u *User) GetID() int {
+	return u.ID
+}
+
+func (u *User) GetEmail() string {
+	return u.Email
+}
+
+func (u *User) GetRole() string {
+	return u.Role
 }
 
 type UserRegisterRequest struct {
@@ -30,4 +49,15 @@ type UserRegisterRequest struct {
 	Password           string `json:"password"`
 	Role               string `json:"role"`
 	AdminCreationToken string `json:"adminCreationToken"`
+}
+
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type AuthResponse struct {
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
+	User         User   `json:"user"`
 }

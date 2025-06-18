@@ -7,6 +7,7 @@ import (
 
 	"github.com/Asif-Faizal/Versace/config"
 	"github.com/Asif-Faizal/Versace/services/user"
+	"github.com/Asif-Faizal/Versace/utils/middleware"
 	"github.com/gorilla/mux"
 )
 
@@ -32,12 +33,21 @@ func (s *APIServer) Run() error {
 	// Create a new router instance
 	router := mux.NewRouter()
 
+	// Use the logging middleware
+	router.Use(middleware.LoggingMiddleware)
+
 	// Create a subrouter for API versioning
 	// All routes will be prefixed with /api/v1
 	subrouter := router.PathPrefix("/api/v1").Subrouter()
 
+	// Initialize user store
+	userStore := user.NewStore(s.db)
+
+	// Initialize auth service
+	authService := user.NewAuthService(userStore)
+
 	// Initialize user handler and register its routes
-	userHandler := user.NewHandler(nil, s.config.AdminCreationToken)
+	userHandler := user.NewHandler(userStore, userStore, authService, s.config.AdminCreationToken)
 	userHandler.RegisterRoutes(subrouter)
 
 	log.Println("Starting server on", s.listenAddress)

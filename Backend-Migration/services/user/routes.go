@@ -3,6 +3,9 @@ package user
 import (
 	"encoding/json"
 	"net/http"
+	"time"
+
+	"log"
 
 	"github.com/Asif-Faizal/Versace/types"
 	"github.com/gorilla/mux"
@@ -12,13 +15,15 @@ import (
 // It contains methods to handle different user-related endpoints
 type Handler struct {
 	store              types.UserStore // Interface for user data operations
-	adminCreationToken string          // Token required for admin creation
+	tokenStore         types.TokenStore
+	authService        *AuthService
+	adminCreationToken string // Token required for admin creation
 }
 
 // NewHandler creates a new instance of the user Handler
 // This is a constructor function for the Handler struct
-func NewHandler(store types.UserStore, adminCreationToken string) *Handler {
-	return &Handler{store: store, adminCreationToken: adminCreationToken}
+func NewHandler(store types.UserStore, tokenStore types.TokenStore, authService *AuthService, adminCreationToken string) *Handler {
+	return &Handler{store: store, tokenStore: tokenStore, authService: authService, adminCreationToken: adminCreationToken}
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
@@ -39,29 +44,74 @@ func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
 
 // Register handles the POST request to create a new user
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
-	var user types.UserRegisterRequest
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+	var userReq types.UserRegisterRequest
+	if err := json.NewDecoder(r.Body).Decode(&userReq); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if user.Role == "admin" {
-		if user.AdminCreationToken == "" {
+	if userReq.Role == "admin" {
+		if userReq.AdminCreationToken == "" {
 			http.Error(w, "adminCreationToken is required for admin registration", http.StatusBadRequest)
 			return
 		}
-		if user.AdminCreationToken != h.adminCreationToken {
+		if userReq.AdminCreationToken != h.adminCreationToken {
 			http.Error(w, "invalid adminCreationToken", http.StatusUnauthorized)
 			return
 		}
 	} else {
-		// For normal users, ignore adminCreationToken
-		user.AdminCreationToken = ""
+		userReq.Role = "user"
+		userReq.AdminCreationToken = ""
 	}
 
-	// TODO: Insert user creation logic here (e.g., call h.store.CreateUser)
+	hashedPassword, err := h.authService.HashPassword(userReq.Password)
+	if err != nil {
+		log.Printf("failed to hash password: %v", err)
+		http.Error(w, "failed to hash password", http.StatusInternalServerError)
+		return
+	}
+
+	newUser := &types.User{
+		FirstName: userReq.FirstName,
+		LastName:  userReq.LastName,
+		Email:     userReq.Email,
+		Password:  hashedPassword,
+		Role:      userReq.Role,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	createdUser, err := h.store.CreateUser(newUser)
+	if err != nil {
+		log.Printf("failed to create user: %v", err)
+		http.Error(w, "failed to create user", http.StatusInternalServerError)
+		return
+	}
+
+	deviceInfo := types.DeviceInfo{
+		DeviceID:    r.Header.Get("X-Device-ID"),
+		DeviceName:  r.Header.Get("X-Device-Name"),
+		DeviceType:  r.Header.Get("X-Device-Type"),
+		DeviceOS:    r.Header.Get("X-Device-OS"),
+		DeviceModel: r.Header.Get("X-Device-Model"),
+		DeviceIP:    r.RemoteAddr,
+	}
+
+	accessToken, refreshToken, err := h.authService.CreateToken(createdUser, deviceInfo)
+	if err != nil {
+		log.Printf("failed to create tokens: %v", err)
+		http.Error(w, "failed to create tokens", http.StatusInternalServerError)
+		return
+	}
+
+	response := types.AuthResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		User:         *createdUser,
+	}
+
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"message": "User registered successfully (mock)"})
+	json.NewEncoder(w).Encode(response)
 }
 
 // GetUserByID handles the GET request to retrieve a user by ID

@@ -17,6 +17,12 @@ type Token struct {
 	DeviceInfo   DeviceInfo `json:"device_info" db:"device_info"`
 }
 
+// TokenStore defines the interface for token data operations
+type TokenStore interface {
+	CreateToken(token *Token) error
+	GetTokenByRefreshToken(refreshToken string) (*Token, error)
+}
+
 type DeviceInfo struct {
 	ID          int    `json:"id" db:"id"`
 	TokenID     int    `json:"token_id" db:"token_id"`

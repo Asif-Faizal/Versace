@@ -13,7 +13,10 @@ type Config struct {
 	DBName             string
 	DBAddress          string
 	AdminCreationToken string
+	JWTSecret          string
 }
+
+var Envs *Config
 
 func InitConfig() (*Config, error) {
 	cfg := &Config{
@@ -24,14 +27,16 @@ func InitConfig() (*Config, error) {
 		DBName:             os.Getenv("DB_NAME"),
 		DBAddress:          os.Getenv("DB_ADDRESS"),
 		AdminCreationToken: os.Getenv("ADMIN_CREATION_TOKEN"),
+		JWTSecret:          os.Getenv("JWT_SECRET"),
 	}
 
 	// Validate required environment variables
 	if cfg.ServerHost == "" || cfg.ServerPort == "" || cfg.DBUser == "" ||
-		cfg.DBPassword == "" || cfg.DBName == "" || cfg.DBAddress == "" || cfg.AdminCreationToken == "" {
+		cfg.DBPassword == "" || cfg.DBName == "" || cfg.DBAddress == "" || cfg.AdminCreationToken == "" || cfg.JWTSecret == "" {
 		return nil, fmt.Errorf("all environment variables must be set")
 	}
 
+	Envs = cfg
 	return cfg, nil
 }
 
