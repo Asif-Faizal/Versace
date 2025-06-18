@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 
 	"github.com/Asif-Faizal/Versace/cmd/api"
@@ -27,9 +28,17 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	server := api.NewAPIServer(cfg.GetServerAddress(), db)
+	InitializeDB(db)
+	server := api.NewAPIServer(cfg.GetServerAddress(), db, cfg)
 	if err := server.Run(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func InitializeDB(db *sql.DB) {
+	err := db.Ping()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Database connected successfully")
 }

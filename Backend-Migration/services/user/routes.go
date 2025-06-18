@@ -1,6 +1,7 @@
 package user
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/Asif-Faizal/Versace/types"
@@ -10,18 +11,19 @@ import (
 // Handler represents the user-related HTTP handlers
 // It contains methods to handle different user-related endpoints
 type Handler struct {
-	store types.UserStore // Interface for user data operations
+	store              types.UserStore // Interface for user data operations
+	adminCreationToken string          // Token required for admin creation
 }
 
 // NewHandler creates a new instance of the user Handler
 // This is a constructor function for the Handler struct
-func NewHandler(store types.UserStore) *Handler {
-	return &Handler{store: store}
+func NewHandler(store types.UserStore, adminCreationToken string) *Handler {
+	return &Handler{store: store, adminCreationToken: adminCreationToken}
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/users", h.GetUsers).Methods("GET")
-	router.HandleFunc("/users", h.CreateUser).Methods("POST")
+	router.HandleFunc("/users", h.Register).Methods("POST")
 	router.HandleFunc("/users/{id}", h.GetUserByID).Methods("GET")
 	router.HandleFunc("/users/{id}", h.UpdateUser).Methods("PUT")
 	router.HandleFunc("/users/{id}", h.DeleteUser).Methods("DELETE")
@@ -35,8 +37,31 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
 }
 
-// CreateUser handles the POST request to create a new user
-func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
+// Register handles the POST request to create a new user
+func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
+	var user types.UserRegisterRequest
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if user.Role == "admin" {
+		if user.AdminCreationToken == "" {
+			http.Error(w, "adminCreationToken is required for admin registration", http.StatusBadRequest)
+			return
+		}
+		if user.AdminCreationToken != h.adminCreationToken {
+			http.Error(w, "invalid adminCreationToken", http.StatusUnauthorized)
+			return
+		}
+	} else {
+		// For normal users, ignore adminCreationToken
+		user.AdminCreationToken = ""
+	}
+
+	// TODO: Insert user creation logic here (e.g., call h.store.CreateUser)
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{"message": "User registered successfully (mock)"})
 }
 
 // GetUserByID handles the GET request to retrieve a user by ID

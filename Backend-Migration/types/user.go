@@ -16,5 +16,16 @@ type User struct {
 	LastName  string    `json:"lastName"`  // User's last name
 	Email     string    `json:"email"`     // User's email address (unique)
 	Password  string    `json:"password"`  // Hashed password
+	Role      string    `json:"role"`      // User's role (admin, user, etc.)
 	CreatedAt time.Time `json:"createdAt"` // Timestamp when the user was created
+	UpdatedAt time.Time `json:"updatedAt"` // Timestamp when the user was updated
+}
+
+type UserRegisterRequest struct {
+	FirstName          string `json:"firstName"`
+	LastName           string `json:"lastName"`
+	Email              string `json:"email"`
+	Password           string `json:"password"`
+	Role               string `json:"role"`
+	AdminCreationToken string `json:"adminCreationToken"`
 }

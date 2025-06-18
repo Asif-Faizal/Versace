@@ -6,27 +6,29 @@ import (
 )
 
 type Config struct {
-	ServerHost string
-	ServerPort string
-	DBUser     string
-	DBPassword string
-	DBName     string
-	DBAddress  string
+	ServerHost         string
+	ServerPort         string
+	DBUser             string
+	DBPassword         string
+	DBName             string
+	DBAddress          string
+	AdminCreationToken string
 }
 
 func InitConfig() (*Config, error) {
 	cfg := &Config{
-		ServerHost: os.Getenv("SERVER_HOST"),
-		ServerPort: os.Getenv("SERVER_PORT"),
-		DBUser:     os.Getenv("DB_USER"),
-		DBPassword: os.Getenv("DB_PASSWORD"),
-		DBName:     os.Getenv("DB_NAME"),
-		DBAddress:  os.Getenv("DB_ADDRESS"),
+		ServerHost:         os.Getenv("SERVER_HOST"),
+		ServerPort:         os.Getenv("SERVER_PORT"),
+		DBUser:             os.Getenv("DB_USER"),
+		DBPassword:         os.Getenv("DB_PASSWORD"),
+		DBName:             os.Getenv("DB_NAME"),
+		DBAddress:          os.Getenv("DB_ADDRESS"),
+		AdminCreationToken: os.Getenv("ADMIN_CREATION_TOKEN"),
 	}
 
 	// Validate required environment variables
 	if cfg.ServerHost == "" || cfg.ServerPort == "" || cfg.DBUser == "" ||
-		cfg.DBPassword == "" || cfg.DBName == "" || cfg.DBAddress == "" {
+		cfg.DBPassword == "" || cfg.DBName == "" || cfg.DBAddress == "" || cfg.AdminCreationToken == "" {
 		return nil, fmt.Errorf("all environment variables must be set")
 	}
 
