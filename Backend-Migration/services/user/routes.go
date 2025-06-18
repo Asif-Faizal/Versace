@@ -29,6 +29,7 @@ func NewHandler(store types.UserStore, tokenStore types.TokenStore, authService 
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/users", h.GetUsers).Methods("GET")
+	router.HandleFunc("/users/check", h.CheckEmail).Methods("POST")
 	router.HandleFunc("/users", h.Register).Methods("POST")
 	router.HandleFunc("/users/{id}", h.GetUserByID).Methods("GET")
 	router.HandleFunc("/users/{id}", h.UpdateUser).Methods("PUT")
@@ -124,6 +125,36 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(response)
+}
+
+func (h *Handler) CheckEmail(w http.ResponseWriter, r *http.Request) {
+	var userReq types.CheckEmailRequest
+	if err := json.NewDecoder(r.Body).Decode(&userReq); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		return
+	}
+
+	// Read device info from headers (for future use or logging)
+	_ = types.DeviceInfo{
+		DeviceID:    r.Header.Get("X-Device-ID"),
+		DeviceName:  r.Header.Get("X-Device-Name"),
+		DeviceType:  r.Header.Get("X-Device-Type"),
+		DeviceOS:    r.Header.Get("X-Device-OS"),
+		DeviceModel: r.Header.Get("X-Device-Model"),
+		DeviceIP:    r.RemoteAddr,
+	}
+
+	existingUser, err := h.store.GetUserByEmail(userReq.Email)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to check for existing user", err.Error())
+		return
+	}
+	if existingUser != nil {
+		utils.WriteError(w, http.StatusConflict, "User with this email already exists", "")
+		return
+	}
+
+	utils.WriteSuccess(w, http.StatusOK, "Email is available", nil)
 }
 
 // GetUserByID handles the GET request to retrieve a user by ID

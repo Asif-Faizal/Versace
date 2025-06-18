@@ -51,6 +51,10 @@ type UserRegisterRequest struct {
 	AdminCreationToken string `json:"adminCreationToken"`
 }
 
+type CheckEmailRequest struct {
+	Email string `json:"email"`
+}
+
 type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
