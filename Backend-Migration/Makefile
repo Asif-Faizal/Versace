@@ -14,13 +14,23 @@ run:
 
 # Migration commands
 migration-create:
-	@migrate create -ext sql -dir cmd/migrate/migrations -seq $(filter-out $@,$(MAKECMDGOALS))
+	@migrate create -ext sql -dir cmd/migration/sql -seq $(filter-out $@,$(MAKECMDGOALS))
 
 migrate-up:
-	@go run cmd/migrate/main.go up
+	@if [ -f .env ]; then \
+		export $$(cat .env | grep -v '^#' | xargs) && go run cmd/migration/main.go up; \
+	else \
+		echo "Error: .env file not found"; \
+		exit 1; \
+	fi
 
 migrate-down:
-	@go run cmd/migrate/main.go down
+	@if [ -f .env ]; then \
+		export $$(cat .env | grep -v '^#' | xargs) && go run cmd/migration/main.go down; \
+	else \
+		echo "Error: .env file not found"; \
+		exit 1; \
+	fi
 
 # Allow passing arguments to migration-create
 %:
