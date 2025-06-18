@@ -52,6 +52,24 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate the user input
+	if !utils.IsValidEmail(userReq.Email) {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid email format", "")
+		return
+	}
+	if !utils.IsValidPassword(userReq.Password) {
+		utils.WriteError(w, http.StatusBadRequest, "Password must be more than 6 characters", "")
+		return
+	}
+	if !utils.IsValidName(userReq.FirstName) {
+		utils.WriteError(w, http.StatusBadRequest, "First name must be more than 3 characters", "")
+		return
+	}
+	if !utils.IsValidOptionalName(userReq.LastName) {
+		utils.WriteError(w, http.StatusBadRequest, "Last name must be empty or more than 3 characters", "")
+		return
+	}
+
 	// Check if user already exists
 	existingUser, err := h.store.GetUserByEmail(userReq.Email)
 	if err != nil {
@@ -131,6 +149,12 @@ func (h *Handler) CheckEmail(w http.ResponseWriter, r *http.Request) {
 	var userReq types.CheckEmailRequest
 	if err := json.NewDecoder(r.Body).Decode(&userReq); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		return
+	}
+
+	// Validate the email format
+	if !utils.IsValidEmail(userReq.Email) {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid email format", "")
 		return
 	}
 
