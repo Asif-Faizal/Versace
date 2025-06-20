@@ -176,3 +176,26 @@ func (s *Store) GetTokenByUserIDAndDeviceID(userID int, deviceID string) (*types
 
 	return token, nil
 }
+
+func (s *Store) GetDevicesByUserID(userID int) ([]types.DeviceInfo, error) {
+	rows, err := s.db.Query(`
+		SELECT di.id, di.token_id, di.device_id, di.device_name, di.device_type, di.device_os, di.device_model, di.device_ip
+		FROM device_info di
+		JOIN tokens t ON di.token_id = t.id
+		WHERE t.user_id = ? AND t.revoked = false
+	`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var devices []types.DeviceInfo
+	for rows.Next() {
+		var device types.DeviceInfo
+		if err := rows.Scan(&device.ID, &device.TokenID, &device.DeviceID, &device.DeviceName, &device.DeviceType, &device.DeviceOS, &device.DeviceModel, &device.DeviceIP); err != nil {
+			return nil, err
+		}
+		devices = append(devices, device)
+	}
+	return devices, nil
+}

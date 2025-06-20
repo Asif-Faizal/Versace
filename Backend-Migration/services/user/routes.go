@@ -9,6 +9,7 @@ import (
 
 	"github.com/Asif-Faizal/Versace/types"
 	"github.com/Asif-Faizal/Versace/utils"
+	"github.com/golang-jwt/jwt"
 	"github.com/gorilla/mux"
 )
 
@@ -34,6 +35,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/users", h.Register).Methods("POST")
 	router.HandleFunc("/users/send-otp", h.SendOTP).Methods("POST")
 	router.HandleFunc("/users/verify-otp", h.VerifyOTP).Methods("POST")
+	router.HandleFunc("/users/device-sessions", h.GetDeviceSessions).Methods("GET")
 	router.HandleFunc("/users/{id}", h.GetUserByID).Methods("GET")
 	router.HandleFunc("/users/{id}", h.UpdateUser).Methods("PUT")
 	router.HandleFunc("/users/{id}", h.DeleteUser).Methods("DELETE")
@@ -262,6 +264,64 @@ func (h *Handler) VerifyOTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteSuccess(w, http.StatusOK, "OTP verified successfully", nil)
+}
+
+func (h *Handler) GetDeviceSessions(w http.ResponseWriter, r *http.Request) {
+	// 1. Parse Authorization header
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
+		utils.WriteError(w, http.StatusUnauthorized, "Missing or invalid Authorization header", "")
+		return
+	}
+	tokenString := authHeader[7:]
+
+	// 2. Verify and parse token
+	token, err := h.authService.VerifyToken(tokenString)
+	if err != nil || !token.Valid {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid or expired token", "")
+		return
+	}
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid token claims", "")
+		return
+	}
+	userIDFloat, ok := claims["id"].(float64)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user ID in token", "")
+		return
+	}
+	userID := int(userIDFloat)
+
+	// 3. Get device_id from header
+	deviceID := r.Header.Get("X-Device-ID")
+
+	// 4. Fetch devices for this user
+	devices, err := h.tokenStore.GetDevicesByUserID(userID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get device sessions", err.Error())
+		return
+	}
+
+	found := false
+	for i := range devices {
+		if deviceID != "" && devices[i].DeviceID == deviceID {
+			devices[i].IsCurrent = true
+			found = true
+		}
+	}
+
+	if !found {
+		utils.WriteError(w, http.StatusUnauthorized, "Device mismatch", "Device ID is not registered for this user")
+		return
+	}
+
+	response := types.DeviceSessionsResponse{
+		Devices: devices,
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
 // GetUserByID handles the GET request to retrieve a user by ID

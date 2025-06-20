@@ -23,6 +23,9 @@ type TokenStore interface {
 	GetTokenByRefreshToken(refreshToken string) (*Token, error)
 	GetTokenByUserIDAndDeviceID(userID int, deviceID string) (*Token, error)
 	UpdateToken(token *Token) error
+
+	// Device Info
+	GetDevicesByUserID(userID int) ([]DeviceInfo, error)
 }
 
 type DeviceInfo struct {
@@ -34,4 +37,14 @@ type DeviceInfo struct {
 	DeviceOS    string `json:"device_os" db:"device_os"`
 	DeviceModel string `json:"device_model" db:"device_model"`
 	DeviceIP    string `json:"device_ip" db:"device_ip"`
+	IsCurrent   bool   `json:"is_current"`
+}
+
+type DeviceSessionsRequest struct {
+	UserID   int    `json:"user_id" db:"user_id"`
+	DeviceID string `json:"device_id" db:"device_id"`
+}
+
+type DeviceSessionsResponse struct {
+	Devices []DeviceInfo `json:"devices"`
 }
