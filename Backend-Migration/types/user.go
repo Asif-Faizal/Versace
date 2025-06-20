@@ -11,6 +11,8 @@ type UserStore interface {
 	GetUserByID(id int) (*User, error)
 	CreateUser(user *User) (*User, error)
 	GetUsers() ([]User, error)
+	UpdateUser(user *User) error
+	DeleteUser(userID int) error
 
 	// OTP
 	SaveOTP(otp *OTP) error
@@ -102,4 +104,9 @@ type GetUserByIDRequest struct {
 
 type UserResponse struct {
 	User User `json:"user"`
+}
+
+type UpdateUserRequest struct {
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
 }

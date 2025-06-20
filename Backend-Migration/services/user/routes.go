@@ -39,7 +39,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/users/device-sessions", h.GetDeviceSessions).Methods("GET") // all users       //? completed
 	router.HandleFunc("/users/{id}", h.GetUserByIDAdmin).Methods("GET")             // admin only      //? completed
 	router.HandleFunc("/details", h.GetUserByID).Methods("GET")                     // all users       //? completed
-	router.HandleFunc("/users/{id}", h.UpdateUser).Methods("PUT")                   // all users       //! not completed
+	router.HandleFunc("/users", h.UpdateUser).Methods("PUT")                        // all users       //! not completed
 	router.HandleFunc("/users/{id}", h.DeleteUser).Methods("DELETE")                // all users       //! not completed
 	router.HandleFunc("/users/login", h.Login).Methods("POST")                      // all users       //? completed
 	router.HandleFunc("/users/logout", h.Logout).Methods("POST")                    // all users       //! not completed
@@ -565,10 +565,174 @@ func (h *Handler) GetDeviceSessions(w http.ResponseWriter, r *http.Request) {
 
 // UpdateUser handles the PUT request to update an existing user
 func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
+	// Parse request body
+	var req types.UpdateUserRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		return
+	}
+
+	// Validate input
+	if !utils.IsValidName(req.FirstName) {
+		utils.WriteError(w, http.StatusBadRequest, "First name must be more than 3 characters", "")
+		return
+	}
+	if !utils.IsValidOptionalName(req.LastName) {
+		utils.WriteError(w, http.StatusBadRequest, "Last name must be empty or more than 3 characters", "")
+		return
+	}
+
+	// Authentication
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
+		utils.WriteError(w, http.StatusUnauthorized, "Missing or invalid Authorization header", "")
+		return
+	}
+	tokenString := authHeader[7:]
+	token, err := h.authService.VerifyToken(tokenString)
+	if err != nil || !token.Valid {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid or expired token", "")
+		return
+	}
+
+	// Extract user info from token
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid token claims", "")
+		return
+	}
+	userIDFloat, ok := claims["id"].(float64)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user ID in token", "")
+		return
+	}
+	userID := int(userIDFloat)
+
+	// Device verification
+	deviceID := r.Header.Get("X-Device-ID")
+	if deviceID == "" {
+		utils.WriteError(w, http.StatusBadRequest, "Device ID is required", "")
+		return
+	}
+
+	// Verify device session exists for this user
+	existingToken, err := h.tokenStore.GetTokenByUserIDAndDeviceID(userID, deviceID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to verify device session", err.Error())
+		return
+	}
+	if existingToken == nil {
+		utils.WriteError(w, http.StatusUnauthorized, "Device mismatch", "Device ID is not registered for this user")
+		return
+	}
+
+	// Verify that the token in the header matches the device session
+	if existingToken.AccessToken != tokenString {
+		utils.WriteError(w, http.StatusUnauthorized, "Token mismatch", "Token is not associated with this device")
+		return
+	}
+
+	// Check if user exists
+	existingUser, err := h.store.GetUserByID(userID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		return
+	}
+	if existingUser == nil {
+		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		return
+	}
+
+	// Update user fields
+	existingUser.FirstName = req.FirstName
+	existingUser.LastName = req.LastName
+	existingUser.UpdatedAt = time.Now()
+
+	// Update user in database
+	err = h.store.UpdateUser(existingUser)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to update user", err.Error())
+		return
+	}
+
+	response := types.UserResponse{
+		User: *existingUser,
+	}
+
+	utils.WriteSuccess(w, http.StatusOK, "User updated successfully", response)
 }
 
 // DeleteUser handles the DELETE request to delete an existing user
 func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	// Authentication
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
+		utils.WriteError(w, http.StatusUnauthorized, "Missing or invalid Authorization header", "")
+		return
+	}
+	tokenString := authHeader[7:]
+	token, err := h.authService.VerifyToken(tokenString)
+	if err != nil || !token.Valid {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid or expired token", "")
+		return
+	}
+
+	// Extract user info from token
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid token claims", "")
+		return
+	}
+	userIDFloat, ok := claims["id"].(float64)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user ID in token", "")
+		return
+	}
+	userID := int(userIDFloat)
+
+	// Device verification
+	deviceID := r.Header.Get("X-Device-ID")
+	if deviceID == "" {
+		utils.WriteError(w, http.StatusBadRequest, "Device ID is required", "")
+		return
+	}
+
+	// Verify device session exists for this user
+	existingToken, err := h.tokenStore.GetTokenByUserIDAndDeviceID(userID, deviceID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to verify device session", err.Error())
+		return
+	}
+	if existingToken == nil {
+		utils.WriteError(w, http.StatusUnauthorized, "Device mismatch", "Device ID is not registered for this user")
+		return
+	}
+
+	// Verify that the token in the header matches the device session
+	if existingToken.AccessToken != tokenString {
+		utils.WriteError(w, http.StatusUnauthorized, "Token mismatch", "Token is not associated with this device")
+		return
+	}
+
+	// Check if user exists
+	existingUser, err := h.store.GetUserByID(userID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		return
+	}
+	if existingUser == nil {
+		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		return
+	}
+
+	// Delete user from database
+	err = h.store.DeleteUser(userID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to delete user", err.Error())
+		return
+	}
+
+	utils.WriteSuccess(w, http.StatusOK, "User deleted successfully", nil)
 }
 
 // Login handles the POST request to login a user

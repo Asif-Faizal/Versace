@@ -222,3 +222,13 @@ func (s *Store) GetDevicesByUserID(userID int) ([]types.DeviceInfo, error) {
 	}
 	return devices, nil
 }
+
+func (s *Store) UpdateUser(user *types.User) error {
+	_, err := s.db.Exec("UPDATE users SET first_name = ?, last_name = ?, role = ?, updated_at = ? WHERE id = ?", user.FirstName, user.LastName, user.Role, user.UpdatedAt, user.ID)
+	return err
+}
+
+func (s *Store) DeleteUser(userID int) error {
+	_, err := s.db.Exec("DELETE FROM users WHERE id = ?", userID)
+	return err
+}
