@@ -203,6 +203,45 @@ func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 
 // Refresh handles the POST request to refresh a user's session
 func (h *Handler) Refresh(w http.ResponseWriter, r *http.Request) {
+	var req types.RefreshTokenRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		return
+	}
+
+	deviceInfo := types.DeviceInfo{
+		DeviceID:    r.Header.Get("X-Device-ID"),
+		DeviceName:  r.Header.Get("X-Device-Name"),
+		DeviceType:  r.Header.Get("X-Device-Type"),
+		DeviceOS:    r.Header.Get("X-Device-OS"),
+		DeviceModel: r.Header.Get("X-Device-Model"),
+		DeviceIP:    r.RemoteAddr,
+	}
+
+	newAccessToken, newRefreshToken, userID, err := h.authService.RefreshToken(req.RefreshToken, deviceInfo)
+	if err != nil {
+		utils.WriteError(w, http.StatusUnauthorized, "Failed to refresh token", err.Error())
+		return
+	}
+
+	user, err := h.store.GetUserByID(userID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user details", err.Error())
+		return
+	}
+	if user == nil {
+		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		return
+	}
+
+	response := types.AuthResponse{
+		AccessToken:  newAccessToken,
+		RefreshToken: newRefreshToken,
+		User:         *user,
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
 // ResetPassword handles the POST request to reset a user's password

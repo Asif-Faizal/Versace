@@ -28,8 +28,16 @@ func (s *Store) GetUserByEmail(email string) (*types.User, error) {
 }
 
 func (s *Store) GetUserByID(id int) (*types.User, error) {
-	// ... implementation ...
-	return nil, nil
+	row := s.db.QueryRow("SELECT id, first_name, last_name, email, password, role, created_at, updated_at FROM users WHERE id = ?", id)
+
+	user := new(types.User)
+	if err := row.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.Password, &user.Role, &user.CreatedAt, &user.UpdatedAt); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil // No user found is not an error in this context
+		}
+		return nil, err
+	}
+	return user, nil
 }
 
 func (s *Store) CreateUser(user *types.User) (*types.User, error) {
@@ -73,6 +81,34 @@ func (s *Store) CreateToken(token *types.Token) error {
 }
 
 func (s *Store) GetTokenByRefreshToken(refreshToken string) (*types.Token, error) {
-	// ... implementation ...
-	return nil, nil
+	row := s.db.QueryRow(`
+		SELECT t.id, t.user_id, t.access_token, t.refresh_token, t.expires_at, t.revoked, t.created_at, t.updated_at,
+		       di.id, di.token_id, di.device_id, di.device_name, di.device_type, di.device_os, di.device_model, di.device_ip
+		FROM tokens t
+		LEFT JOIN device_info di ON t.id = di.token_id
+		WHERE t.refresh_token = ?
+	`, refreshToken)
+
+	token := new(types.Token)
+	err := row.Scan(
+		&token.ID, &token.UserID, &token.AccessToken, &token.RefreshToken, &token.ExpiresAt, &token.Revoked, &token.CreatedAt, &token.UpdatedAt,
+		&token.DeviceInfo.ID, &token.DeviceInfo.TokenID, &token.DeviceInfo.DeviceID, &token.DeviceInfo.DeviceName, &token.DeviceInfo.DeviceType, &token.DeviceInfo.DeviceOS, &token.DeviceInfo.DeviceModel, &token.DeviceInfo.DeviceIP,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil // No token found is not an error
+		}
+		return nil, err
+	}
+
+	return token, nil
+}
+
+func (s *Store) UpdateToken(token *types.Token) error {
+	_, err := s.db.Exec(`
+		UPDATE tokens 
+		SET access_token = ?, refresh_token = ?, expires_at = ?, revoked = ?, updated_at = ?
+		WHERE id = ?
+	`, token.AccessToken, token.RefreshToken, token.ExpiresAt, token.Revoked, token.UpdatedAt, token.ID)
+	return err
 }
