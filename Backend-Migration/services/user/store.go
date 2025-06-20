@@ -2,6 +2,7 @@ package user
 
 import (
 	"database/sql"
+	"time"
 
 	"github.com/Asif-Faizal/Versace/types"
 )
@@ -230,5 +231,18 @@ func (s *Store) UpdateUser(user *types.User) error {
 
 func (s *Store) DeleteUser(userID int) error {
 	_, err := s.db.Exec("DELETE FROM users WHERE id = ?", userID)
+	return err
+}
+
+func (s *Store) UpdateEmail(userID int, email string) error {
+	_, err := s.db.Exec("UPDATE users SET email = ?, updated_at = ? WHERE id = ?", email, time.Now(), userID)
+	return err
+}
+
+func (s *Store) ChangePassword(userID int, hashedPassword string) error {
+	_, err := s.db.Exec("UPDATE users SET password = ?, updated_at = ? WHERE id = ?", hashedPassword, time.Now(), userID)
+	if err != nil {
+		return err
+	}
 	return err
 }

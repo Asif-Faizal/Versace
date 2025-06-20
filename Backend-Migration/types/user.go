@@ -13,6 +13,8 @@ type UserStore interface {
 	GetUsers() ([]User, error)
 	UpdateUser(user *User) error
 	DeleteUser(userID int) error
+	UpdateEmail(userID int, email string) error
+	ChangePassword(userID int, password string) error
 
 	// OTP
 	SaveOTP(otp *OTP) error
@@ -109,4 +111,13 @@ type UserResponse struct {
 type UpdateUserRequest struct {
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
+}
+
+type UpdateEmailRequest struct {
+	Email string `json:"email"`
+}
+
+type ChangePasswordRequest struct {
+	CurrentPassword string `json:"currentPassword"`
+	NewPassword     string `json:"newPassword"`
 }

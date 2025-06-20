@@ -40,6 +40,8 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/users/{id}", h.GetUserByIDAdmin).Methods("GET")             // admin only      //? completed
 	router.HandleFunc("/details", h.GetUserByID).Methods("GET")                     // all users       //? completed
 	router.HandleFunc("/users", h.UpdateUser).Methods("PUT")                        // all users       //! not completed
+	router.HandleFunc("/users/update-email", h.UpdateEmail).Methods("PUT")          // all users       //! not completed
+	router.HandleFunc("/users/change-password", h.ChangePassword).Methods("PUT")    // all users       //! not completed
 	router.HandleFunc("/users/{id}", h.DeleteUser).Methods("DELETE")                // all users       //! not completed
 	router.HandleFunc("/users/login", h.Login).Methods("POST")                      // all users       //? completed
 	router.HandleFunc("/users/logout", h.Logout).Methods("POST")                    // all users       //! not completed
@@ -842,4 +844,213 @@ func (h *Handler) Refresh(w http.ResponseWriter, r *http.Request) {
 
 // ResetPassword handles the POST request to reset a user's password
 func (h *Handler) ResetPassword(w http.ResponseWriter, r *http.Request) {
+}
+
+// UpdateEmail handles the PUT request to update user's email
+func (h *Handler) UpdateEmail(w http.ResponseWriter, r *http.Request) {
+	// Parse request body
+	var req types.UpdateEmailRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		return
+	}
+
+	// Validate email format
+	if !utils.IsValidEmail(req.Email) {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid email format", "")
+		return
+	}
+
+	// Authentication
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
+		utils.WriteError(w, http.StatusUnauthorized, "Missing or invalid Authorization header", "")
+		return
+	}
+	tokenString := authHeader[7:]
+	token, err := h.authService.VerifyToken(tokenString)
+	if err != nil || !token.Valid {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid or expired token", "")
+		return
+	}
+
+	// Extract user info from token
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid token claims", "")
+		return
+	}
+	userIDFloat, ok := claims["id"].(float64)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user ID in token", "")
+		return
+	}
+	userID := int(userIDFloat)
+
+	// Device verification
+	deviceID := r.Header.Get("X-Device-ID")
+	if deviceID == "" {
+		utils.WriteError(w, http.StatusBadRequest, "Device ID is required", "")
+		return
+	}
+
+	// Verify device session exists for this user
+	existingToken, err := h.tokenStore.GetTokenByUserIDAndDeviceID(userID, deviceID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to verify device session", err.Error())
+		return
+	}
+	if existingToken == nil {
+		utils.WriteError(w, http.StatusUnauthorized, "Device mismatch", "Device ID is not registered for this user")
+		return
+	}
+
+	// Verify that the token in the header matches the device session
+	if existingToken.AccessToken != tokenString {
+		utils.WriteError(w, http.StatusUnauthorized, "Token mismatch", "Token is not associated with this device")
+		return
+	}
+
+	// Check if user exists
+	existingUser, err := h.store.GetUserByID(userID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		return
+	}
+	if existingUser == nil {
+		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		return
+	}
+
+	// Check if email is already taken by another user
+	if req.Email != existingUser.Email {
+		emailUser, err := h.store.GetUserByEmail(req.Email)
+		if err != nil {
+			utils.WriteError(w, http.StatusInternalServerError, "Failed to check email availability", err.Error())
+			return
+		}
+		if emailUser != nil {
+			utils.WriteError(w, http.StatusConflict, "Email already exists", "")
+			return
+		}
+	}
+
+	// Update email
+	existingUser.Email = req.Email
+	existingUser.UpdatedAt = time.Now()
+
+	// Update user in database
+	err = h.store.UpdateEmail(userID, req.Email)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to update email", err.Error())
+		return
+	}
+
+	response := types.UserResponse{
+		User: *existingUser,
+	}
+
+	utils.WriteSuccess(w, http.StatusOK, "Email updated successfully", response)
+}
+
+// ChangePassword handles the PUT request to change user's password
+func (h *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
+	// Parse request body
+	var req types.ChangePasswordRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		return
+	}
+
+	// Validate new password
+	if !utils.IsValidPassword(req.NewPassword) {
+		utils.WriteError(w, http.StatusBadRequest, "New password must be more than 6 characters", "")
+		return
+	}
+
+	// Authentication
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
+		utils.WriteError(w, http.StatusUnauthorized, "Missing or invalid Authorization header", "")
+		return
+	}
+	tokenString := authHeader[7:]
+	token, err := h.authService.VerifyToken(tokenString)
+	if err != nil || !token.Valid {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid or expired token", "")
+		return
+	}
+
+	// Extract user info from token
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid token claims", "")
+		return
+	}
+	userIDFloat, ok := claims["id"].(float64)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user ID in token", "")
+		return
+	}
+	userID := int(userIDFloat)
+
+	// Device verification
+	deviceID := r.Header.Get("X-Device-ID")
+	if deviceID == "" {
+		utils.WriteError(w, http.StatusBadRequest, "Device ID is required", "")
+		return
+	}
+
+	// Verify device session exists for this user
+	existingToken, err := h.tokenStore.GetTokenByUserIDAndDeviceID(userID, deviceID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to verify device session", err.Error())
+		return
+	}
+	if existingToken == nil {
+		utils.WriteError(w, http.StatusUnauthorized, "Device mismatch", "Device ID is not registered for this user")
+		return
+	}
+
+	// Verify that the token in the header matches the device session
+	if existingToken.AccessToken != tokenString {
+		utils.WriteError(w, http.StatusUnauthorized, "Token mismatch", "Token is not associated with this device")
+		return
+	}
+
+	// Check if user exists
+	existingUser, err := h.store.GetUserByID(userID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		return
+	}
+	if existingUser == nil {
+		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		return
+	}
+
+	// Verify current password
+	if err := h.authService.ComparePasswords(existingUser.Password, req.CurrentPassword); err != nil {
+		utils.WriteError(w, http.StatusUnauthorized, "Current password is incorrect", "")
+		return
+	}
+
+	// Hash new password
+	hashedPassword, err := h.authService.HashPassword(req.NewPassword)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to hash password", err.Error())
+		return
+	}
+
+	// Debug: Log the hashed password to verify it's being generated
+	log.Printf("Hashed password for user %d: %s", userID, hashedPassword)
+
+	// Update password in database with hashed password
+	err = h.store.ChangePassword(userID, hashedPassword)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to update password", err.Error())
+		return
+	}
+
+	utils.WriteSuccess(w, http.StatusOK, "Password changed successfully", nil)
 }
