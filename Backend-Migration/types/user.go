@@ -95,3 +95,11 @@ type AuthResponse struct {
 type UsersResponse struct {
 	Users []User `json:"users"`
 }
+
+type GetUserByIDRequest struct {
+	UserID int `json:"userID"`
+}
+
+type UserResponse struct {
+	User User `json:"user"`
+}

@@ -3,6 +3,7 @@ package user
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"time"
 
 	"log"
@@ -30,19 +31,20 @@ func NewHandler(store types.UserStore, tokenStore types.TokenStore, authService 
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/users", h.GetUsers).Methods("GET")
-	router.HandleFunc("/users/check", h.CheckEmail).Methods("POST")
-	router.HandleFunc("/users", h.Register).Methods("POST")
-	router.HandleFunc("/users/send-otp", h.SendOTP).Methods("POST")
-	router.HandleFunc("/users/verify-otp", h.VerifyOTP).Methods("POST")
-	router.HandleFunc("/users/device-sessions", h.GetDeviceSessions).Methods("GET")
-	router.HandleFunc("/users/{id}", h.GetUserByID).Methods("GET")
-	router.HandleFunc("/users/{id}", h.UpdateUser).Methods("PUT")
-	router.HandleFunc("/users/{id}", h.DeleteUser).Methods("DELETE")
-	router.HandleFunc("/users/login", h.Login).Methods("POST")
-	router.HandleFunc("/users/logout", h.Logout).Methods("POST")
-	router.HandleFunc("/users/refresh", h.Refresh).Methods("POST")
-	router.HandleFunc("/users/reset-password", h.ResetPassword).Methods("POST")
+	router.HandleFunc("/users", h.GetUsers).Methods("GET")                          // admin only      //? completed
+	router.HandleFunc("/users/check", h.CheckEmail).Methods("POST")                 // all users       //? completed
+	router.HandleFunc("/users", h.Register).Methods("POST")                         // all users       //? completed
+	router.HandleFunc("/users/send-otp", h.SendOTP).Methods("POST")                 // all users       //? completed
+	router.HandleFunc("/users/verify-otp", h.VerifyOTP).Methods("POST")             // all users       //? completed
+	router.HandleFunc("/users/device-sessions", h.GetDeviceSessions).Methods("GET") // all users       //? completed
+	router.HandleFunc("/users/{id}", h.GetUserByIDAdmin).Methods("GET")             // admin only      //? completed
+	router.HandleFunc("/details", h.GetUserByID).Methods("GET")                     // all users       //? completed
+	router.HandleFunc("/users/{id}", h.UpdateUser).Methods("PUT")                   // all users       //! not completed
+	router.HandleFunc("/users/{id}", h.DeleteUser).Methods("DELETE")                // all users       //! not completed
+	router.HandleFunc("/users/login", h.Login).Methods("POST")                      // all users       //? completed
+	router.HandleFunc("/users/logout", h.Logout).Methods("POST")                    // all users       //! not completed
+	router.HandleFunc("/users/refresh", h.Refresh).Methods("POST")                  // all users       //? completed
+	router.HandleFunc("/users/reset-password", h.ResetPassword).Methods("POST")     // all users       //! not completed
 }
 
 // GetUsers handles the GET request to retrieve all users
@@ -117,8 +119,173 @@ func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
 		Users: users,
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
+	utils.WriteSuccess(w, http.StatusOK, "Users fetched successfully", response)
+}
+
+// GetUserByIDAdmin handles the GET request to retrieve a user by ID
+func (h *Handler) GetUserByIDAdmin(w http.ResponseWriter, r *http.Request) {
+	// Extract user ID from URL path parameter
+	vars := mux.Vars(r)
+	userIDStr, ok := vars["id"]
+	if !ok {
+		utils.WriteError(w, http.StatusBadRequest, "User ID is required", "")
+		return
+	}
+
+	// Parse user ID from string to int
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid user ID format", "")
+		return
+	}
+
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
+		utils.WriteError(w, http.StatusUnauthorized, "Missing or invalid Authorization header", "")
+		return
+	}
+	tokenString := authHeader[7:]
+	token, err := h.authService.VerifyToken(tokenString)
+	if err != nil || !token.Valid {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid or expired token", "")
+		return
+	}
+
+	// Check if user is admin
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid token claims", "")
+		return
+	}
+	userRole, ok := claims["role"].(string)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user role in token", "")
+		return
+	}
+	if userRole != "admin" {
+		utils.WriteError(w, http.StatusForbidden, "Access denied", "Only admin users can view user details")
+		return
+	}
+
+	// Get device ID from header
+	deviceID := r.Header.Get("X-Device-ID")
+	if deviceID == "" {
+		utils.WriteError(w, http.StatusBadRequest, "Device ID is required", "")
+		return
+	}
+
+	// Extract admin user ID from token for device verification
+	adminUserIDFloat, ok := claims["id"].(float64)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user ID in token", "")
+		return
+	}
+	adminUserID := int(adminUserIDFloat)
+
+	// Verify device session exists for this admin
+	existingToken, err := h.tokenStore.GetTokenByUserIDAndDeviceID(adminUserID, deviceID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to verify device session", err.Error())
+		return
+	}
+	if existingToken == nil {
+		utils.WriteError(w, http.StatusUnauthorized, "Device mismatch", "Device ID is not registered for this admin")
+		return
+	}
+
+	// Verify that the token in the header matches the device session
+	if existingToken.AccessToken != tokenString {
+		utils.WriteError(w, http.StatusUnauthorized, "Token mismatch", "Token is not associated with this device")
+		return
+	}
+
+	// Get the requested user by ID
+	user, err := h.store.GetUserByID(userID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		return
+	}
+	if user == nil {
+		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		return
+	}
+
+	response := types.UserResponse{
+		User: *user,
+	}
+
+	utils.WriteSuccess(w, http.StatusOK, "User fetched successfully", response)
+}
+
+func (h *Handler) GetUserByID(w http.ResponseWriter, r *http.Request) {
+
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
+		utils.WriteError(w, http.StatusUnauthorized, "Missing or invalid Authorization header", "")
+		return
+	}
+	tokenString := authHeader[7:]
+	token, err := h.authService.VerifyToken(tokenString)
+	if err != nil || !token.Valid {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid or expired token", "")
+		return
+	}
+
+	// Check if user is admin
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid token claims", "")
+		return
+	}
+
+	// Get device ID from header
+	deviceID := r.Header.Get("X-Device-ID")
+	if deviceID == "" {
+		utils.WriteError(w, http.StatusBadRequest, "Device ID is required", "")
+		return
+	}
+
+	// Extract admin user ID from token for device verification
+	UserIDFloat, ok := claims["id"].(float64)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user ID in token", "")
+		return
+	}
+	userID := int(UserIDFloat)
+
+	// Verify device session exists for this admin
+	existingToken, err := h.tokenStore.GetTokenByUserIDAndDeviceID(userID, deviceID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to verify device session", err.Error())
+		return
+	}
+	if existingToken == nil {
+		utils.WriteError(w, http.StatusUnauthorized, "Device mismatch", "Device ID is not registered for this admin")
+		return
+	}
+
+	// Verify that the token in the header matches the device session
+	if existingToken.AccessToken != tokenString {
+		utils.WriteError(w, http.StatusUnauthorized, "Token mismatch", "Token is not associated with this device")
+		return
+	}
+
+	// Get the requested user by ID
+	user, err := h.store.GetUserByID(userID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		return
+	}
+	if user == nil {
+		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		return
+	}
+
+	response := types.UserResponse{
+		User: *user,
+	}
+
+	utils.WriteSuccess(w, http.StatusOK, "User fetched successfully", response)
 }
 
 // Register handles the POST request to create a new user
@@ -394,10 +561,6 @@ func (h *Handler) GetDeviceSessions(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
-}
-
-// GetUserByID handles the GET request to retrieve a user by ID
-func (h *Handler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 }
 
 // UpdateUser handles the PUT request to update an existing user
