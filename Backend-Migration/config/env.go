@@ -37,15 +37,15 @@ func InitConfig() (*Config, error) {
 		DBAddress:          os.Getenv("DB_ADDRESS"),
 		AdminCreationToken: os.Getenv("ADMIN_CREATION_TOKEN"),
 		JWTSecret:          os.Getenv("JWT_SECRET"),
-		JWTExpiry:          os.Getenv("JWT_EXPIRY"),
+		JWTExpiry:          os.Getenv("JWT_EXPIRATION"),
 		EmailHost:          os.Getenv("EMAIL_HOST"),
 		EmailPort:          os.Getenv("EMAIL_PORT"),
 		EmailSecure:        os.Getenv("EMAIL_SECURE"),
 		EmailUser:          os.Getenv("EMAIL_USER"),
 		EmailPassword:      os.Getenv("EMAIL_PASSWORD"),
 		EmailFrom:          os.Getenv("EMAIL_FROM"),
-		OTPExpiry:          os.Getenv("OTP_EXPIRY"),
-		JWTRefreshExpiry:   os.Getenv("JWT_REFRESH_EXPIRY"),
+		OTPExpiry:          os.Getenv("OTP_EXPIRATION"),
+		JWTRefreshExpiry:   os.Getenv("JWT_REFRESH_EXPIRATION"),
 	}
 
 	// Validate required environment variables

@@ -21,6 +21,7 @@ type Token struct {
 type TokenStore interface {
 	CreateToken(token *Token) error
 	GetTokenByRefreshToken(refreshToken string) (*Token, error)
+	GetTokenByUserIDAndDeviceID(userID int, deviceID string) (*Token, error)
 	UpdateToken(token *Token) error
 }
 

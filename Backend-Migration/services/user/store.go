@@ -151,3 +151,28 @@ func (s *Store) DeleteOTP(email string) error {
 	_, err := s.db.Exec("DELETE FROM otps WHERE email = ?", email)
 	return err
 }
+
+func (s *Store) GetTokenByUserIDAndDeviceID(userID int, deviceID string) (*types.Token, error) {
+	row := s.db.QueryRow(`
+        SELECT t.id, t.user_id, t.access_token, t.refresh_token, t.expires_at, t.revoked, t.created_at, t.updated_at,
+               di.id, di.token_id, di.device_id, di.device_name, di.device_type, di.device_os, di.device_model, di.device_ip
+        FROM tokens t
+        JOIN device_info di ON t.id = di.token_id
+        WHERE t.user_id = ? AND di.device_id = ?
+    `, userID, deviceID)
+
+	token := new(types.Token)
+	err := row.Scan(
+		&token.ID, &token.UserID, &token.AccessToken, &token.RefreshToken, &token.ExpiresAt, &token.Revoked, &token.CreatedAt, &token.UpdatedAt,
+		&token.DeviceInfo.ID, &token.DeviceInfo.TokenID, &token.DeviceInfo.DeviceID, &token.DeviceInfo.DeviceName, &token.DeviceInfo.DeviceType, &token.DeviceInfo.DeviceOS, &token.DeviceInfo.DeviceModel, &token.DeviceInfo.DeviceIP,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil // No token found is not an error
+		}
+		return nil, err
+	}
+
+	return token, nil
+}

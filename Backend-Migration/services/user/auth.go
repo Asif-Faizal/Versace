@@ -178,3 +178,50 @@ func (s *AuthService) RefreshToken(refreshTokenString string, deviceInfo types.D
 
 	return newAccessToken, newRefreshToken, user.ID, nil
 }
+
+func (s *AuthService) Login(user *types.User, deviceInfo types.DeviceInfo) (accessToken string, refreshToken string, err error) {
+	// Check if a session already exists for this device
+	existingToken, err := s.tokenStore.GetTokenByUserIDAndDeviceID(user.ID, deviceInfo.DeviceID)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to check for existing token: %w", err)
+	}
+
+	accessToken, refreshToken, err = s.generateTokens(user)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to generate tokens: %w", err)
+	}
+
+	refreshExpiry, err := time.ParseDuration(config.Envs.JWTRefreshExpiry)
+	if err != nil {
+		return "", "", fmt.Errorf("invalid jwt refresh expiry duration: %w", err)
+	}
+
+	if existingToken != nil {
+		// Update the existing token
+		existingToken.AccessToken = accessToken
+		existingToken.RefreshToken = refreshToken
+		existingToken.ExpiresAt = time.Now().Add(refreshExpiry)
+		existingToken.UpdatedAt = time.Now()
+		existingToken.Revoked = false // Ensure the token is not revoked
+
+		err = s.tokenStore.UpdateToken(existingToken)
+		if err != nil {
+			return "", "", fmt.Errorf("failed to update token: %w", err)
+		}
+	} else {
+		// Create a new token for the new device
+		token := &types.Token{
+			UserID:       user.ID,
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
+			ExpiresAt:    time.Now().Add(refreshExpiry),
+			DeviceInfo:   deviceInfo,
+		}
+		err = s.tokenStore.CreateToken(token)
+		if err != nil {
+			return "", "", fmt.Errorf("failed to create token: %w", err)
+		}
+	}
+
+	return accessToken, refreshToken, nil
+}

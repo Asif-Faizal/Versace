@@ -278,6 +278,60 @@ func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 // Login handles the POST request to login a user
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
+	var req types.LoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		return
+	}
+
+	// 1. Validate user exists
+	user, err := h.store.GetUserByEmail(req.Email)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Error fetching user", err.Error())
+		return
+	}
+	if user == nil {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid email or password", "")
+		return
+	}
+
+	// 2. Compare password
+	if err := h.authService.ComparePasswords(user.Password, req.Password); err != nil {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid email or password", "")
+		return
+	}
+
+	// 3. Get device info
+	deviceInfo := types.DeviceInfo{
+		DeviceID:    r.Header.Get("X-Device-ID"),
+		DeviceName:  r.Header.Get("X-Device-Name"),
+		DeviceType:  r.Header.Get("X-Device-Type"),
+		DeviceOS:    r.Header.Get("X-Device-OS"),
+		DeviceModel: r.Header.Get("X-Device-Model"),
+		DeviceIP:    r.RemoteAddr,
+	}
+
+	if deviceInfo.DeviceID == "" {
+		utils.WriteError(w, http.StatusBadRequest, "Device ID is required", "")
+		return
+	}
+
+	// 4. Handle token creation/update
+	accessToken, refreshToken, err := h.authService.Login(user, deviceInfo)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to login", err.Error())
+		return
+	}
+
+	// 5. Send response
+	response := types.AuthResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		User:         *user,
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
 // Logout handles the POST request to logout a user
