@@ -246,3 +246,28 @@ func (s *Store) ChangePassword(userID int, hashedPassword string) error {
 	}
 	return err
 }
+
+func (s *Store) RevokeToken(userID int) error {
+	_, err := s.db.Exec("UPDATE tokens SET revoked = true WHERE user_id = ?", userID)
+	return err
+}
+
+func (s *Store) IsTokenRevoked(userID int, deviceID string) (bool, error) {
+	row := s.db.QueryRow(`
+		SELECT t.revoked
+		FROM tokens t
+		JOIN device_info di ON t.id = di.token_id
+		WHERE t.user_id = ? AND di.device_id = ?
+	`, userID, deviceID)
+
+	var revoked bool
+	err := row.Scan(&revoked)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return true, nil // If no token found, consider it revoked
+		}
+		return false, err
+	}
+
+	return revoked, nil
+}

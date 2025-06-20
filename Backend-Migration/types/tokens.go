@@ -23,6 +23,7 @@ type TokenStore interface {
 	GetTokenByRefreshToken(refreshToken string) (*Token, error)
 	GetTokenByUserIDAndDeviceID(userID int, deviceID string) (*Token, error)
 	UpdateToken(token *Token) error
+	IsTokenRevoked(userID int, deviceID string) (bool, error)
 
 	// Device Info
 	GetDevicesByUserID(userID int) ([]DeviceInfo, error)

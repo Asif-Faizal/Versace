@@ -15,6 +15,7 @@ type UserStore interface {
 	DeleteUser(userID int) error
 	UpdateEmail(userID int, email string) error
 	ChangePassword(userID int, password string) error
+	RevokeToken(userID int) error
 
 	// OTP
 	SaveOTP(otp *OTP) error
@@ -120,4 +121,13 @@ type UpdateEmailRequest struct {
 type ChangePasswordRequest struct {
 	CurrentPassword string `json:"currentPassword"`
 	NewPassword     string `json:"newPassword"`
+}
+
+type DeleteAccountRequest struct {
+	Password string `json:"password"`
+}
+
+type AdminDeleteAccountRequest struct {
+	AdminCreationToken string `json:"adminCreationToken"`
+	Password           string `json:"password"`
 }
