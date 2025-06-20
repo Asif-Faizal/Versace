@@ -208,10 +208,16 @@ func (h *Handler) SendOTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	otpExpiry, err := time.ParseDuration(h.emailService.config.OTPExpiry)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Invalid OTP expiry duration", err.Error())
+		return
+	}
+
 	otpModel := &types.OTP{
 		Email:     req.Email,
 		Code:      otp,
-		ExpiresAt: time.Now().Add(5 * time.Minute),
+		ExpiresAt: time.Now().Add(otpExpiry),
 	}
 	if err := h.store.SaveOTP(otpModel); err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, "Failed to save OTP", err.Error())

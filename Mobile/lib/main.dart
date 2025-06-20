@@ -12,8 +12,8 @@ import 'package:versace/core/theme/cubit/theme_cubit.dart';
 import 'package:versace/core/theme/cubit/theme_state.dart';
 import 'package:versace/features/splash/cubit/splash/splash_cubit.dart';
 
-import 'core/api/enviornment_config.dart';
-import 'core/api/api_config.dart';
+import 'core/api/enviornment.config.dart';
+import 'core/api/api.config.dart';
 import 'features/dashboard/bloc/user_details/user_details_bloc.dart';
 import 'features/dashboard/cubit/bottom_nav_cubit.dart';
 import 'features/login/bloc/login/login_bloc.dart';

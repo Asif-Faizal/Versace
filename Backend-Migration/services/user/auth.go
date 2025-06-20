@@ -31,12 +31,21 @@ func (s *AuthService) ComparePasswords(hashedPassword, password string) error {
 }
 
 func (s *AuthService) generateTokens(user types.Authable) (accessToken string, refreshToken string, err error) {
+	jwtExpiry, err := time.ParseDuration(config.Envs.JWTExpiry)
+	if err != nil {
+		return "", "", fmt.Errorf("invalid jwt expiry duration: %w", err)
+	}
+	refreshExpiry, err := time.ParseDuration(config.Envs.JWTRefreshExpiry)
+	if err != nil {
+		return "", "", fmt.Errorf("invalid jwt refresh expiry duration: %w", err)
+	}
+
 	// Create access token
 	accessClaims := jwt.MapClaims{
 		"id":    user.GetID(),
 		"email": user.GetEmail(),
 		"role":  user.GetRole(),
-		"exp":   time.Now().Add(time.Hour * 1).Unix(), // 1 hour
+		"exp":   time.Now().Add(jwtExpiry).Unix(),
 	}
 	accessToken, err = jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims).SignedString([]byte(config.Envs.JWTSecret))
 	if err != nil {
@@ -48,7 +57,7 @@ func (s *AuthService) generateTokens(user types.Authable) (accessToken string, r
 		"id":    user.GetID(),
 		"email": user.GetEmail(),
 		"role":  user.GetRole(),
-		"exp":   time.Now().Add(time.Hour * 24 * 7).Unix(), // 7 days
+		"exp":   time.Now().Add(refreshExpiry).Unix(),
 	}
 	refreshToken, err = jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString([]byte(config.Envs.JWTSecret))
 	if err != nil {
@@ -64,12 +73,17 @@ func (s *AuthService) CreateToken(user types.Authable, deviceInfo types.DeviceIn
 		return "", "", err
 	}
 
+	refreshExpiry, err := time.ParseDuration(config.Envs.JWTRefreshExpiry)
+	if err != nil {
+		return "", "", fmt.Errorf("invalid jwt refresh expiry duration: %w", err)
+	}
+
 	// Store refresh token
 	token := &types.Token{
 		UserID:       user.GetID(),
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		ExpiresAt:    time.Now().Add(time.Hour * 24 * 7),
+		ExpiresAt:    time.Now().Add(refreshExpiry),
 		DeviceInfo:   deviceInfo,
 	}
 	err = s.tokenStore.CreateToken(token)
@@ -146,10 +160,15 @@ func (s *AuthService) RefreshToken(refreshTokenString string, deviceInfo types.D
 		return "", "", 0, fmt.Errorf("failed to generate new tokens: %w", err)
 	}
 
+	refreshExpiry, err := time.ParseDuration(config.Envs.JWTRefreshExpiry)
+	if err != nil {
+		return "", "", 0, fmt.Errorf("invalid jwt refresh expiry duration: %w", err)
+	}
+
 	// 8. Update the token in the database
 	storedToken.AccessToken = newAccessToken
 	storedToken.RefreshToken = newRefreshToken
-	storedToken.ExpiresAt = time.Now().Add(time.Hour * 24 * 7)
+	storedToken.ExpiresAt = time.Now().Add(refreshExpiry)
 	storedToken.UpdatedAt = time.Now()
 
 	err = s.tokenStore.UpdateToken(storedToken)
