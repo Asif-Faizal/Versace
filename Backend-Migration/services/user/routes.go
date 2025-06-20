@@ -47,6 +47,78 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 
 // GetUsers handles the GET request to retrieve all users
 func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
+		utils.WriteError(w, http.StatusUnauthorized, "Missing or invalid Authorization header", "")
+		return
+	}
+	tokenString := authHeader[7:]
+	token, err := h.authService.VerifyToken(tokenString)
+	if err != nil || !token.Valid {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid or expired token", "")
+		return
+	}
+
+	// Check if user is admin
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid token claims", "")
+		return
+	}
+	userRole, ok := claims["role"].(string)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user role in token", "")
+		return
+	}
+	if userRole != "admin" {
+		utils.WriteError(w, http.StatusForbidden, "Access denied", "Only admin users can view all users")
+		return
+	}
+
+	// Get device ID from header
+	deviceID := r.Header.Get("X-Device-ID")
+	if deviceID == "" {
+		utils.WriteError(w, http.StatusBadRequest, "Device ID is required", "")
+		return
+	}
+
+	// Extract user ID from token for device verification
+	userIDFloat, ok := claims["id"].(float64)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user ID in token", "")
+		return
+	}
+	userID := int(userIDFloat)
+
+	// Verify device session exists for this admin
+	existingToken, err := h.tokenStore.GetTokenByUserIDAndDeviceID(userID, deviceID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to verify device session", err.Error())
+		return
+	}
+	if existingToken == nil {
+		utils.WriteError(w, http.StatusUnauthorized, "Device mismatch", "Device ID is not registered for this admin")
+		return
+	}
+
+	// Verify that the token in the header matches the device session
+	if existingToken.AccessToken != tokenString {
+		utils.WriteError(w, http.StatusUnauthorized, "Token mismatch", "Token is not associated with this device")
+		return
+	}
+
+	users, err := h.store.GetUsers()
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get users", err.Error())
+		return
+	}
+
+	response := types.UsersResponse{
+		Users: users,
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
 // Register handles the POST request to create a new user

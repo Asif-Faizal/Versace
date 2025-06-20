@@ -10,6 +10,7 @@ type UserStore interface {
 	GetUserByEmail(email string) (*User, error)
 	GetUserByID(id int) (*User, error)
 	CreateUser(user *User) (*User, error)
+	GetUsers() ([]User, error)
 
 	// OTP
 	SaveOTP(otp *OTP) error
@@ -89,4 +90,8 @@ type AuthResponse struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
 	User         User   `json:"user"`
+}
+
+type UsersResponse struct {
+	Users []User `json:"users"`
 }

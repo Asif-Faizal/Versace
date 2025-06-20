@@ -14,6 +14,29 @@ func NewStore(db *sql.DB) *Store {
 	return &Store{db: db}
 }
 
+func (s *Store) GetUsers() ([]types.User, error) {
+	rows, err := s.db.Query("SELECT id, first_name, last_name, email, password, role, created_at, updated_at FROM users WHERE role != 'admin'")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []types.User
+	for rows.Next() {
+		var user types.User
+		if err := rows.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.Password, &user.Role, &user.CreatedAt, &user.UpdatedAt); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
 func (s *Store) GetUserByEmail(email string) (*types.User, error) {
 	row := s.db.QueryRow("SELECT id, first_name, last_name, email, password, role, created_at, updated_at FROM users WHERE email = ?", email)
 
