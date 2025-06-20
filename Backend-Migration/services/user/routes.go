@@ -18,19 +18,22 @@ type Handler struct {
 	store              types.UserStore // Interface for user data operations
 	tokenStore         types.TokenStore
 	authService        *AuthService
+	emailService       *EmailService
 	adminCreationToken string // Token required for admin creation
 }
 
 // NewHandler creates a new instance of the user Handler
 // This is a constructor function for the Handler struct
-func NewHandler(store types.UserStore, tokenStore types.TokenStore, authService *AuthService, adminCreationToken string) *Handler {
-	return &Handler{store: store, tokenStore: tokenStore, authService: authService, adminCreationToken: adminCreationToken}
+func NewHandler(store types.UserStore, tokenStore types.TokenStore, authService *AuthService, adminCreationToken string, emailService *EmailService) *Handler {
+	return &Handler{store: store, tokenStore: tokenStore, authService: authService, adminCreationToken: adminCreationToken, emailService: emailService}
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/users", h.GetUsers).Methods("GET")
 	router.HandleFunc("/users/check", h.CheckEmail).Methods("POST")
 	router.HandleFunc("/users", h.Register).Methods("POST")
+	router.HandleFunc("/users/send-otp", h.SendOTP).Methods("POST")
+	router.HandleFunc("/users/verify-otp", h.VerifyOTP).Methods("POST")
 	router.HandleFunc("/users/{id}", h.GetUserByID).Methods("GET")
 	router.HandleFunc("/users/{id}", h.UpdateUser).Methods("PUT")
 	router.HandleFunc("/users/{id}", h.DeleteUser).Methods("DELETE")
@@ -179,6 +182,80 @@ func (h *Handler) CheckEmail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteSuccess(w, http.StatusOK, "Email is available", nil)
+}
+
+func (h *Handler) SendOTP(w http.ResponseWriter, r *http.Request) {
+	var req types.SendOTPRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		return
+	}
+
+	if !utils.IsValidEmail(req.Email) {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid email format", "")
+		return
+	}
+
+	otp, err := h.emailService.generateOTP()
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to generate OTP", err.Error())
+		return
+	}
+
+	err = h.emailService.SendOTP(req.Email, otp)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to send OTP", err.Error())
+		return
+	}
+
+	otpModel := &types.OTP{
+		Email:     req.Email,
+		Code:      otp,
+		ExpiresAt: time.Now().Add(5 * time.Minute),
+	}
+	if err := h.store.SaveOTP(otpModel); err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to save OTP", err.Error())
+		return
+	}
+
+	utils.WriteSuccess(w, http.StatusOK, "OTP sent successfully", nil)
+}
+
+func (h *Handler) VerifyOTP(w http.ResponseWriter, r *http.Request) {
+	var req types.VerifyOTPRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		return
+	}
+
+	storedOTP, err := h.store.GetOTPByEmail(req.Email)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to retrieve OTP", err.Error())
+		return
+	}
+
+	if storedOTP == nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid or expired OTP", "")
+		return
+	}
+
+	if storedOTP.ExpiresAt.Before(time.Now()) {
+		utils.WriteError(w, http.StatusBadRequest, "OTP has expired", "")
+		return
+	}
+
+	if storedOTP.Code != req.OTP {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid OTP", "")
+		return
+	}
+
+	// OTP is valid, delete it so it cannot be reused
+	if err := h.store.DeleteOTP(req.Email); err != nil {
+		// Log this error but don't fail the request, as the OTP was valid
+		log.Printf("failed to delete used OTP for email %s: %v", req.Email, err)
+	}
+
+	utils.WriteSuccess(w, http.StatusOK, "OTP verified successfully", nil)
 }
 
 // GetUserByID handles the GET request to retrieve a user by ID

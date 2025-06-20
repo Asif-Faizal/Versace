@@ -112,3 +112,42 @@ func (s *Store) UpdateToken(token *types.Token) error {
 	`, token.AccessToken, token.RefreshToken, token.ExpiresAt, token.Revoked, token.UpdatedAt, token.ID)
 	return err
 }
+
+func (s *Store) SaveOTP(otp *types.OTP) error {
+	// Use an UPSERT-like behavior: delete any existing OTP for the email, then insert the new one.
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback() // Rollback on error
+
+	_, err = tx.Exec("DELETE FROM otps WHERE email = ?", otp.Email)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec("INSERT INTO otps (email, code, expires_at) VALUES (?, ?, ?)", otp.Email, otp.Code, otp.ExpiresAt)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func (s *Store) GetOTPByEmail(email string) (*types.OTP, error) {
+	row := s.db.QueryRow("SELECT id, email, code, expires_at FROM otps WHERE email = ?", email)
+
+	otp := new(types.OTP)
+	if err := row.Scan(&otp.ID, &otp.Email, &otp.Code, &otp.ExpiresAt); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil // No OTP found is not an error
+		}
+		return nil, err
+	}
+	return otp, nil
+}
+
+func (s *Store) DeleteOTP(email string) error {
+	_, err := s.db.Exec("DELETE FROM otps WHERE email = ?", email)
+	return err
+}

@@ -46,8 +46,11 @@ func (s *APIServer) Run() error {
 	// Initialize auth service
 	authService := user.NewAuthService(userStore)
 
+	// Initialize email service
+	emailService := user.NewEmailService(s.config)
+
 	// Initialize user handler and register its routes
-	userHandler := user.NewHandler(userStore, userStore, authService, s.config.AdminCreationToken)
+	userHandler := user.NewHandler(userStore, userStore, authService, s.config.AdminCreationToken, emailService)
 	userHandler.RegisterRoutes(subrouter)
 
 	log.Println("Starting server on", s.listenAddress)

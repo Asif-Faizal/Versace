@@ -10,6 +10,11 @@ type UserStore interface {
 	GetUserByEmail(email string) (*User, error)
 	GetUserByID(id int) (*User, error)
 	CreateUser(user *User) (*User, error)
+
+	// OTP
+	SaveOTP(otp *OTP) error
+	GetOTPByEmail(email string) (*OTP, error)
+	DeleteOTP(email string) error
 }
 
 // Authable is an interface for objects that can be used for authentication.
@@ -62,6 +67,22 @@ type LoginRequest struct {
 
 type RefreshTokenRequest struct {
 	RefreshToken string `json:"refreshToken"`
+}
+
+type OTP struct {
+	ID        int       `json:"id"`
+	Email     string    `json:"email"`
+	Code      string    `json:"code"`
+	ExpiresAt time.Time `json:"expiresAt"`
+}
+
+type SendOTPRequest struct {
+	Email string `json:"email"`
+}
+
+type VerifyOTPRequest struct {
+	Email string `json:"email"`
+	OTP   string `json:"otp"`
 }
 
 type AuthResponse struct {
