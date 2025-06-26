@@ -131,3 +131,7 @@ type AdminDeleteAccountRequest struct {
 	AdminCreationToken string `json:"adminCreationToken"`
 	Password           string `json:"password"`
 }
+
+type ResetPasswordRequest struct {
+	NewPassword string `json:"newPassword"`
+}

@@ -60,7 +60,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/users/login", h.Login).Methods("POST")                               // all users       //? completed
 	router.HandleFunc("/users/logout", h.Logout).Methods("POST")                             // all users       //? completed
 	router.HandleFunc("/users/refresh", h.Refresh).Methods("POST")                           // all users       //? completed
-	router.HandleFunc("/users/reset-password", h.ResetPassword).Methods("POST")              // all users       //! not completed
+	router.HandleFunc("/users/reset-password", h.ResetPassword).Methods("PUT")               // all users       //? completed
 }
 
 // GetUsers handles the GET request to retrieve all users
@@ -944,8 +944,103 @@ func (h *Handler) Refresh(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-// ResetPassword handles the POST request to reset a user's password
+// ResetPassword handles the PUT request to reset a user's password
 func (h *Handler) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	// Parse request body
+	var req types.ResetPasswordRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		return
+	}
+
+	// Validate new password
+	if !utils.IsValidPassword(req.NewPassword) {
+		utils.WriteError(w, http.StatusBadRequest, "New password must be more than 6 characters", "")
+		return
+	}
+
+	// Authentication
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
+		utils.WriteError(w, http.StatusUnauthorized, "Missing or invalid Authorization header", "")
+		return
+	}
+	tokenString := authHeader[7:]
+	token, err := h.authService.VerifyToken(tokenString)
+	if err != nil || !token.Valid {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid or expired token", "")
+		return
+	}
+
+	// Extract user info from token
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid token claims", "")
+		return
+	}
+	userIDFloat, ok := claims["id"].(float64)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user ID in token", "")
+		return
+	}
+	userID := int(userIDFloat)
+
+	// Device verification
+	deviceID := r.Header.Get("X-Device-ID")
+	if deviceID == "" {
+		utils.WriteError(w, http.StatusBadRequest, "Device ID is required", "")
+		return
+	}
+
+	// Verify device session exists for this user
+	existingToken, err := h.tokenStore.GetTokenByUserIDAndDeviceID(userID, deviceID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to verify device session", err.Error())
+		return
+	}
+	if existingToken == nil {
+		utils.WriteError(w, http.StatusUnauthorized, "Device mismatch", "Device ID is not registered for this user")
+		return
+	}
+
+	// Verify that the token in the header matches the device session
+	if existingToken.AccessToken != tokenString {
+		utils.WriteError(w, http.StatusUnauthorized, "Token mismatch", "Token is not associated with this device")
+		return
+	}
+
+	// Check if token is revoked
+	if err := h.checkTokenRevocation(userID, deviceID); err != nil {
+		utils.WriteError(w, http.StatusUnauthorized, "Token has been revoked", "")
+		return
+	}
+
+	// Check if user exists
+	existingUser, err := h.store.GetUserByID(userID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		return
+	}
+	if existingUser == nil {
+		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		return
+	}
+
+	// Hash new password
+	hashedPassword, err := h.authService.HashPassword(req.NewPassword)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to hash password", err.Error())
+		return
+	}
+
+	// Update password in database with hashed password
+	err = h.store.ChangePassword(userID, hashedPassword)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to reset password", err.Error())
+		return
+	}
+
+	utils.WriteSuccess(w, http.StatusOK, "Password reset successfully", nil)
 }
 
 // UpdateEmail handles the PUT request to update user's email
