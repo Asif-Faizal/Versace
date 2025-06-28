@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/Asif-Faizal/Versace/config"
-	"github.com/Asif-Faizal/Versace/types"
+	types "github.com/Asif-Faizal/Versace/types/user"
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 )

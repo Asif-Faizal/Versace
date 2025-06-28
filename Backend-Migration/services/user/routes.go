@@ -9,7 +9,7 @@ import (
 
 	"log"
 
-	"github.com/Asif-Faizal/Versace/types"
+	types "github.com/Asif-Faizal/Versace/types/user"
 	"github.com/Asif-Faizal/Versace/utils"
 	"github.com/golang-jwt/jwt"
 	"github.com/gorilla/mux"

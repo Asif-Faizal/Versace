@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/Asif-Faizal/Versace/types"
+	types "github.com/Asif-Faizal/Versace/types/user"
 )
 
 type Store struct {
