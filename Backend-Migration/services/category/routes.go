@@ -5,8 +5,10 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/Asif-Faizal/Versace/services/user"
 	types "github.com/Asif-Faizal/Versace/types/category"
 	"github.com/Asif-Faizal/Versace/utils"
+	"github.com/Asif-Faizal/Versace/utils/middleware"
 	"github.com/gorilla/mux"
 )
 
@@ -18,12 +20,21 @@ func NewHandler(store types.CategoryStore) *Handler {
 	return &Handler{store: store}
 }
 
-func (h *Handler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/categories", h.GetCategories).Methods("GET")
-	router.HandleFunc("/categories/{id}", h.GetCategoryByID).Methods("GET")
-	router.HandleFunc("/categories", h.CreateCategory).Methods("POST")
-	router.HandleFunc("/categories/{id}", h.UpdateCategory).Methods("PUT")
-	router.HandleFunc("/categories/{id}", h.DeleteCategory).Methods("DELETE")
+func (h *Handler) RegisterRoutes(router *mux.Router, authService *user.AuthService) {
+	// Authenticated routes
+	authRouter := router.PathPrefix("").Subrouter()
+	authRouter.Use(middleware.AuthMiddleware(authService))
+
+	authRouter.HandleFunc("/categories", h.GetCategories).Methods("GET")
+	authRouter.HandleFunc("/categories/{id}", h.GetCategoryByID).Methods("GET")
+
+	// Admin routes
+	adminRouter := authRouter.PathPrefix("").Subrouter()
+	adminRouter.Use(middleware.AdminAuthMiddleware)
+
+	adminRouter.HandleFunc("/categories", h.CreateCategory).Methods("POST")
+	adminRouter.HandleFunc("/categories/{id}", h.UpdateCategory).Methods("PUT")
+	adminRouter.HandleFunc("/categories/{id}", h.DeleteCategory).Methods("DELETE")
 }
 
 func (h *Handler) GetCategories(w http.ResponseWriter, r *http.Request) {

@@ -59,7 +59,7 @@ func (s *APIServer) Run() error {
 
 	// Initialize category handler and register its routes
 	categoryHandler := category.NewHandler(categoryStore)
-	categoryHandler.RegisterRoutes(subrouter)
+	categoryHandler.RegisterRoutes(subrouter, authService)
 
 	log.Println("Starting server on", s.listenAddress)
 
