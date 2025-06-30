@@ -2,16 +2,13 @@ package user
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
 
-	"log"
-
 	types "github.com/Asif-Faizal/Versace/types/user"
 	"github.com/Asif-Faizal/Versace/utils"
-	"github.com/golang-jwt/jwt"
 	"github.com/gorilla/mux"
 )
 
@@ -31,106 +28,39 @@ func NewHandler(store types.UserStore, tokenStore types.TokenStore, authService 
 	return &Handler{store: store, tokenStore: tokenStore, authService: authService, adminCreationToken: adminCreationToken, emailService: emailService}
 }
 
-// checkTokenRevocation is a helper function to verify if a token is revoked
-func (h *Handler) checkTokenRevocation(userID int, deviceID string) error {
-	revoked, err := h.tokenStore.IsTokenRevoked(userID, deviceID)
-	if err != nil {
-		return err
-	}
-	if revoked {
-		return fmt.Errorf("token has been revoked")
-	}
-	return nil
-}
-
 func (h *Handler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/users", h.GetUsers).Methods("GET")                                   // admin only      //? completed
-	router.HandleFunc("/users/check", h.CheckEmail).Methods("POST")                          // all users       //? completed
-	router.HandleFunc("/users", h.Register).Methods("POST")                                  // all users       //? completed
-	router.HandleFunc("/users/send-otp", h.SendOTP).Methods("POST")                          // all users       //? completed
-	router.HandleFunc("/users/verify-otp", h.VerifyOTP).Methods("POST")                      // all users       //? completed
-	router.HandleFunc("/users/device-sessions", h.GetDeviceSessions).Methods("GET")          // all users       //? completed
-	router.HandleFunc("/users/{id}", h.GetUserByIDAdmin).Methods("GET")                      // admin only      //? completed
-	router.HandleFunc("/details", h.GetUserByID).Methods("GET")                              // all users       //? completed
-	router.HandleFunc("/users", h.UpdateUser).Methods("PUT")                                 // all users       //? completed
-	router.HandleFunc("/users/update-email", h.UpdateEmail).Methods("PUT")                   // all users       //? completed
-	router.HandleFunc("/users/change-password", h.ChangePassword).Methods("PUT")             // all users       //? completed
-	router.HandleFunc("/users/delete-account", h.DeleteAccount).Methods("DELETE")            // all users       //? completed
-	router.HandleFunc("/users/admin-delete-account", h.AdminDeleteAccount).Methods("DELETE") // admin only      //? completed
-	router.HandleFunc("/users/login", h.Login).Methods("POST")                               // all users       //? completed
-	router.HandleFunc("/users/logout", h.Logout).Methods("POST")                             // all users       //? completed
-	router.HandleFunc("/users/refresh", h.Refresh).Methods("POST")                           // all users       //? completed
-	router.HandleFunc("/users/reset-password", h.ResetPassword).Methods("PUT")               // all users       //? completed
+	// Public routes
+	router.HandleFunc("/users/check", h.CheckEmail).Methods("POST")
+	router.HandleFunc("/users", h.Register).Methods("POST")
+	router.HandleFunc("/users/send-otp", h.SendOTP).Methods("POST")
+	router.HandleFunc("/users/verify-otp", h.VerifyOTP).Methods("POST")
+	router.HandleFunc("/users/login", h.Login).Methods("POST")
+	router.HandleFunc("/users/refresh", h.Refresh).Methods("POST")
+
+	// Authenticated routes
+	authRouter := router.PathPrefix("").Subrouter()
+	authRouter.Use(AuthMiddleware(h.authService))
+
+	authRouter.HandleFunc("/users/device-sessions", h.GetDeviceSessions).Methods("GET")
+	authRouter.HandleFunc("/details", h.GetUserByID).Methods("GET")
+	authRouter.HandleFunc("/users", h.UpdateUser).Methods("PUT")
+	authRouter.HandleFunc("/users/update-email", h.UpdateEmail).Methods("PUT")
+	authRouter.HandleFunc("/users/change-password", h.ChangePassword).Methods("PUT")
+	authRouter.HandleFunc("/users/delete-account", h.DeleteAccount).Methods("DELETE")
+	authRouter.HandleFunc("/users/logout", h.Logout).Methods("POST")
+	authRouter.HandleFunc("/users/reset-password", h.ResetPassword).Methods("PUT")
+
+	// Admin routes
+	adminRouter := authRouter.PathPrefix("").Subrouter()
+	adminRouter.Use(AdminAuthMiddleware)
+
+	adminRouter.HandleFunc("/users", h.GetUsers).Methods("GET")
+	adminRouter.HandleFunc("/users/{id}", h.GetUserByIDAdmin).Methods("GET")
+	adminRouter.HandleFunc("/users/admin-delete-account", h.AdminDeleteAccount).Methods("DELETE")
 }
 
 // GetUsers handles the GET request to retrieve all users
 func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
-		utils.WriteError(w, http.StatusUnauthorized, "Missing or invalid Authorization header", "")
-		return
-	}
-	tokenString := authHeader[7:]
-	token, err := h.authService.VerifyToken(tokenString)
-	if err != nil || !token.Valid {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid or expired token", "")
-		return
-	}
-
-	// Check if user is admin
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid token claims", "")
-		return
-	}
-	userRole, ok := claims["role"].(string)
-	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user role in token", "")
-		return
-	}
-	if userRole != "admin" {
-		utils.WriteError(w, http.StatusForbidden, "Access denied", "Only admin users can view all users")
-		return
-	}
-
-	// Get device ID from header
-	deviceID := r.Header.Get("X-Device-ID")
-	if deviceID == "" {
-		utils.WriteError(w, http.StatusBadRequest, "Device ID is required", "")
-		return
-	}
-
-	// Extract user ID from token for device verification
-	userIDFloat, ok := claims["id"].(float64)
-	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user ID in token", "")
-		return
-	}
-	userID := int(userIDFloat)
-
-	// Verify device session exists for this admin
-	existingToken, err := h.tokenStore.GetTokenByUserIDAndDeviceID(userID, deviceID)
-	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to verify device session", err.Error())
-		return
-	}
-	if existingToken == nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Device mismatch", "Device ID is not registered for this admin")
-		return
-	}
-
-	// Verify that the token in the header matches the device session
-	if existingToken.AccessToken != tokenString {
-		utils.WriteError(w, http.StatusUnauthorized, "Token mismatch", "Token is not associated with this device")
-		return
-	}
-
-	// Check if token is revoked
-	if err := h.checkTokenRevocation(userID, deviceID); err != nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Token has been revoked", "")
-		return
-	}
-
 	users, err := h.store.GetUsers()
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, "Failed to get users", err.Error())
@@ -161,72 +91,6 @@ func (h *Handler) GetUserByIDAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
-		utils.WriteError(w, http.StatusUnauthorized, "Missing or invalid Authorization header", "")
-		return
-	}
-	tokenString := authHeader[7:]
-	token, err := h.authService.VerifyToken(tokenString)
-	if err != nil || !token.Valid {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid or expired token", "")
-		return
-	}
-
-	// Check if user is admin
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid token claims", "")
-		return
-	}
-	userRole, ok := claims["role"].(string)
-	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user role in token", "")
-		return
-	}
-	if userRole != "admin" {
-		utils.WriteError(w, http.StatusForbidden, "Access denied", "Only admin users can view user details")
-		return
-	}
-
-	// Get device ID from header
-	deviceID := r.Header.Get("X-Device-ID")
-	if deviceID == "" {
-		utils.WriteError(w, http.StatusBadRequest, "Device ID is required", "")
-		return
-	}
-
-	// Extract admin user ID from token for device verification
-	adminUserIDFloat, ok := claims["id"].(float64)
-	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user ID in token", "")
-		return
-	}
-	adminUserID := int(adminUserIDFloat)
-
-	// Verify device session exists for this admin
-	existingToken, err := h.tokenStore.GetTokenByUserIDAndDeviceID(adminUserID, deviceID)
-	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to verify device session", err.Error())
-		return
-	}
-	if existingToken == nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Device mismatch", "Device ID is not registered for this admin")
-		return
-	}
-
-	// Verify that the token in the header matches the device session
-	if existingToken.AccessToken != tokenString {
-		utils.WriteError(w, http.StatusUnauthorized, "Token mismatch", "Token is not associated with this device")
-		return
-	}
-
-	// Check if token is revoked
-	if err := h.checkTokenRevocation(adminUserID, deviceID); err != nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Token has been revoked", "")
-		return
-	}
-
 	// Get the requested user by ID
 	user, err := h.store.GetUserByID(userID)
 	if err != nil {
@@ -246,66 +110,14 @@ func (h *Handler) GetUserByIDAdmin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetUserByID(w http.ResponseWriter, r *http.Request) {
-
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
-		utils.WriteError(w, http.StatusUnauthorized, "Missing or invalid Authorization header", "")
-		return
-	}
-	tokenString := authHeader[7:]
-	token, err := h.authService.VerifyToken(tokenString)
-	if err != nil || !token.Valid {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid or expired token", "")
-		return
-	}
-
-	// Check if user is admin
-	claims, ok := token.Claims.(jwt.MapClaims)
+	userFromCtx, ok := r.Context().Value(UserKey).(AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid token claims", "")
-		return
-	}
-
-	// Get device ID from header
-	deviceID := r.Header.Get("X-Device-ID")
-	if deviceID == "" {
-		utils.WriteError(w, http.StatusBadRequest, "Device ID is required", "")
-		return
-	}
-
-	// Extract admin user ID from token for device verification
-	UserIDFloat, ok := claims["id"].(float64)
-	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user ID in token", "")
-		return
-	}
-	userID := int(UserIDFloat)
-
-	// Verify device session exists for this admin
-	existingToken, err := h.tokenStore.GetTokenByUserIDAndDeviceID(userID, deviceID)
-	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to verify device session", err.Error())
-		return
-	}
-	if existingToken == nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Device mismatch", "Device ID is not registered for this admin")
-		return
-	}
-
-	// Verify that the token in the header matches the device session
-	if existingToken.AccessToken != tokenString {
-		utils.WriteError(w, http.StatusUnauthorized, "Token mismatch", "Token is not associated with this device")
-		return
-	}
-
-	// Check if token is revoked
-	if err := h.checkTokenRevocation(userID, deviceID); err != nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Token has been revoked", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
 		return
 	}
 
 	// Get the requested user by ID
-	user, err := h.store.GetUserByID(userID)
+	user, err := h.store.GetUserByID(userFromCtx.ID)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
 		return
@@ -540,40 +352,15 @@ func (h *Handler) VerifyOTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetDeviceSessions(w http.ResponseWriter, r *http.Request) {
-	// 1. Parse Authorization header
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
-		utils.WriteError(w, http.StatusUnauthorized, "Missing or invalid Authorization header", "")
-		return
-	}
-	tokenString := authHeader[7:]
-
-	// 2. Verify and parse token
-	token, err := h.authService.VerifyToken(tokenString)
-	if err != nil || !token.Valid {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid or expired token", "")
-		return
-	}
-	claims, ok := token.Claims.(jwt.MapClaims)
+	userFromCtx, ok := r.Context().Value(UserKey).(AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid token claims", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
 		return
 	}
-	userIDFloat, ok := claims["id"].(float64)
-	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user ID in token", "")
-		return
-	}
-	userID := int(userIDFloat)
+	userID := userFromCtx.ID
 
 	// 3. Get device_id from header
 	deviceID := r.Header.Get("X-Device-ID")
-
-	// 4. Check if token is revoked
-	if err := h.checkTokenRevocation(userID, deviceID); err != nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Token has been revoked", "")
-		return
-	}
 
 	// 5. Fetch devices for this user
 	devices, err := h.tokenStore.GetDevicesByUserID(userID)
@@ -622,61 +409,12 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Authentication
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
-		utils.WriteError(w, http.StatusUnauthorized, "Missing or invalid Authorization header", "")
-		return
-	}
-	tokenString := authHeader[7:]
-	token, err := h.authService.VerifyToken(tokenString)
-	if err != nil || !token.Valid {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid or expired token", "")
-		return
-	}
-
-	// Extract user info from token
-	claims, ok := token.Claims.(jwt.MapClaims)
+	userFromCtx, ok := r.Context().Value(UserKey).(AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid token claims", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
 		return
 	}
-	userIDFloat, ok := claims["id"].(float64)
-	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user ID in token", "")
-		return
-	}
-	userID := int(userIDFloat)
-
-	// Device verification
-	deviceID := r.Header.Get("X-Device-ID")
-	if deviceID == "" {
-		utils.WriteError(w, http.StatusBadRequest, "Device ID is required", "")
-		return
-	}
-
-	// Verify device session exists for this user
-	existingToken, err := h.tokenStore.GetTokenByUserIDAndDeviceID(userID, deviceID)
-	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to verify device session", err.Error())
-		return
-	}
-	if existingToken == nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Device mismatch", "Device ID is not registered for this user")
-		return
-	}
-
-	// Verify that the token in the header matches the device session
-	if existingToken.AccessToken != tokenString {
-		utils.WriteError(w, http.StatusUnauthorized, "Token mismatch", "Token is not associated with this device")
-		return
-	}
-
-	// Check if token is revoked
-	if err := h.checkTokenRevocation(userID, deviceID); err != nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Token has been revoked", "")
-		return
-	}
+	userID := userFromCtx.ID
 
 	// Check if user exists
 	existingUser, err := h.store.GetUserByID(userID)
@@ -710,55 +448,12 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 // DeleteUser handles the DELETE request to delete an existing user
 func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
-	// Authentication
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
-		utils.WriteError(w, http.StatusUnauthorized, "Missing or invalid Authorization header", "")
-		return
-	}
-	tokenString := authHeader[7:]
-	token, err := h.authService.VerifyToken(tokenString)
-	if err != nil || !token.Valid {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid or expired token", "")
-		return
-	}
-
-	// Extract user info from token
-	claims, ok := token.Claims.(jwt.MapClaims)
+	userFromCtx, ok := r.Context().Value(UserKey).(AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid token claims", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
 		return
 	}
-	userIDFloat, ok := claims["id"].(float64)
-	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user ID in token", "")
-		return
-	}
-	userID := int(userIDFloat)
-
-	// Device verification
-	deviceID := r.Header.Get("X-Device-ID")
-	if deviceID == "" {
-		utils.WriteError(w, http.StatusBadRequest, "Device ID is required", "")
-		return
-	}
-
-	// Verify device session exists for this user
-	existingToken, err := h.tokenStore.GetTokenByUserIDAndDeviceID(userID, deviceID)
-	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to verify device session", err.Error())
-		return
-	}
-	if existingToken == nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Device mismatch", "Device ID is not registered for this user")
-		return
-	}
-
-	// Verify that the token in the header matches the device session
-	if existingToken.AccessToken != tokenString {
-		utils.WriteError(w, http.StatusUnauthorized, "Token mismatch", "Token is not associated with this device")
-		return
-	}
+	userID := userFromCtx.ID
 
 	// Check if user exists
 	existingUser, err := h.store.GetUserByID(userID)
@@ -841,58 +536,15 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 // Logout handles the POST request to logout a user
 func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
-	// Authentication
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
-		utils.WriteError(w, http.StatusUnauthorized, "Missing or invalid Authorization header", "")
-		return
-	}
-	tokenString := authHeader[7:]
-	token, err := h.authService.VerifyToken(tokenString)
-	if err != nil || !token.Valid {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid or expired token", "")
-		return
-	}
-
-	// Extract user info from token
-	claims, ok := token.Claims.(jwt.MapClaims)
+	userFromCtx, ok := r.Context().Value(UserKey).(AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid token claims", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
 		return
 	}
-	userIDFloat, ok := claims["id"].(float64)
-	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user ID in token", "")
-		return
-	}
-	userID := int(userIDFloat)
-
-	// Device verification
-	deviceID := r.Header.Get("X-Device-ID")
-	if deviceID == "" {
-		utils.WriteError(w, http.StatusBadRequest, "Device ID is required", "")
-		return
-	}
-
-	// Verify device session exists for this user
-	existingToken, err := h.tokenStore.GetTokenByUserIDAndDeviceID(userID, deviceID)
-	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to verify device session", err.Error())
-		return
-	}
-	if existingToken == nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Device mismatch", "Device ID is not registered for this user")
-		return
-	}
-
-	// Verify that the token in the header matches the device session
-	if existingToken.AccessToken != tokenString {
-		utils.WriteError(w, http.StatusUnauthorized, "Token mismatch", "Token is not associated with this device")
-		return
-	}
+	userID := userFromCtx.ID
 
 	// Revoke the token
-	err = h.store.RevokeToken(userID)
+	err := h.store.RevokeToken(userID)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, "Failed to revoke token", err.Error())
 		return
@@ -959,61 +611,12 @@ func (h *Handler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Authentication
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
-		utils.WriteError(w, http.StatusUnauthorized, "Missing or invalid Authorization header", "")
-		return
-	}
-	tokenString := authHeader[7:]
-	token, err := h.authService.VerifyToken(tokenString)
-	if err != nil || !token.Valid {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid or expired token", "")
-		return
-	}
-
-	// Extract user info from token
-	claims, ok := token.Claims.(jwt.MapClaims)
+	userFromCtx, ok := r.Context().Value(UserKey).(AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid token claims", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
 		return
 	}
-	userIDFloat, ok := claims["id"].(float64)
-	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user ID in token", "")
-		return
-	}
-	userID := int(userIDFloat)
-
-	// Device verification
-	deviceID := r.Header.Get("X-Device-ID")
-	if deviceID == "" {
-		utils.WriteError(w, http.StatusBadRequest, "Device ID is required", "")
-		return
-	}
-
-	// Verify device session exists for this user
-	existingToken, err := h.tokenStore.GetTokenByUserIDAndDeviceID(userID, deviceID)
-	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to verify device session", err.Error())
-		return
-	}
-	if existingToken == nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Device mismatch", "Device ID is not registered for this user")
-		return
-	}
-
-	// Verify that the token in the header matches the device session
-	if existingToken.AccessToken != tokenString {
-		utils.WriteError(w, http.StatusUnauthorized, "Token mismatch", "Token is not associated with this device")
-		return
-	}
-
-	// Check if token is revoked
-	if err := h.checkTokenRevocation(userID, deviceID); err != nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Token has been revoked", "")
-		return
-	}
+	userID := userFromCtx.ID
 
 	// Check if user exists
 	existingUser, err := h.store.GetUserByID(userID)
@@ -1058,61 +661,12 @@ func (h *Handler) UpdateEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Authentication
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
-		utils.WriteError(w, http.StatusUnauthorized, "Missing or invalid Authorization header", "")
-		return
-	}
-	tokenString := authHeader[7:]
-	token, err := h.authService.VerifyToken(tokenString)
-	if err != nil || !token.Valid {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid or expired token", "")
-		return
-	}
-
-	// Extract user info from token
-	claims, ok := token.Claims.(jwt.MapClaims)
+	userFromCtx, ok := r.Context().Value(UserKey).(AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid token claims", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
 		return
 	}
-	userIDFloat, ok := claims["id"].(float64)
-	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user ID in token", "")
-		return
-	}
-	userID := int(userIDFloat)
-
-	// Device verification
-	deviceID := r.Header.Get("X-Device-ID")
-	if deviceID == "" {
-		utils.WriteError(w, http.StatusBadRequest, "Device ID is required", "")
-		return
-	}
-
-	// Verify device session exists for this user
-	existingToken, err := h.tokenStore.GetTokenByUserIDAndDeviceID(userID, deviceID)
-	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to verify device session", err.Error())
-		return
-	}
-	if existingToken == nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Device mismatch", "Device ID is not registered for this user")
-		return
-	}
-
-	// Verify that the token in the header matches the device session
-	if existingToken.AccessToken != tokenString {
-		utils.WriteError(w, http.StatusUnauthorized, "Token mismatch", "Token is not associated with this device")
-		return
-	}
-
-	// Check if token is revoked
-	if err := h.checkTokenRevocation(userID, deviceID); err != nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Token has been revoked", "")
-		return
-	}
+	userID := userFromCtx.ID
 
 	// Check if user exists
 	existingUser, err := h.store.GetUserByID(userID)
@@ -1171,61 +725,12 @@ func (h *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Authentication
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
-		utils.WriteError(w, http.StatusUnauthorized, "Missing or invalid Authorization header", "")
-		return
-	}
-	tokenString := authHeader[7:]
-	token, err := h.authService.VerifyToken(tokenString)
-	if err != nil || !token.Valid {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid or expired token", "")
-		return
-	}
-
-	// Extract user info from token
-	claims, ok := token.Claims.(jwt.MapClaims)
+	userFromCtx, ok := r.Context().Value(UserKey).(AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid token claims", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
 		return
 	}
-	userIDFloat, ok := claims["id"].(float64)
-	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user ID in token", "")
-		return
-	}
-	userID := int(userIDFloat)
-
-	// Device verification
-	deviceID := r.Header.Get("X-Device-ID")
-	if deviceID == "" {
-		utils.WriteError(w, http.StatusBadRequest, "Device ID is required", "")
-		return
-	}
-
-	// Verify device session exists for this user
-	existingToken, err := h.tokenStore.GetTokenByUserIDAndDeviceID(userID, deviceID)
-	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to verify device session", err.Error())
-		return
-	}
-	if existingToken == nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Device mismatch", "Device ID is not registered for this user")
-		return
-	}
-
-	// Verify that the token in the header matches the device session
-	if existingToken.AccessToken != tokenString {
-		utils.WriteError(w, http.StatusUnauthorized, "Token mismatch", "Token is not associated with this device")
-		return
-	}
-
-	// Check if token is revoked
-	if err := h.checkTokenRevocation(userID, deviceID); err != nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Token has been revoked", "")
-		return
-	}
+	userID := userFromCtx.ID
 
 	// Check if user exists
 	existingUser, err := h.store.GetUserByID(userID)
@@ -1273,61 +778,12 @@ func (h *Handler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Authentication
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
-		utils.WriteError(w, http.StatusUnauthorized, "Missing or invalid Authorization header", "")
-		return
-	}
-	tokenString := authHeader[7:]
-	token, err := h.authService.VerifyToken(tokenString)
-	if err != nil || !token.Valid {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid or expired token", "")
-		return
-	}
-
-	// Extract user info from token
-	claims, ok := token.Claims.(jwt.MapClaims)
+	userFromCtx, ok := r.Context().Value(UserKey).(AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid token claims", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
 		return
 	}
-	userIDFloat, ok := claims["id"].(float64)
-	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user ID in token", "")
-		return
-	}
-	userID := int(userIDFloat)
-
-	// Device verification
-	deviceID := r.Header.Get("X-Device-ID")
-	if deviceID == "" {
-		utils.WriteError(w, http.StatusBadRequest, "Device ID is required", "")
-		return
-	}
-
-	// Verify device session exists for this user
-	existingToken, err := h.tokenStore.GetTokenByUserIDAndDeviceID(userID, deviceID)
-	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to verify device session", err.Error())
-		return
-	}
-	if existingToken == nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Device mismatch", "Device ID is not registered for this user")
-		return
-	}
-
-	// Verify that the token in the header matches the device session
-	if existingToken.AccessToken != tokenString {
-		utils.WriteError(w, http.StatusUnauthorized, "Token mismatch", "Token is not associated with this device")
-		return
-	}
-
-	// Check if token is revoked
-	if err := h.checkTokenRevocation(userID, deviceID); err != nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Token has been revoked", "")
-		return
-	}
+	userID := userFromCtx.ID
 
 	// Check if user exists
 	existingUser, err := h.store.GetUserByID(userID)
@@ -1365,76 +821,16 @@ func (h *Handler) AdminDeleteAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Authentication
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
-		utils.WriteError(w, http.StatusUnauthorized, "Missing or invalid Authorization header", "")
-		return
-	}
-	tokenString := authHeader[7:]
-	token, err := h.authService.VerifyToken(tokenString)
-	if err != nil || !token.Valid {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid or expired token", "")
-		return
-	}
-
-	// Extract user info from token
-	claims, ok := token.Claims.(jwt.MapClaims)
+	userFromCtx, ok := r.Context().Value(UserKey).(AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid token claims", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
 		return
 	}
-	userIDFloat, ok := claims["id"].(float64)
-	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user ID in token", "")
-		return
-	}
-	userID := int(userIDFloat)
-	userRole, ok := claims["role"].(string)
-	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user role in token", "")
-		return
-	}
-
-	// Check if user is admin
-	if userRole != "admin" {
-		utils.WriteError(w, http.StatusForbidden, "Access denied", "Only admin users can use this endpoint")
-		return
-	}
+	userID := userFromCtx.ID
 
 	// Verify admin creation token
 	if req.AdminCreationToken != h.adminCreationToken {
 		utils.WriteError(w, http.StatusUnauthorized, "Invalid admin creation token", "")
-		return
-	}
-
-	// Device verification
-	deviceID := r.Header.Get("X-Device-ID")
-	if deviceID == "" {
-		utils.WriteError(w, http.StatusBadRequest, "Device ID is required", "")
-		return
-	}
-
-	// Verify device session exists for this admin
-	existingToken, err := h.tokenStore.GetTokenByUserIDAndDeviceID(userID, deviceID)
-	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to verify device session", err.Error())
-		return
-	}
-	if existingToken == nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Device mismatch", "Device ID is not registered for this admin")
-		return
-	}
-
-	// Verify that the token in the header matches the device session
-	if existingToken.AccessToken != tokenString {
-		utils.WriteError(w, http.StatusUnauthorized, "Token mismatch", "Token is not associated with this device")
-		return
-	}
-
-	// Check if token is revoked
-	if err := h.checkTokenRevocation(userID, deviceID); err != nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Token has been revoked", "")
 		return
 	}
 

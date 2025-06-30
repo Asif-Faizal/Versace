@@ -94,7 +94,7 @@ func (s *AuthService) CreateToken(user types.Authable, deviceInfo types.DeviceIn
 	return accessToken, refreshToken, nil
 }
 
-func (s *AuthService) VerifyToken(tokenString string) (*jwt.Token, error) {
+func (s *AuthService) parseToken(tokenString string) (*jwt.Token, error) {
 	return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -103,9 +103,45 @@ func (s *AuthService) VerifyToken(tokenString string) (*jwt.Token, error) {
 	})
 }
 
+func (s *AuthService) VerifyTokenAndDevice(accessTokenString string, deviceID string) (*jwt.Token, error) {
+	token, err := s.parseToken(accessTokenString)
+	if err != nil {
+		return nil, fmt.Errorf("invalid token: %w", err)
+	}
+
+	if !token.Valid {
+		return nil, fmt.Errorf("invalid token")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, fmt.Errorf("invalid token claims")
+	}
+
+	userID := int(claims["id"].(float64))
+
+	storedToken, err := s.tokenStore.GetTokenByUserIDAndDeviceID(userID, deviceID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get token from store: %w", err)
+	}
+	if storedToken == nil {
+		return nil, fmt.Errorf("token not found for this device")
+	}
+
+	if storedToken.AccessToken != accessTokenString {
+		return nil, fmt.Errorf("access token mismatch")
+	}
+
+	if storedToken.Revoked {
+		return nil, fmt.Errorf("token has been revoked")
+	}
+
+	return token, nil
+}
+
 func (s *AuthService) RefreshToken(refreshTokenString string, deviceInfo types.DeviceInfo) (string, string, int, error) {
 	// 1. Verify the refresh token
-	token, err := s.VerifyToken(refreshTokenString)
+	token, err := s.parseToken(refreshTokenString)
 	if err != nil {
 		return "", "", 0, fmt.Errorf("invalid refresh token: %w", err)
 	}

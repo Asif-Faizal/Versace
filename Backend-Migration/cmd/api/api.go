@@ -7,6 +7,7 @@ import (
 
 	"github.com/Asif-Faizal/Versace/config"
 	"github.com/Asif-Faizal/Versace/services/category"
+	"github.com/Asif-Faizal/Versace/services/subcategory"
 	"github.com/Asif-Faizal/Versace/services/user"
 	"github.com/Asif-Faizal/Versace/utils/middleware"
 	"github.com/gorilla/mux"
@@ -60,6 +61,13 @@ func (s *APIServer) Run() error {
 	// Initialize category handler and register its routes
 	categoryHandler := category.NewHandler(categoryStore)
 	categoryHandler.RegisterRoutes(subrouter, authService)
+
+	// Initialize subcategory store
+	subcategoryStore := subcategory.NewStore(s.db)
+
+	// Initialize subcategory handler and register its routes
+	subcategoryHandler := subcategory.NewHandler(subcategoryStore, categoryStore)
+	subcategoryHandler.RegisterRoutes(subrouter, authService)
 
 	log.Println("Starting server on", s.listenAddress)
 

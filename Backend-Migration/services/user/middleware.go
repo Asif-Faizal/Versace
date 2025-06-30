@@ -1,11 +1,10 @@
-package middleware
+package user
 
 import (
 	"context"
 	"net/http"
 	"strings"
 
-	"github.com/Asif-Faizal/Versace/services/user"
 	"github.com/Asif-Faizal/Versace/utils"
 	"github.com/golang-jwt/jwt"
 )
@@ -22,7 +21,7 @@ type AuthenticatedUser struct {
 	Role  string
 }
 
-func AuthMiddleware(authService *user.AuthService) func(http.Handler) http.Handler {
+func AuthMiddleware(authService *AuthService) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			authHeader := r.Header.Get("Authorization")
@@ -38,8 +37,14 @@ func AuthMiddleware(authService *user.AuthService) func(http.Handler) http.Handl
 			}
 			tokenString := parts[1]
 
-			token, err := authService.VerifyToken(tokenString)
-			if err != nil || !token.Valid {
+			deviceID := r.Header.Get("X-Device-ID")
+			if deviceID == "" {
+				utils.WriteError(w, http.StatusUnauthorized, "Missing Device-ID header", "")
+				return
+			}
+
+			token, err := authService.VerifyTokenAndDevice(tokenString, deviceID)
+			if err != nil {
 				utils.WriteError(w, http.StatusUnauthorized, "Invalid or expired token", err.Error())
 				return
 			}
