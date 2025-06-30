@@ -15,7 +15,7 @@ type UserStore interface {
 	DeleteUser(userID int) error
 	UpdateEmail(userID int, email string) error
 	ChangePassword(userID int, password string) error
-	RevokeToken(userID int) error
+	RevokeToken(userID int, deviceID string) error
 
 	// OTP
 	SaveOTP(otp *OTP) error

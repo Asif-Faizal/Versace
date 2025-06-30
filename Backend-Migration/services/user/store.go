@@ -247,8 +247,24 @@ func (s *Store) ChangePassword(userID int, hashedPassword string) error {
 	return err
 }
 
-func (s *Store) RevokeToken(userID int) error {
-	_, err := s.db.Exec("UPDATE tokens SET revoked = true WHERE user_id = ?", userID)
+func (s *Store) RevokeToken(userID int, deviceID string) error {
+	// Find the token_id associated with the user_id and device_id
+	var tokenID int
+	err := s.db.QueryRow(`
+        SELECT t.id 
+        FROM tokens t
+        JOIN device_info di ON t.id = di.token_id
+        WHERE t.user_id = ? AND di.device_id = ?
+    `, userID, deviceID).Scan(&tokenID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil // No token found, so nothing to revoke.
+		}
+		return err
+	}
+
+	// Set the revoked flag to true for the found token
+	_, err = s.db.Exec("UPDATE tokens SET revoked = true WHERE id = ?", tokenID)
 	return err
 }
 

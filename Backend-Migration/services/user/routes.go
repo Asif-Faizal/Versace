@@ -542,9 +542,14 @@ func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	userID := userFromCtx.ID
+	deviceID := r.Header.Get("X-Device-ID")
+	if deviceID == "" {
+		utils.WriteError(w, http.StatusBadRequest, "Device ID is required", "")
+		return
+	}
 
 	// Revoke the token
-	err := h.store.RevokeToken(userID)
+	err := h.store.RevokeToken(userID, deviceID)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, "Failed to revoke token", err.Error())
 		return
