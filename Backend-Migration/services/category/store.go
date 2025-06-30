@@ -71,6 +71,11 @@ func (s *Store) UpdateCategory(category *types.Category) error {
 	return err
 }
 
+func (s *Store) UpdateCategoryImageURL(id int, imageURL string) error {
+	_, err := s.db.Exec("UPDATE categories SET image_url = ?, updated_at = NOW() WHERE id = ?", imageURL, id)
+	return err
+}
+
 func (s *Store) DeleteCategory(id int) error {
 	// Delete a category from the database
 	_, err := s.db.Exec("DELETE FROM categories WHERE id = ?", id)

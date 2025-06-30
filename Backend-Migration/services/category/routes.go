@@ -2,9 +2,11 @@ package category
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
+	"github.com/Asif-Faizal/Versace/services/supabase"
 	"github.com/Asif-Faizal/Versace/services/user"
 	types "github.com/Asif-Faizal/Versace/types/category"
 	"github.com/Asif-Faizal/Versace/utils"
@@ -13,11 +15,12 @@ import (
 )
 
 type Handler struct {
-	store types.CategoryStore
+	store           types.CategoryStore
+	supabaseService *supabase.SupabaseService
 }
 
-func NewHandler(store types.CategoryStore) *Handler {
-	return &Handler{store: store}
+func NewHandler(store types.CategoryStore, supabaseService *supabase.SupabaseService) *Handler {
+	return &Handler{store: store, supabaseService: supabaseService}
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router, authService *user.AuthService, storageMiddleware *middleware.StorageMiddleware) {
@@ -35,6 +38,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router, authService *user.AuthServi
 	adminRouter.Handle("/categories", storageMiddleware.Upload(http.HandlerFunc(h.CreateCategory))).Methods("POST")
 	adminRouter.HandleFunc("/categories/{id}", h.UpdateCategory).Methods("PUT")
 	adminRouter.HandleFunc("/categories/{id}", h.DeleteCategory).Methods("DELETE")
+	adminRouter.Handle("/categories/{id}/image", storageMiddleware.Upload(http.HandlerFunc(h.UpdateCategoryImage))).Methods("POST")
 }
 
 func (h *Handler) GetCategories(w http.ResponseWriter, r *http.Request) {
@@ -139,6 +143,53 @@ func (h *Handler) UpdateCategory(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteSuccess(w, http.StatusOK, "Category updated successfully", category)
+}
+
+func (h *Handler) UpdateCategoryImage(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	idStr, ok := vars["id"]
+	if !ok {
+		utils.WriteError(w, http.StatusBadRequest, "Missing category ID", "")
+		return
+	}
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid category ID", err.Error())
+		return
+	}
+
+	imageUrls, ok := r.Context().Value("imageUrls").([]string)
+	if !ok || len(imageUrls) == 0 {
+		utils.WriteError(w, http.StatusBadRequest, "Image URL not found", "")
+		return
+	}
+
+	category, err := h.store.GetCategoryByID(id)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, "Category not found", err.Error())
+		return
+	}
+
+	if category.ImageURL != "" {
+		fileName, err := supabase.GetFileNameFromURL(category.ImageURL)
+		if err != nil {
+			utils.WriteError(w, http.StatusInternalServerError, "Failed to parse old image URL", err.Error())
+			return
+		}
+
+		if err := h.supabaseService.DeleteFile("images", fileName); err != nil {
+			log.Printf("Failed to delete old image from storage: %v", err)
+		}
+	}
+
+	newImageURL := imageUrls[0]
+	if err := h.store.UpdateCategoryImageURL(id, newImageURL); err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to update category image URL", err.Error())
+		return
+	}
+
+	utils.WriteSuccess(w, http.StatusOK, "Category image updated successfully", map[string]string{"imageUrl": newImageURL})
 }
 
 func (h *Handler) DeleteCategory(w http.ResponseWriter, r *http.Request) {

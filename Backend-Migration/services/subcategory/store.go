@@ -15,31 +15,26 @@ func NewStore(db *sql.DB) *Store {
 }
 
 func (s *Store) GetSubcategories() ([]types.Subcategory, error) {
-	rows, err := s.db.Query("SELECT id, name, description, category_id, created_at, updated_at FROM subcategories")
+	var subcategories []types.Subcategory
+	rows, err := s.db.Query("SELECT id, name, description, image_url, category_id, created_at, updated_at FROM subcategories")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var subcategories []types.Subcategory
 	for rows.Next() {
 		var subcategory types.Subcategory
-		if err := rows.Scan(&subcategory.ID, &subcategory.Name, &subcategory.Description, &subcategory.CategoryID, &subcategory.CreatedAt, &subcategory.UpdatedAt); err != nil {
+		if err := rows.Scan(&subcategory.ID, &subcategory.Name, &subcategory.Description, &subcategory.ImageURL, &subcategory.CategoryID, &subcategory.CreatedAt, &subcategory.UpdatedAt); err != nil {
 			return nil, err
 		}
 		subcategories = append(subcategories, subcategory)
 	}
-
-	if err = rows.Err(); err != nil {
-		return nil, err
-	}
-
 	return subcategories, nil
 }
 
 func (s *Store) GetSubcategoryByID(id int) (*types.Subcategory, error) {
 	var subcategory types.Subcategory
-	err := s.db.QueryRow("SELECT id, name, description, category_id, created_at, updated_at FROM subcategories WHERE id = ?", id).Scan(&subcategory.ID, &subcategory.Name, &subcategory.Description, &subcategory.CategoryID, &subcategory.CreatedAt, &subcategory.UpdatedAt)
+	err := s.db.QueryRow("SELECT id, name, description, image_url, category_id, created_at, updated_at FROM subcategories WHERE id = ?", id).Scan(&subcategory.ID, &subcategory.Name, &subcategory.Description, &subcategory.ImageURL, &subcategory.CategoryID, &subcategory.CreatedAt, &subcategory.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +42,7 @@ func (s *Store) GetSubcategoryByID(id int) (*types.Subcategory, error) {
 }
 
 func (s *Store) GetSubcategoriesByCategoryID(categoryID int) ([]types.Subcategory, error) {
-	rows, err := s.db.Query("SELECT id, name, description, category_id, created_at, updated_at FROM subcategories WHERE category_id = ?", categoryID)
+	rows, err := s.db.Query("SELECT id, name, description, image_url, category_id, created_at, updated_at FROM subcategories WHERE category_id = ?", categoryID)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +51,7 @@ func (s *Store) GetSubcategoriesByCategoryID(categoryID int) ([]types.Subcategor
 	var subcategories []types.Subcategory
 	for rows.Next() {
 		var subcategory types.Subcategory
-		if err := rows.Scan(&subcategory.ID, &subcategory.Name, &subcategory.Description, &subcategory.CategoryID, &subcategory.CreatedAt, &subcategory.UpdatedAt); err != nil {
+		if err := rows.Scan(&subcategory.ID, &subcategory.Name, &subcategory.Description, &subcategory.ImageURL, &subcategory.CategoryID, &subcategory.CreatedAt, &subcategory.UpdatedAt); err != nil {
 			return nil, err
 		}
 		subcategories = append(subcategories, subcategory)
@@ -70,7 +65,7 @@ func (s *Store) GetSubcategoriesByCategoryID(categoryID int) ([]types.Subcategor
 }
 
 func (s *Store) CreateSubcategory(subcategory *types.Subcategory) (*types.Subcategory, error) {
-	res, err := s.db.Exec("INSERT INTO subcategories (name, description, category_id) VALUES (?, ?, ?)", subcategory.Name, subcategory.Description, subcategory.CategoryID)
+	res, err := s.db.Exec("INSERT INTO subcategories (name, description, image_url, category_id) VALUES (?, ?, ?, ?)", subcategory.Name, subcategory.Description, subcategory.ImageURL, subcategory.CategoryID)
 	if err != nil {
 		return nil, err
 	}
@@ -85,6 +80,11 @@ func (s *Store) CreateSubcategory(subcategory *types.Subcategory) (*types.Subcat
 
 func (s *Store) UpdateSubcategory(subcategory *types.Subcategory) error {
 	_, err := s.db.Exec("UPDATE subcategories SET name = ?, description = ?, category_id = ?, updated_at = NOW() WHERE id = ?", subcategory.Name, subcategory.Description, subcategory.CategoryID, subcategory.ID)
+	return err
+}
+
+func (s *Store) UpdateSubcategoryImageURL(id int, imageURL string) error {
+	_, err := s.db.Exec("UPDATE subcategories SET image_url = ?, updated_at = NOW() WHERE id = ?", imageURL, id)
 	return err
 }
 

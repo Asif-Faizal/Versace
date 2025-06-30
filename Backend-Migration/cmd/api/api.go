@@ -8,6 +8,7 @@ import (
 	"github.com/Asif-Faizal/Versace/config"
 	"github.com/Asif-Faizal/Versace/services/category"
 	"github.com/Asif-Faizal/Versace/services/subcategory"
+	"github.com/Asif-Faizal/Versace/services/supabase"
 	"github.com/Asif-Faizal/Versace/services/user"
 	"github.com/Asif-Faizal/Versace/utils/middleware"
 	"github.com/gorilla/mux"
@@ -61,15 +62,18 @@ func (s *APIServer) Run() error {
 	// Initialize category store
 	categoryStore := category.NewStore(s.db)
 
+	// Initialize supabase service
+	supabaseService := supabase.NewSupabaseService(s.config)
+
 	// Initialize category handler and register its routes
-	categoryHandler := category.NewHandler(categoryStore)
+	categoryHandler := category.NewHandler(categoryStore, supabaseService)
 	categoryHandler.RegisterRoutes(subrouter, authService, storageMiddleware)
 
 	// Initialize subcategory store
 	subcategoryStore := subcategory.NewStore(s.db)
 
 	// Initialize subcategory handler and register its routes
-	subcategoryHandler := subcategory.NewHandler(subcategoryStore, categoryStore)
+	subcategoryHandler := subcategory.NewHandler(subcategoryStore, categoryStore, supabaseService)
 	subcategoryHandler.RegisterRoutes(subrouter, authService, storageMiddleware)
 
 	// Example of how to use the storage middleware for a route

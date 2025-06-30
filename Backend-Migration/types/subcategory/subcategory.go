@@ -6,6 +6,7 @@ type Subcategory struct {
 	ID          int       `json:"id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
+	ImageURL    string    `json:"imageUrl"`
 	CategoryID  int       `json:"categoryId"`
 	CreatedAt   time.Time `json:"createdAt"`
 	UpdatedAt   time.Time `json:"updatedAt"`
@@ -17,6 +18,7 @@ type SubcategoryStore interface {
 	GetSubcategoriesByCategoryID(categoryID int) ([]Subcategory, error)
 	CreateSubcategory(subcategory *Subcategory) (*Subcategory, error)
 	UpdateSubcategory(subcategory *Subcategory) error
+	UpdateSubcategoryImageURL(id int, imageURL string) error
 	DeleteSubcategory(id int) error
 }
 
