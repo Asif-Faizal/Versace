@@ -5,21 +5,10 @@ import (
 	"net/http"
 	"strings"
 
+	types "github.com/Asif-Faizal/Versace/types/user"
 	"github.com/Asif-Faizal/Versace/utils"
 	"github.com/golang-jwt/jwt"
 )
-
-type key int
-
-const (
-	UserKey key = iota
-)
-
-type AuthenticatedUser struct {
-	ID    int
-	Email string
-	Role  string
-}
 
 func AuthMiddleware(authService *AuthService) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -55,13 +44,13 @@ func AuthMiddleware(authService *AuthService) func(http.Handler) http.Handler {
 				return
 			}
 
-			user := AuthenticatedUser{
+			user := types.AuthenticatedUser{
 				ID:    int(claims["id"].(float64)),
 				Email: claims["email"].(string),
 				Role:  claims["role"].(string),
 			}
 
-			ctx := context.WithValue(r.Context(), UserKey, user)
+			ctx := context.WithValue(r.Context(), types.UserKey, user)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
@@ -69,7 +58,7 @@ func AuthMiddleware(authService *AuthService) func(http.Handler) http.Handler {
 
 func AdminAuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		user, ok := r.Context().Value(UserKey).(AuthenticatedUser)
+		user, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 		if !ok || strings.ToUpper(user.Role) != "ADMIN" {
 			utils.WriteError(w, http.StatusForbidden, "Admin access required", "")
 			return

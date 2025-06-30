@@ -1,14 +1,18 @@
 package user
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
 	"time"
 
+	"github.com/Asif-Faizal/Versace/config"
+	"github.com/Asif-Faizal/Versace/services/supabase"
 	types "github.com/Asif-Faizal/Versace/types/user"
 	"github.com/Asif-Faizal/Versace/utils"
+	"github.com/Asif-Faizal/Versace/utils/middleware"
 	"github.com/gorilla/mux"
 )
 
@@ -20,12 +24,13 @@ type Handler struct {
 	authService        *AuthService
 	emailService       *EmailService
 	adminCreationToken string // Token required for admin creation
+	supabaseService    *supabase.SupabaseService
 }
 
 // NewHandler creates a new instance of the user Handler
 // This is a constructor function for the Handler struct
-func NewHandler(store types.UserStore, tokenStore types.TokenStore, authService *AuthService, adminCreationToken string, emailService *EmailService) *Handler {
-	return &Handler{store: store, tokenStore: tokenStore, authService: authService, adminCreationToken: adminCreationToken, emailService: emailService}
+func NewHandler(store types.UserStore, tokenStore types.TokenStore, authService *AuthService, adminCreationToken string, emailService *EmailService, supabaseService *supabase.SupabaseService) *Handler {
+	return &Handler{store: store, tokenStore: tokenStore, authService: authService, adminCreationToken: adminCreationToken, emailService: emailService, supabaseService: supabaseService}
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
@@ -49,6 +54,12 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 	authRouter.HandleFunc("/users/delete-account", h.DeleteAccount).Methods("DELETE")
 	authRouter.HandleFunc("/users/logout", h.Logout).Methods("POST")
 	authRouter.HandleFunc("/users/reset-password", h.ResetPassword).Methods("PUT")
+	authRouter.HandleFunc("/users/me", h.handleGetMyProfile).Methods("GET")
+	authRouter.HandleFunc("/users/me", h.handleUpdateMyProfile).Methods("PUT")
+	authRouter.HandleFunc("/users/me/email", h.handleChangeEmail).Methods("PUT")
+	authRouter.HandleFunc("/users/me/password", h.handleChangePassword).Methods("PUT")
+	authRouter.HandleFunc("/users/me", h.handleDeleteMyAccount).Methods("DELETE")
+	authRouter.Handle("/users/me/profile/image", middleware.NewStorageMiddleware(config.Envs).Upload(http.HandlerFunc(h.handleUpdateProfileImage))).Methods("POST")
 
 	// Admin routes
 	adminRouter := authRouter.PathPrefix("").Subrouter()
@@ -110,7 +121,7 @@ func (h *Handler) GetUserByIDAdmin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetUserByID(w http.ResponseWriter, r *http.Request) {
-	userFromCtx, ok := r.Context().Value(UserKey).(AuthenticatedUser)
+	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
 		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
 		return
@@ -352,7 +363,7 @@ func (h *Handler) VerifyOTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetDeviceSessions(w http.ResponseWriter, r *http.Request) {
-	userFromCtx, ok := r.Context().Value(UserKey).(AuthenticatedUser)
+	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
 		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
 		return
@@ -409,7 +420,7 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userFromCtx, ok := r.Context().Value(UserKey).(AuthenticatedUser)
+	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
 		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
 		return
@@ -448,7 +459,7 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 // DeleteUser handles the DELETE request to delete an existing user
 func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
-	userFromCtx, ok := r.Context().Value(UserKey).(AuthenticatedUser)
+	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
 		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
 		return
@@ -536,7 +547,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 // Logout handles the POST request to logout a user
 func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
-	userFromCtx, ok := r.Context().Value(UserKey).(AuthenticatedUser)
+	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
 		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
 		return
@@ -616,7 +627,7 @@ func (h *Handler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userFromCtx, ok := r.Context().Value(UserKey).(AuthenticatedUser)
+	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
 		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
 		return
@@ -666,7 +677,7 @@ func (h *Handler) UpdateEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userFromCtx, ok := r.Context().Value(UserKey).(AuthenticatedUser)
+	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
 		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
 		return
@@ -730,7 +741,7 @@ func (h *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userFromCtx, ok := r.Context().Value(UserKey).(AuthenticatedUser)
+	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
 		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
 		return
@@ -783,7 +794,7 @@ func (h *Handler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userFromCtx, ok := r.Context().Value(UserKey).(AuthenticatedUser)
+	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
 		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
 		return
@@ -826,7 +837,7 @@ func (h *Handler) AdminDeleteAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userFromCtx, ok := r.Context().Value(UserKey).(AuthenticatedUser)
+	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
 		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
 		return
@@ -864,4 +875,239 @@ func (h *Handler) AdminDeleteAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteSuccess(w, http.StatusOK, "Admin account deleted successfully", nil)
+}
+
+func (h *Handler) handleGetMyProfile(w http.ResponseWriter, r *http.Request) {
+	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
+		return
+	}
+
+	user, err := h.store.GetUserByID(userFromCtx.ID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		return
+	}
+	if user == nil {
+		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		return
+	}
+
+	response := types.UserResponse{
+		User: *user,
+	}
+
+	utils.WriteSuccess(w, http.StatusOK, "User fetched successfully", response)
+}
+
+func (h *Handler) handleUpdateMyProfile(w http.ResponseWriter, r *http.Request) {
+	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
+		return
+	}
+
+	var req types.UpdateUserRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		return
+	}
+
+	if !utils.IsValidName(req.FirstName) {
+		utils.WriteError(w, http.StatusBadRequest, "First name must be more than 3 characters", "")
+		return
+	}
+	if !utils.IsValidOptionalName(req.LastName) {
+		utils.WriteError(w, http.StatusBadRequest, "Last name must be empty or more than 3 characters", "")
+		return
+	}
+
+	user, err := h.store.GetUserByID(userFromCtx.ID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		return
+	}
+	if user == nil {
+		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		return
+	}
+
+	user.FirstName = req.FirstName
+	user.LastName = req.LastName
+	user.UpdatedAt = time.Now()
+
+	err = h.store.UpdateUser(user)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to update user", err.Error())
+		return
+	}
+
+	response := types.UserResponse{
+		User: *user,
+	}
+
+	utils.WriteSuccess(w, http.StatusOK, "User updated successfully", response)
+}
+
+func (h *Handler) handleChangeEmail(w http.ResponseWriter, r *http.Request) {
+	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
+		return
+	}
+
+	var req types.UpdateEmailRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		return
+	}
+
+	if !utils.IsValidEmail(req.Email) {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid email format", "")
+		return
+	}
+
+	user, err := h.store.GetUserByID(userFromCtx.ID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		return
+	}
+	if user == nil {
+		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		return
+	}
+
+	if req.Email != user.Email {
+		existingUser, err := h.store.GetUserByEmail(req.Email)
+		if err != nil {
+			utils.WriteError(w, http.StatusInternalServerError, "Failed to check email availability", err.Error())
+			return
+		}
+		if existingUser != nil {
+			utils.WriteError(w, http.StatusConflict, "Email already exists", "")
+			return
+		}
+	}
+
+	user.Email = req.Email
+	user.UpdatedAt = time.Now()
+
+	err = h.store.UpdateEmail(user.ID, req.Email)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to update email", err.Error())
+		return
+	}
+
+	response := types.UserResponse{
+		User: *user,
+	}
+
+	utils.WriteSuccess(w, http.StatusOK, "Email updated successfully", response)
+}
+
+func (h *Handler) handleChangePassword(w http.ResponseWriter, r *http.Request) {
+	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
+		return
+	}
+
+	var req types.ChangePasswordRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		return
+	}
+
+	if !utils.IsValidPassword(req.NewPassword) {
+		utils.WriteError(w, http.StatusBadRequest, "New password must be more than 6 characters", "")
+		return
+	}
+
+	user, err := h.store.GetUserByID(userFromCtx.ID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		return
+	}
+	if user == nil {
+		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		return
+	}
+
+	if err := h.authService.ComparePasswords(user.Password, req.CurrentPassword); err != nil {
+		utils.WriteError(w, http.StatusUnauthorized, "Current password is incorrect", "")
+		return
+	}
+
+	hashedPassword, err := h.authService.HashPassword(req.NewPassword)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to hash password", err.Error())
+		return
+	}
+
+	err = h.store.ChangePassword(user.ID, hashedPassword)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to update password", err.Error())
+		return
+	}
+
+	utils.WriteSuccess(w, http.StatusOK, "Password changed successfully", nil)
+}
+
+func (h *Handler) handleDeleteMyAccount(w http.ResponseWriter, r *http.Request) {
+	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
+		return
+	}
+
+	err := h.store.DeleteUser(userFromCtx.ID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to delete user", err.Error())
+		return
+	}
+
+	utils.WriteSuccess(w, http.StatusOK, "Account deleted successfully", nil)
+}
+
+func (h *Handler) handleUpdateProfileImage(w http.ResponseWriter, r *http.Request) {
+	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
+		return
+	}
+	userID := userFromCtx.ID
+
+	imageUrls, ok := r.Context().Value("imageUrls").([]string)
+	if !ok || len(imageUrls) == 0 {
+		utils.WriteError(w, http.StatusBadRequest, "Image URL not found", "")
+		return
+	}
+
+	user, err := h.store.GetUserByID(userID)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, "User not found", err.Error())
+		return
+	}
+
+	if user.ProfileURL.String != "" {
+		fileName, err := supabase.GetFileNameFromURL(user.ProfileURL.String)
+		if err != nil {
+			utils.WriteError(w, http.StatusInternalServerError, "Failed to parse old image URL", err.Error())
+			return
+		}
+
+		if err := h.supabaseService.DeleteFile("images", fileName); err != nil {
+			log.Printf("Failed to delete old image from storage: %v", err)
+		}
+	}
+
+	newImageURL := imageUrls[0]
+	nullImageURL := sql.NullString{String: newImageURL, Valid: true}
+	if err := h.store.UpdateProfileURL(userID, nullImageURL); err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to update user profile URL", err.Error())
+		return
+	}
+
+	utils.WriteSuccess(w, http.StatusOK, "Profile image updated successfully", map[string]string{"profileUrl": newImageURL})
 }

@@ -1,8 +1,35 @@
 package types
 
 import (
+	"database/sql"
+	"encoding/json"
 	"time"
 )
+
+// NullString is a wrapper around sql.NullString that marshals to JSON as a string or null.
+type NullString struct {
+	sql.NullString
+}
+
+// MarshalJSON implements the json.Marshaler interface.
+func (ns NullString) MarshalJSON() ([]byte, error) {
+	if !ns.Valid {
+		return []byte("null"), nil
+	}
+	return json.Marshal(ns.String)
+}
+
+type key int
+
+const (
+	UserKey key = iota
+)
+
+type AuthenticatedUser struct {
+	ID    int
+	Email string
+	Role  string
+}
 
 // UserStore defines the interface for user data operations
 // Any struct that implements these methods can be used as a user store
@@ -16,6 +43,7 @@ type UserStore interface {
 	UpdateEmail(userID int, email string) error
 	ChangePassword(userID int, password string) error
 	RevokeToken(userID int, deviceID string) error
+	UpdateProfileURL(userID int, profileURL sql.NullString) error
 
 	// OTP
 	SaveOTP(otp *OTP) error
@@ -31,14 +59,15 @@ type Authable interface {
 }
 
 type User struct {
-	ID        int       `json:"id"`        // Unique identifier for the user
-	FirstName string    `json:"firstName"` // User's first name
-	LastName  string    `json:"lastName"`  // User's last name
-	Email     string    `json:"email"`     // User's email address (unique)
-	Password  string    `json:"-"`         // Hashed password
-	Role      string    `json:"role"`      // User's role (admin, user, etc.)
-	CreatedAt time.Time `json:"createdAt"` // Timestamp when the user was created
-	UpdatedAt time.Time `json:"updatedAt"` // Timestamp when the user was updated
+	ID         int        `json:"id"`        // Unique identifier for the user
+	FirstName  string     `json:"firstName"` // User's first name
+	LastName   string     `json:"lastName"`  // User's last name
+	Email      string     `json:"email"`     // User's email address (unique)
+	Password   string     `json:"-"`         // Hashed password
+	ProfileURL NullString `json:"profileUrl"`
+	Role       string     `json:"role"`      // User's role (admin, user, etc.)
+	CreatedAt  time.Time  `json:"createdAt"` // Timestamp when the user was created
+	UpdatedAt  time.Time  `json:"updatedAt"` // Timestamp when the user was updated
 }
 
 func (u *User) GetID() int {

@@ -16,7 +16,7 @@ func NewStore(db *sql.DB) *Store {
 }
 
 func (s *Store) GetUsers() ([]types.User, error) {
-	rows, err := s.db.Query("SELECT id, first_name, last_name, email, password, role, created_at, updated_at FROM users WHERE role != 'admin'")
+	rows, err := s.db.Query("SELECT id, first_name, last_name, email, role, profile_url, created_at, updated_at FROM users")
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +25,7 @@ func (s *Store) GetUsers() ([]types.User, error) {
 	var users []types.User
 	for rows.Next() {
 		var user types.User
-		if err := rows.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.Password, &user.Role, &user.CreatedAt, &user.UpdatedAt); err != nil {
+		if err := rows.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.Role, &user.ProfileURL, &user.CreatedAt, &user.UpdatedAt); err != nil {
 			return nil, err
 		}
 		users = append(users, user)
@@ -39,33 +39,31 @@ func (s *Store) GetUsers() ([]types.User, error) {
 }
 
 func (s *Store) GetUserByEmail(email string) (*types.User, error) {
-	row := s.db.QueryRow("SELECT id, first_name, last_name, email, password, role, created_at, updated_at FROM users WHERE email = ?", email)
-
-	user := new(types.User)
-	if err := row.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.Password, &user.Role, &user.CreatedAt, &user.UpdatedAt); err != nil {
+	var user types.User
+	err := s.db.QueryRow("SELECT id, first_name, last_name, email, password, role, profile_url, created_at, updated_at FROM users WHERE email = ?", email).Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.Password, &user.Role, &user.ProfileURL, &user.CreatedAt, &user.UpdatedAt)
+	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil // No user found is not an error in this context
 		}
 		return nil, err
 	}
-	return user, nil
+	return &user, nil
 }
 
 func (s *Store) GetUserByID(id int) (*types.User, error) {
-	row := s.db.QueryRow("SELECT id, first_name, last_name, email, password, role, created_at, updated_at FROM users WHERE id = ?", id)
-
-	user := new(types.User)
-	if err := row.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.Password, &user.Role, &user.CreatedAt, &user.UpdatedAt); err != nil {
+	var user types.User
+	err := s.db.QueryRow("SELECT id, first_name, last_name, email, password, role, profile_url, created_at, updated_at FROM users WHERE id = ?", id).Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.Password, &user.Role, &user.ProfileURL, &user.CreatedAt, &user.UpdatedAt)
+	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil // No user found is not an error in this context
 		}
 		return nil, err
 	}
-	return user, nil
+	return &user, nil
 }
 
 func (s *Store) CreateUser(user *types.User) (*types.User, error) {
-	res, err := s.db.Exec("INSERT INTO users (first_name, last_name, email, password, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)", user.FirstName, user.LastName, user.Email, user.Password, user.Role, user.CreatedAt, user.UpdatedAt)
+	res, err := s.db.Exec("INSERT INTO users (first_name, last_name, email, password, role) VALUES (?, ?, ?, ?, ?)", user.FirstName, user.LastName, user.Email, user.Password, user.Role)
 	if err != nil {
 		return nil, err
 	}
@@ -225,7 +223,7 @@ func (s *Store) GetDevicesByUserID(userID int) ([]types.DeviceInfo, error) {
 }
 
 func (s *Store) UpdateUser(user *types.User) error {
-	_, err := s.db.Exec("UPDATE users SET first_name = ?, last_name = ?, role = ?, updated_at = ? WHERE id = ?", user.FirstName, user.LastName, user.Role, user.UpdatedAt, user.ID)
+	_, err := s.db.Exec("UPDATE users SET first_name = ?, last_name = ?, role = ?, updated_at = ? WHERE id = ?", user.FirstName, user.LastName, user.Role, time.Now(), user.ID)
 	return err
 }
 
@@ -239,11 +237,8 @@ func (s *Store) UpdateEmail(userID int, email string) error {
 	return err
 }
 
-func (s *Store) ChangePassword(userID int, hashedPassword string) error {
-	_, err := s.db.Exec("UPDATE users SET password = ?, updated_at = ? WHERE id = ?", hashedPassword, time.Now(), userID)
-	if err != nil {
-		return err
-	}
+func (s *Store) ChangePassword(userID int, password string) error {
+	_, err := s.db.Exec("UPDATE users SET password = ? WHERE id = ?", password, userID)
 	return err
 }
 
@@ -286,4 +281,9 @@ func (s *Store) IsTokenRevoked(userID int, deviceID string) (bool, error) {
 	}
 
 	return revoked, nil
+}
+
+func (s *Store) UpdateProfileURL(userID int, profileURL sql.NullString) error {
+	_, err := s.db.Exec("UPDATE users SET profile_url = ? WHERE id = ?", profileURL, userID)
+	return err
 }

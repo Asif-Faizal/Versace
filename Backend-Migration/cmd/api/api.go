@@ -55,15 +55,18 @@ func (s *APIServer) Run() error {
 	// Initialize email service
 	emailService := user.NewEmailService(s.config)
 
+	// Initialize supabase service
+	supabaseService := supabase.NewSupabaseService(s.config)
+
 	// Initialize user handler and register its routes
-	userHandler := user.NewHandler(userStore, userStore, authService, s.config.AdminCreationToken, emailService)
+	userHandler := user.NewHandler(userStore, userStore, authService, s.config.AdminCreationToken, emailService, supabaseService)
 	userHandler.RegisterRoutes(subrouter)
 
 	// Initialize category store
 	categoryStore := category.NewStore(s.db)
 
 	// Initialize supabase service
-	supabaseService := supabase.NewSupabaseService(s.config)
+	supabaseService = supabase.NewSupabaseService(s.config)
 
 	// Initialize category handler and register its routes
 	categoryHandler := category.NewHandler(categoryStore, supabaseService)
