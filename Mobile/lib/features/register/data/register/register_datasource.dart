@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:versace/features/register/domain/register/entity/register_entity.dart';
 
-import '../../../../core/api/api_config.dart';
+import '../../../../core/api/api.config.dart';
 import '../../../../core/error/exception_handler.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';

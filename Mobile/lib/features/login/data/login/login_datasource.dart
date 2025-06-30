@@ -7,7 +7,7 @@ import 'package:versace/features/login/data/login/models/login_request_model.dar
 import 'package:versace/features/login/data/login/models/login_reponse_model.dart';
 import 'package:versace/features/login/domain/login/entities/login_entity.dart';
 
-import '../../../../core/api/api_config.dart';
+import '../../../../core/api/api.config.dart';
 import '../../../../core/error/exception_handler.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
