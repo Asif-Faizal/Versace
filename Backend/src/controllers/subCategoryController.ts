@@ -1,11 +1,21 @@
 import { Request, Response, NextFunction } from 'express';
 import { SubCategoryService } from '../services/subCategoryService';
 import { StatusCodes } from '../utils/statusCodes';
+import { clearCache } from '../middleware/cache';
 
 export class SubCategoryController {
   static async createSubCategory(req: Request, res: Response, next: NextFunction) {
     try {
-      const subCategory = await SubCategoryService.createSubCategory(req.body);
+      // Use the file from multer middleware if it exists
+      const imageFile = req.file;
+      const subCategoryData = req.body;
+      
+      const subCategory = await SubCategoryService.createSubCategory(subCategoryData, imageFile);
+      
+      // Clear caches
+      await clearCache('subcategories:*');
+      await clearCache('products:*');
+      
       res.status(StatusCodes.CREATED).json(subCategory);
     } catch (error) {
       next(error);
@@ -33,7 +43,16 @@ export class SubCategoryController {
 
   static async updateSubCategory(req: Request, res: Response, next: NextFunction) {
     try {
-      const subCategory = await SubCategoryService.updateSubCategory(req.params.id, req.body);
+      // Use the file from multer middleware if it exists
+      const imageFile = req.file;
+      const subCategoryData = req.body;
+      
+      const subCategory = await SubCategoryService.updateSubCategory(req.params.id, subCategoryData, imageFile);
+      
+      // Clear caches
+      await clearCache('subcategories:*');
+      await clearCache('products:*');
+      
       res.status(StatusCodes.OK).json(subCategory);
     } catch (error) {
       next(error);
@@ -43,6 +62,11 @@ export class SubCategoryController {
   static async deleteSubCategory(req: Request, res: Response, next: NextFunction) {
     try {
       await SubCategoryService.deleteSubCategory(req.params.id);
+      
+      // Clear caches
+      await clearCache('subcategories:*');
+      await clearCache('products:*');
+      
       res.status(StatusCodes.NO_CONTENT).send();
     } catch (error) {
       next(error);

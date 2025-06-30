@@ -224,3 +224,37 @@ The API uses a standardized error response format:
   "Strict-Transport-Security": "max-age=31536000; includeSubDomains"
 }
 ```
+
+## Supabase Image Storage Setup
+
+This application uses Supabase for storing images for categories, subcategories, and product variants. Follow these steps to set up Supabase for image storage:
+
+1. Create a Supabase account at [https://supabase.com](https://supabase.com) and create a new project
+2. Navigate to the Storage section in your Supabase dashboard
+3. Create three buckets with the following names:
+   - `categories`
+   - `subcategories`
+   - `products`
+4. Set the privacy settings for each bucket to "Public" so that the images can be accessed without authentication
+5. Add the following environment variables to your `.env.development` and `.env.production` files:
+
+   ```bash
+   SUPABASE_URL=your_supabase_url
+   SUPABASE_KEY=your_supabase_anon_key
+   ```
+
+   You can find these values in the API section of your Supabase project dashboard.
+
+### Image Storage Structure
+
+The application stores images in the following structure:
+
+- **Categories**: Each category has a single image
+- **Subcategories**: Each subcategory has a single image
+- **Products**: Each product variant combination (color/size/variant) can have up to 4 images:
+  - Main image: The primary product image
+  - Thumbnail: A smaller version for listings
+  - Detail1: Additional detail image
+  - Detail2: Additional detail image
+
+When updating colors for a product, you need to upload new images for each color variant.

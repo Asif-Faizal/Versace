@@ -8,7 +8,7 @@ import 'package:versace/core/injection/injection_container.dart';
 import 'package:versace/core/storage/storage_helper.dart';
 import 'package:versace/features/dashboard/domain/user_details/entity/user_details_entity.dart';
 
-import '../../../../core/api/api_config.dart';
+import '../../../../core/api/api.config.dart';
 import '../../../../core/error/exception_handler.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../domain/user_details/entity/update_user_details_entity.dart';

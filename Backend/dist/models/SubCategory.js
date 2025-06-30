@@ -46,6 +46,10 @@ const subCategorySchema = new mongoose_1.Schema({
         required: [true, 'SubCategory description is required'],
         trim: true
     },
+    image: {
+        type: String,
+        default: ''
+    },
     category: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: 'Category',

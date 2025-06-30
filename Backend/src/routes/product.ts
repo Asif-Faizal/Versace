@@ -1,8 +1,10 @@
 import { Router } from 'express';
 import { ProductController } from '../controllers/productController';
 import { authenticate, authorize } from '../middleware/auth';
-import { body, query } from 'express-validator';
+import { body, query, param } from 'express-validator';
 import { cacheMiddleware } from '../middleware/cache';
+import { ProductImageController } from '../controllers/productImageController';
+import { upload, handleUploadErrors } from '../middleware/fileUpload';
 
 const router = Router();
 
@@ -12,7 +14,10 @@ const productValidation = [
   body('description').notEmpty().withMessage('Product description is required'),
   body('basePrice').isNumeric().withMessage('Base price must be a number'),
   body('category').isMongoId().withMessage('Valid category ID is required'),
-  body('subCategory').isMongoId().withMessage('Valid subcategory ID is required')
+  body('subcategory').isMongoId().withMessage('Valid subcategory ID is required'),
+  body('variants').optional().isArray().withMessage('Variants must be an array'),
+  body('colors').optional().isArray().withMessage('Colors must be an array'),
+  body('sizes').optional().isArray().withMessage('Sizes must be an array'),
 ];
 
 const variantCombinationValidation = [
@@ -32,6 +37,14 @@ const queryValidation = [
   query('search').optional().isString().withMessage('Search must be a string'),
   query('sortBy').optional().isIn(['createdAt', 'basePrice', 'rating', 'name']).withMessage('Invalid sort field'),
   query('sortOrder').optional().isIn(['asc', 'desc']).withMessage('Sort order must be either asc or desc')
+];
+
+const variantValidation = [
+  body('variant').optional({ nullable: true }),
+  body('color').optional({ nullable: true }),
+  body('size').optional({ nullable: true }),
+  body('additionalPrice').isNumeric().withMessage('Additional price must be a number'),
+  body('stock').isInt({ min: 0 }).withMessage('Stock must be a positive integer'),
 ];
 
 // User-specific routes (require authentication)
@@ -56,13 +69,13 @@ router.patch('/:id/cart/quantity', authenticate, ProductController.updateCartIte
 
 // Protected routes - Admin only
 router.post('/', authenticate, authorize(['admin']), productValidation, ProductController.createProduct);
-router.put('/:id', authenticate, authorize(['admin']), productValidation, ProductController.updateProduct);
-router.delete('/:id', authenticate, authorize(['admin']), ProductController.deleteProduct);
+router.put('/:id', authenticate, authorize(['admin']), param('id').isMongoId().withMessage('Invalid product ID'), ProductController.updateProduct);
+router.delete('/:id', authenticate, authorize(['admin']), param('id').isMongoId().withMessage('Invalid product ID'), ProductController.deleteProduct);
 
 // Product attributes management - Admin only
-router.post('/:id/variants', authenticate, authorize(['admin']), ProductController.addProductVariant);
-router.post('/:id/variants/bulk', authenticate, authorize(['admin']), ProductController.addMultipleProductVariants);
-router.delete('/:id/variants/:variantName', authenticate, authorize(['admin']), ProductController.removeProductVariant);
+router.post('/:id/variants', authenticate, authorize(['admin']), param('id').isMongoId().withMessage('Invalid product ID'), variantValidation, ProductController.addProductVariant);
+router.put('/:id/variants/:variantId', authenticate, authorize(['admin']), param('id').isMongoId().withMessage('Invalid product ID'), param('variantId').isMongoId().withMessage('Invalid variant ID'), variantValidation, ProductController.updateVariantCombination);
+router.delete('/:id/variants/:variantId', authenticate, authorize(['admin']), param('id').isMongoId().withMessage('Invalid product ID'), param('variantId').isMongoId().withMessage('Invalid variant ID'), ProductController.removeProductVariant);
 
 router.post('/:id/colors', authenticate, authorize(['admin']), ProductController.addProductColor);
 router.post('/:id/colors/bulk', authenticate, authorize(['admin']), ProductController.addMultipleProductColors);
@@ -81,8 +94,27 @@ router.delete('/:id/variant-combinations/:combinationId', authenticate, authoriz
 router.get('/:id/variant-combinations', authenticate, ProductController.getVariantCombinations);
 
 // Single deletion routes - Admin only
-router.delete('/:id/variant', authenticate, authorize(['admin']), ProductController.deleteVariant);
 router.delete('/:id/color', authenticate, authorize(['admin']), ProductController.deleteColor);
 router.delete('/:id/size', authenticate, authorize(['admin']), ProductController.deleteSize);
+
+// Product variant image routes
+router.post('/:productId/variants/:variantId/images', 
+  authenticate, 
+  authorize(['admin']),
+  upload.fields([
+    { name: 'main', maxCount: 1 },
+    { name: 'thumbnail', maxCount: 1 },
+    { name: 'detail1', maxCount: 1 },
+    { name: 'detail2', maxCount: 1 }
+  ]),
+  handleUploadErrors,
+  ProductImageController.uploadVariantImages
+);
+
+router.delete('/:productId/variants/:variantId/images', 
+  authenticate, 
+  authorize(['admin']),
+  ProductImageController.deleteVariantImages
+);
 
 export default router;

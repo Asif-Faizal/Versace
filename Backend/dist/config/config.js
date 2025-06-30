@@ -25,7 +25,9 @@ const requiredEnvVars = [
     'EMAIL_PASSWORD',
     'EMAIL_FROM',
     'ADMIN_CREATION_TOKEN',
-    'REDIS_URL'
+    'REDIS_URL',
+    'SUPABASE_URL',
+    'SUPABASE_KEY'
 ];
 // Check for missing variables
 requiredEnvVars.forEach((name) => {
@@ -68,5 +70,14 @@ exports.default = {
             cart: parseInt(process.env.REDIS_CACHE_CART || '86400', 10), // 24 hours default
         }
     },
-    adminCreationToken: process.env.ADMIN_CREATION_TOKEN
+    adminCreationToken: process.env.ADMIN_CREATION_TOKEN,
+    supabase: {
+        url: process.env.SUPABASE_URL,
+        key: process.env.SUPABASE_KEY,
+        buckets: {
+            categories: 'categories',
+            subcategories: 'subcategories',
+            products: 'products'
+        }
+    }
 };

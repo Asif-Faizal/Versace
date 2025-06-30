@@ -1,5 +1,12 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
+export interface IProductImage {
+  main: string;
+  thumbnail: string;
+  detail1: string;
+  detail2: string;
+}
+
 export interface IVariantCombination {
   _id: mongoose.Types.ObjectId;
   variant: string | null;
@@ -10,6 +17,7 @@ export interface IVariantCombination {
   sizeIndex?: number;
   additionalPrice: number;
   stock: number;
+  images: IProductImage;
   toObject(): any;
 }
 
@@ -34,6 +42,13 @@ export interface IProduct extends Document {
   updatedAt: Date;
 }
 
+const productImageSchema = new Schema({
+  main: { type: String, default: '' },
+  thumbnail: { type: String, default: '' },
+  detail1: { type: String, default: '' },
+  detail2: { type: String, default: '' }
+}, { _id: false });
+
 const variantCombinationSchema = new Schema({
   variant: { type: String, default: null },
   color: { type: String, default: null },
@@ -42,7 +57,8 @@ const variantCombinationSchema = new Schema({
   colorIndex: { type: Number },
   sizeIndex: { type: Number },
   additionalPrice: { type: Number, required: true, default: 0 },
-  stock: { type: Number, required: true, default: 0 }
+  stock: { type: Number, required: true, default: 0 },
+  images: { type: productImageSchema, default: () => ({}) }
 });
 
 const productSchema = new Schema({

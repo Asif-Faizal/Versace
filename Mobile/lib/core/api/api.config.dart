@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart' show rootBundle;
-import 'enviornment_config.dart';
+import 'enviornment.config.dart';
 
 class ApiConfig {
   static String? baseUrl;

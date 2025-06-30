@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "410401534777",
+    "project_id": "versace-db907",
+    "storage_bucket": "versace-db907.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:410401534777:android:8baafcee95db103467aee8",
+        "android_client_info": {
+          "package_name": "com.example.versace"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_d6EjA-dQ-x5H5I7WOhDsN1mgtUrruY0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

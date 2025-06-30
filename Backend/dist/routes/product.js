@@ -5,6 +5,8 @@ const productController_1 = require("../controllers/productController");
 const auth_1 = require("../middleware/auth");
 const express_validator_1 = require("express-validator");
 const cache_1 = require("../middleware/cache");
+const productImageController_1 = require("../controllers/productImageController");
+const fileUpload_1 = require("../middleware/fileUpload");
 const router = (0, express_1.Router)();
 // Validation middleware
 const productValidation = [
@@ -12,7 +14,10 @@ const productValidation = [
     (0, express_validator_1.body)('description').notEmpty().withMessage('Product description is required'),
     (0, express_validator_1.body)('basePrice').isNumeric().withMessage('Base price must be a number'),
     (0, express_validator_1.body)('category').isMongoId().withMessage('Valid category ID is required'),
-    (0, express_validator_1.body)('subCategory').isMongoId().withMessage('Valid subcategory ID is required')
+    (0, express_validator_1.body)('subcategory').isMongoId().withMessage('Valid subcategory ID is required'),
+    (0, express_validator_1.body)('variants').optional().isArray().withMessage('Variants must be an array'),
+    (0, express_validator_1.body)('colors').optional().isArray().withMessage('Colors must be an array'),
+    (0, express_validator_1.body)('sizes').optional().isArray().withMessage('Sizes must be an array'),
 ];
 const variantCombinationValidation = [
     (0, express_validator_1.body)('additionalPrice').isNumeric().withMessage('Additional price must be a number'),
@@ -30,6 +35,13 @@ const queryValidation = [
     (0, express_validator_1.query)('search').optional().isString().withMessage('Search must be a string'),
     (0, express_validator_1.query)('sortBy').optional().isIn(['createdAt', 'basePrice', 'rating', 'name']).withMessage('Invalid sort field'),
     (0, express_validator_1.query)('sortOrder').optional().isIn(['asc', 'desc']).withMessage('Sort order must be either asc or desc')
+];
+const variantValidation = [
+    (0, express_validator_1.body)('variant').optional({ nullable: true }),
+    (0, express_validator_1.body)('color').optional({ nullable: true }),
+    (0, express_validator_1.body)('size').optional({ nullable: true }),
+    (0, express_validator_1.body)('additionalPrice').isNumeric().withMessage('Additional price must be a number'),
+    (0, express_validator_1.body)('stock').isInt({ min: 0 }).withMessage('Stock must be a positive integer'),
 ];
 // User-specific routes (require authentication)
 router.get('/wishlist', auth_1.authenticate, productController_1.ProductController.getWishlistItems);
@@ -50,12 +62,12 @@ router.delete('/:id/cart', auth_1.authenticate, productController_1.ProductContr
 router.patch('/:id/cart/quantity', auth_1.authenticate, productController_1.ProductController.updateCartItemQuantity);
 // Protected routes - Admin only
 router.post('/', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productValidation, productController_1.ProductController.createProduct);
-router.put('/:id', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productValidation, productController_1.ProductController.updateProduct);
-router.delete('/:id', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productController_1.ProductController.deleteProduct);
+router.put('/:id', auth_1.authenticate, (0, auth_1.authorize)(['admin']), (0, express_validator_1.param)('id').isMongoId().withMessage('Invalid product ID'), productController_1.ProductController.updateProduct);
+router.delete('/:id', auth_1.authenticate, (0, auth_1.authorize)(['admin']), (0, express_validator_1.param)('id').isMongoId().withMessage('Invalid product ID'), productController_1.ProductController.deleteProduct);
 // Product attributes management - Admin only
-router.post('/:id/variants', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productController_1.ProductController.addProductVariant);
-router.post('/:id/variants/bulk', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productController_1.ProductController.addMultipleProductVariants);
-router.delete('/:id/variants/:variantName', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productController_1.ProductController.removeProductVariant);
+router.post('/:id/variants', auth_1.authenticate, (0, auth_1.authorize)(['admin']), (0, express_validator_1.param)('id').isMongoId().withMessage('Invalid product ID'), variantValidation, productController_1.ProductController.addProductVariant);
+router.put('/:id/variants/:variantId', auth_1.authenticate, (0, auth_1.authorize)(['admin']), (0, express_validator_1.param)('id').isMongoId().withMessage('Invalid product ID'), (0, express_validator_1.param)('variantId').isMongoId().withMessage('Invalid variant ID'), variantValidation, productController_1.ProductController.updateVariantCombination);
+router.delete('/:id/variants/:variantId', auth_1.authenticate, (0, auth_1.authorize)(['admin']), (0, express_validator_1.param)('id').isMongoId().withMessage('Invalid product ID'), (0, express_validator_1.param)('variantId').isMongoId().withMessage('Invalid variant ID'), productController_1.ProductController.removeProductVariant);
 router.post('/:id/colors', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productController_1.ProductController.addProductColor);
 router.post('/:id/colors/bulk', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productController_1.ProductController.addMultipleProductColors);
 router.delete('/:id/colors/:colorName', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productController_1.ProductController.removeProductColor);
@@ -70,7 +82,14 @@ router.put('/:id/variant-combinations/:combinationId', auth_1.authenticate, (0, 
 router.delete('/:id/variant-combinations/:combinationId', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productController_1.ProductController.deleteVariantCombination);
 router.get('/:id/variant-combinations', auth_1.authenticate, productController_1.ProductController.getVariantCombinations);
 // Single deletion routes - Admin only
-router.delete('/:id/variant', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productController_1.ProductController.deleteVariant);
 router.delete('/:id/color', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productController_1.ProductController.deleteColor);
 router.delete('/:id/size', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productController_1.ProductController.deleteSize);
+// Product variant image routes
+router.post('/:productId/variants/:variantId/images', auth_1.authenticate, (0, auth_1.authorize)(['admin']), fileUpload_1.upload.fields([
+    { name: 'main', maxCount: 1 },
+    { name: 'thumbnail', maxCount: 1 },
+    { name: 'detail1', maxCount: 1 },
+    { name: 'detail2', maxCount: 1 }
+]), fileUpload_1.handleUploadErrors, productImageController_1.ProductImageController.uploadVariantImages);
+router.delete('/:productId/variants/:variantId/images', auth_1.authenticate, (0, auth_1.authorize)(['admin']), productImageController_1.ProductImageController.deleteVariantImages);
 exports.default = router;
