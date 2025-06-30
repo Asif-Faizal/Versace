@@ -38,6 +38,9 @@ func (s *APIServer) Run() error {
 	// Use the logging middleware
 	router.Use(middleware.LoggingMiddleware)
 
+	// Initialize Storage middleware
+	storageMiddleware := middleware.NewStorageMiddleware(s.config)
+
 	// Create a subrouter for API versioning
 	// All routes will be prefixed with /api/v1
 	subrouter := router.PathPrefix("/api/v1").Subrouter()
@@ -60,14 +63,17 @@ func (s *APIServer) Run() error {
 
 	// Initialize category handler and register its routes
 	categoryHandler := category.NewHandler(categoryStore)
-	categoryHandler.RegisterRoutes(subrouter, authService)
+	categoryHandler.RegisterRoutes(subrouter, authService, storageMiddleware)
 
 	// Initialize subcategory store
 	subcategoryStore := subcategory.NewStore(s.db)
 
 	// Initialize subcategory handler and register its routes
 	subcategoryHandler := subcategory.NewHandler(subcategoryStore, categoryStore)
-	subcategoryHandler.RegisterRoutes(subrouter, authService)
+	subcategoryHandler.RegisterRoutes(subrouter, authService, storageMiddleware)
+
+	// Example of how to use the storage middleware for a route
+	// subrouter.Handle("/products", storageMiddleware.Upload(http.HandlerFunc(CreateProductHandler))).Methods("POST")
 
 	log.Println("Starting server on", s.listenAddress)
 

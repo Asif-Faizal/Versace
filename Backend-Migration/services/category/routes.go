@@ -8,6 +8,7 @@ import (
 	"github.com/Asif-Faizal/Versace/services/user"
 	types "github.com/Asif-Faizal/Versace/types/category"
 	"github.com/Asif-Faizal/Versace/utils"
+	"github.com/Asif-Faizal/Versace/utils/middleware"
 	"github.com/gorilla/mux"
 )
 
@@ -19,7 +20,7 @@ func NewHandler(store types.CategoryStore) *Handler {
 	return &Handler{store: store}
 }
 
-func (h *Handler) RegisterRoutes(router *mux.Router, authService *user.AuthService) {
+func (h *Handler) RegisterRoutes(router *mux.Router, authService *user.AuthService, storageMiddleware *middleware.StorageMiddleware) {
 	// Authenticated routes
 	authRouter := router.PathPrefix("").Subrouter()
 	authRouter.Use(user.AuthMiddleware(authService))
@@ -31,7 +32,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router, authService *user.AuthServi
 	adminRouter := authRouter.PathPrefix("").Subrouter()
 	adminRouter.Use(user.AdminAuthMiddleware)
 
-	adminRouter.HandleFunc("/categories", h.CreateCategory).Methods("POST")
+	adminRouter.Handle("/categories", storageMiddleware.Upload(http.HandlerFunc(h.CreateCategory))).Methods("POST")
 	adminRouter.HandleFunc("/categories/{id}", h.UpdateCategory).Methods("PUT")
 	adminRouter.HandleFunc("/categories/{id}", h.DeleteCategory).Methods("DELETE")
 }
@@ -70,21 +71,25 @@ func (h *Handler) GetCategoryByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) CreateCategory(w http.ResponseWriter, r *http.Request) {
-	var payload types.CategoryCreateRequest
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+	imageUrls, ok := r.Context().Value("imageUrls").([]string)
+	if !ok || len(imageUrls) == 0 {
+		utils.WriteError(w, http.StatusBadRequest, "Image URL not found", "")
 		return
 	}
 
+	name := r.FormValue("name")
+	description := r.FormValue("description")
+
 	// Simple validation
-	if payload.Name == "" {
+	if name == "" {
 		utils.WriteError(w, http.StatusBadRequest, "Category name is required", "")
 		return
 	}
 
 	category := &types.Category{
-		Name:        payload.Name,
-		Description: payload.Description,
+		Name:        name,
+		Description: description,
+		ImageURL:    imageUrls[0], // Using the first image URL
 	}
 
 	createdCategory, err := h.store.CreateCategory(category)

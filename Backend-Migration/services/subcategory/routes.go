@@ -9,6 +9,7 @@ import (
 	categoryTypes "github.com/Asif-Faizal/Versace/types/category"
 	subcategoryTypes "github.com/Asif-Faizal/Versace/types/subcategory"
 	"github.com/Asif-Faizal/Versace/utils"
+	"github.com/Asif-Faizal/Versace/utils/middleware"
 	"github.com/gorilla/mux"
 )
 
@@ -21,7 +22,7 @@ func NewHandler(store subcategoryTypes.SubcategoryStore, categoryStore categoryT
 	return &Handler{store: store, categoryStore: categoryStore}
 }
 
-func (h *Handler) RegisterRoutes(router *mux.Router, authService *user.AuthService) {
+func (h *Handler) RegisterRoutes(router *mux.Router, authService *user.AuthService, storageMiddleware *middleware.StorageMiddleware) {
 	authRouter := router.PathPrefix("").Subrouter()
 	authRouter.Use(user.AuthMiddleware(authService))
 

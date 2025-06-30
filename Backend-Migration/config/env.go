@@ -23,6 +23,8 @@ type Config struct {
 	EmailPassword      string
 	EmailFrom          string
 	OTPExpiry          string
+	SupabaseURL        string
+	SupabaseKey        string
 }
 
 var Envs *Config
@@ -46,6 +48,8 @@ func InitConfig() (*Config, error) {
 		EmailFrom:          os.Getenv("EMAIL_FROM"),
 		OTPExpiry:          os.Getenv("OTP_EXPIRATION"),
 		JWTRefreshExpiry:   os.Getenv("JWT_REFRESH_EXPIRATION"),
+		SupabaseURL:        os.Getenv("SUPABASE_URL"),
+		SupabaseKey:        os.Getenv("SUPABASE_KEY"),
 	}
 
 	// Validate required environment variables
@@ -56,6 +60,10 @@ func InitConfig() (*Config, error) {
 
 	if cfg.EmailHost == "" || cfg.EmailPort == "" || cfg.EmailUser == "" || cfg.EmailPassword == "" || cfg.EmailFrom == "" || cfg.OTPExpiry == "" {
 		return nil, fmt.Errorf("all email environment variables must be set")
+	}
+
+	if cfg.SupabaseURL == "" || cfg.SupabaseKey == "" {
+		return nil, fmt.Errorf("supabase URL and Key must be set")
 	}
 
 	Envs = cfg

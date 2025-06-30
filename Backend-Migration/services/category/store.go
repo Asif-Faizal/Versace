@@ -16,7 +16,7 @@ func NewStore(db *sql.DB) *Store {
 
 func (s *Store) GetCategories() ([]types.Category, error) {
 	// Get all categories from the database
-	rows, err := s.db.Query("SELECT id, name, description, created_at, updated_at FROM categories")
+	rows, err := s.db.Query("SELECT id, name, description, image_url, created_at, updated_at FROM categories")
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func (s *Store) GetCategories() ([]types.Category, error) {
 	var categories []types.Category
 	for rows.Next() {
 		var category types.Category
-		if err := rows.Scan(&category.ID, &category.Name, &category.Description, &category.CreatedAt, &category.UpdatedAt); err != nil {
+		if err := rows.Scan(&category.ID, &category.Name, &category.Description, &category.ImageURL, &category.CreatedAt, &category.UpdatedAt); err != nil {
 			return nil, err
 		}
 		categories = append(categories, category)
@@ -42,7 +42,7 @@ func (s *Store) GetCategories() ([]types.Category, error) {
 
 func (s *Store) CreateCategory(category *types.Category) (*types.Category, error) {
 	// Insert a new category into the database
-	res, err := s.db.Exec("INSERT INTO categories (name, description) VALUES (?, ?)", category.Name, category.Description)
+	res, err := s.db.Exec("INSERT INTO categories (name, description, image_url) VALUES (?, ?, ?)", category.Name, category.Description, category.ImageURL)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (s *Store) CreateCategory(category *types.Category) (*types.Category, error
 func (s *Store) GetCategoryByID(id int) (*types.Category, error) {
 	// Get a category by ID from the database
 	var category types.Category
-	err := s.db.QueryRow("SELECT id, name, description, created_at, updated_at FROM categories WHERE id = ?", id).Scan(&category.ID, &category.Name, &category.Description, &category.CreatedAt, &category.UpdatedAt)
+	err := s.db.QueryRow("SELECT id, name, description, image_url, created_at, updated_at FROM categories WHERE id = ?", id).Scan(&category.ID, &category.Name, &category.Description, &category.ImageURL, &category.CreatedAt, &category.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
