@@ -17,6 +17,7 @@ type SubcategoryStore interface {
 	GetSubcategoryByID(id int) (*Subcategory, error)
 	GetSubcategoriesByCategoryID(categoryID int) ([]Subcategory, error)
 	CreateSubcategory(subcategory *Subcategory) (*Subcategory, error)
+	BulkCreateSubcategory(subcategories []*Subcategory) error
 	UpdateSubcategory(subcategory *Subcategory) error
 	UpdateSubcategoryImageURL(id int, imageURL string) error
 	DeleteSubcategory(id int) error

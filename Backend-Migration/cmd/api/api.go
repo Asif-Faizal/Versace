@@ -79,9 +79,6 @@ func (s *APIServer) Run() error {
 	subcategoryHandler := subcategory.NewHandler(subcategoryStore, categoryStore, supabaseService)
 	subcategoryHandler.RegisterRoutes(subrouter, authService, storageMiddleware)
 
-	// Example of how to use the storage middleware for a route
-	// subrouter.Handle("/products", storageMiddleware.Upload(http.HandlerFunc(CreateProductHandler))).Methods("POST")
-
 	log.Println("Starting server on", s.listenAddress)
 
 	// Start the HTTP server and listen for incoming requests

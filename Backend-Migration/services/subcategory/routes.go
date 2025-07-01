@@ -36,10 +36,11 @@ func (h *Handler) RegisterRoutes(router *mux.Router, authService *user.AuthServi
 	adminRouter := authRouter.PathPrefix("").Subrouter()
 	adminRouter.Use(user.AdminAuthMiddleware)
 
-	adminRouter.Handle("/subcategory", storageMiddleware.Upload(http.HandlerFunc(h.CreateSubcategory))).Methods("POST")
-	adminRouter.HandleFunc("/subcategory/{id}", h.UpdateSubcategory).Methods("PUT")
-	adminRouter.HandleFunc("/subcategory/{id}", h.DeleteSubcategory).Methods("DELETE")
-	adminRouter.Handle("/subcategory/{id}/image", storageMiddleware.Upload(http.HandlerFunc(h.UpdateSubcategoryImage))).Methods("POST")
+	adminRouter.Handle("/subcategories", storageMiddleware.Upload(http.HandlerFunc(h.CreateSubcategory))).Methods("POST")
+	adminRouter.HandleFunc("/subcategories/bulk", h.handleBulkCreateSubcategory).Methods("POST")
+	adminRouter.HandleFunc("/subcategories/{id}", h.UpdateSubcategory).Methods("PUT")
+	adminRouter.Handle("/subcategories/{id}/image", storageMiddleware.Upload(http.HandlerFunc(h.UpdateSubcategoryImage))).Methods("POST")
+	adminRouter.HandleFunc("/subcategories/{id}", h.DeleteSubcategory).Methods("DELETE")
 }
 
 func (h *Handler) GetSubcategories(w http.ResponseWriter, r *http.Request) {

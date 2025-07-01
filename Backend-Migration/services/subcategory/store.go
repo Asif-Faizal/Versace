@@ -78,6 +78,29 @@ func (s *Store) CreateSubcategory(subcategory *types.Subcategory) (*types.Subcat
 	return s.GetSubcategoryByID(int(id))
 }
 
+func (s *Store) BulkCreateSubcategory(subcategories []*types.Subcategory) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	stmt, err := tx.Prepare("INSERT INTO subcategories (name, description, image_url, category_id) VALUES (?, ?, ?, ?)")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	for _, sc := range subcategories {
+		_, err := stmt.Exec(sc.Name, sc.Description, sc.ImageURL, sc.CategoryID)
+		if err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
+}
+
 func (s *Store) UpdateSubcategory(subcategory *types.Subcategory) error {
 	_, err := s.db.Exec("UPDATE subcategories SET name = ?, description = ?, category_id = ?, updated_at = NOW() WHERE id = ?", subcategory.Name, subcategory.Description, subcategory.CategoryID, subcategory.ID)
 	return err
