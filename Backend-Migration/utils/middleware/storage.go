@@ -3,13 +3,10 @@ package middleware
 import (
 	"context"
 	"log"
-	"mime"
 	"net/http"
-	"path/filepath"
 
 	"github.com/Asif-Faizal/Versace/config"
 	"github.com/Asif-Faizal/Versace/services/supabase"
-	storage_go "github.com/supabase-community/storage-go"
 )
 
 type StorageMiddleware struct {
@@ -42,16 +39,7 @@ func (sm *StorageMiddleware) Upload(next http.Handler) http.Handler {
 			}
 			defer file.Close()
 
-			contentType := fileHeader.Header.Get("Content-Type")
-			if contentType == "" {
-				contentType = mime.TypeByExtension(filepath.Ext(fileHeader.Filename))
-			}
-
-			fileOptions := storage_go.FileOptions{
-				ContentType: &contentType,
-			}
-
-			url, err := sm.supabaseService.UploadFile("images", fileHeader.Filename, file, fileOptions)
+			url, err := sm.supabaseService.UploadFile(fileHeader, "images")
 			if err != nil {
 				log.Printf("Error uploading file to storage: %v", err)
 				http.Error(w, "Unable to upload file to storage", http.StatusInternalServerError)

@@ -15,6 +15,7 @@ type CategoryStore interface {
 	GetCategories() ([]Category, error)
 	GetCategoryByID(id int) (*Category, error)
 	CreateCategory(category *Category) (*Category, error)
+	BulkCreateCategory([]*Category) error
 	UpdateCategory(category *Category) error
 	UpdateCategoryImageURL(id int, imageURL string) error
 	DeleteCategory(id int) error

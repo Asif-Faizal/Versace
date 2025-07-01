@@ -36,6 +36,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router, authService *user.AuthServi
 	adminRouter.Use(user.AdminAuthMiddleware)
 
 	adminRouter.Handle("/categories", storageMiddleware.Upload(http.HandlerFunc(h.CreateCategory))).Methods("POST")
+	adminRouter.HandleFunc("/categories/bulk", h.handleBulkCreateCategory).Methods("POST")
 	adminRouter.HandleFunc("/categories/{id}", h.UpdateCategory).Methods("PUT")
 	adminRouter.HandleFunc("/categories/{id}", h.DeleteCategory).Methods("DELETE")
 	adminRouter.Handle("/categories/{id}/image", storageMiddleware.Upload(http.HandlerFunc(h.UpdateCategoryImage))).Methods("POST")
