@@ -45,3 +45,12 @@ app.*.map.json
 /android/app/release
 
 .env
+
+# Scripts and build artifacts
+merge-develop-to-main.sh
+merge-feature-to-develop.sh
+push-feature.sh
+rebase-feature.sh
+torso-dark.png
+torso-light.png
+/bin/
