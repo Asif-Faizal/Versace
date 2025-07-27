@@ -58,3 +58,12 @@ torso-light.png
 
 # Backend
 Backend/bin/
+
+# Firebase configuration files
+google-services.json
+firebase.json
+GoogleService-Info.plist
+firebase_options.dart
+.env.development
+.env.production
+.env.simulator
