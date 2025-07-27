@@ -101,3 +101,19 @@ func (s *Store) DeleteProduct(id int) error {
 	}
 	return nil
 }
+
+func (s *Store) UpdateProductImageURL(id int, imageURL string) error {
+	existingProduct, err := s.GetProductByID(id)
+	if err != nil {
+		return err
+	}
+	if existingProduct == nil {
+		return sql.ErrNoRows
+	}
+
+	_, err = s.db.Exec("UPDATE products SET main_image_url = ? WHERE id = ?", imageURL, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}

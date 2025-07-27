@@ -18,6 +18,7 @@ type ProductStore interface {
 	GetProductByID(id int) (*Product, error)
 	CreateProduct(product *Product) (*Product, error)
 	UpdateProduct(product *Product) (*Product, error)
+	UpdateProductImageURL(id int, imageURL string) error
 	DeleteProduct(id int) error
 	// BulkCreateProduct(products []*Product) error
 }
@@ -57,6 +58,10 @@ type ProductByIDResponse struct {
 
 type ProductUpdateResponse struct {
 	Product Product `json:"product"`
+}
+
+type ProductUpdateImageURLResponse struct {
+	Message string `json:"message"`
 }
 
 type ProductDeleteResponse struct {

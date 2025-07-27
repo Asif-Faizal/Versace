@@ -35,6 +35,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router, authService *user.AuthServi
 	adminRouter.Handle("/product", storageMiddleware.Upload(http.HandlerFunc(h.CreateProduct))).Methods("POST")
 	adminRouter.Handle("/product/{id}", storageMiddleware.Upload(http.HandlerFunc(h.UpdateProduct))).Methods("PUT")
 	adminRouter.Handle("/product/{id}", http.HandlerFunc(h.DeleteProduct)).Methods("DELETE")
+	adminRouter.Handle("/product/{id}/image", storageMiddleware.Upload(http.HandlerFunc(h.UpdateProductImageURL))).Methods("PUT")
 }
 
 func (h *Handler) GetProducts(w http.ResponseWriter, r *http.Request) {
@@ -159,4 +160,26 @@ func (h *Handler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	utils.WriteSuccess(w, http.StatusOK, "Product deleted successfully", product.ProductDeleteResponse{Message: "Product deleted successfully"})
+}
+
+func (h *Handler) UpdateProductImageURL(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid product ID", err.Error())
+		return
+	}
+
+	imageUrls, ok := r.Context().Value("imageUrls").([]string)
+	if !ok || len(imageUrls) == 0 {
+		utils.WriteError(w, http.StatusBadRequest, "Image URL not found", "")
+		return
+	}
+
+	err = h.store.UpdateProductImageURL(id, imageUrls[0])
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to update product image URL", err.Error())
+		return
+	}
+	utils.WriteSuccess(w, http.StatusOK, "Product image URL updated successfully", product.ProductUpdateImageURLResponse{Message: "Product image URL updated successfully"})
 }
