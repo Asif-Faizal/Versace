@@ -1,5 +1,5 @@
 build:
-	@go build -o bin/gommerce cmd/main.go
+	@go build -o bin/versace cmd/main.go
 
 test:
 	@go test -v ./...

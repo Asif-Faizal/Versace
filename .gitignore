@@ -55,3 +55,6 @@ rebase-feature.sh
 torso-dark.png
 torso-light.png
 /bin/
+
+# Backend
+Backend/bin/
