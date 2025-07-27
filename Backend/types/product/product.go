@@ -18,7 +18,7 @@ type ProductStore interface {
 	GetProductByID(id int) (*Product, error)
 	CreateProduct(product *Product) (*Product, error)
 	UpdateProduct(product *Product) (*Product, error)
-	// DeleteProduct(id int) error
+	DeleteProduct(id int) error
 	// BulkCreateProduct(products []*Product) error
 }
 

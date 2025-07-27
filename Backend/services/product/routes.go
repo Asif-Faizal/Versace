@@ -34,6 +34,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router, authService *user.AuthServi
 
 	adminRouter.Handle("/product", storageMiddleware.Upload(http.HandlerFunc(h.CreateProduct))).Methods("POST")
 	adminRouter.Handle("/product/{id}", storageMiddleware.Upload(http.HandlerFunc(h.UpdateProduct))).Methods("PUT")
+	adminRouter.Handle("/product/{id}", http.HandlerFunc(h.DeleteProduct)).Methods("DELETE")
 }
 
 func (h *Handler) GetProducts(w http.ResponseWriter, r *http.Request) {
@@ -142,4 +143,20 @@ func (h *Handler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	utils.WriteSuccess(w, http.StatusOK, "Product updated successfully", product.ProductUpdateResponse{Product: *updatedProduct})
+}
+
+func (h *Handler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid product ID", err.Error())
+		return
+	}
+
+	err = h.store.DeleteProduct(id)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to delete product", err.Error())
+		return
+	}
+	utils.WriteSuccess(w, http.StatusOK, "Product deleted successfully", product.ProductDeleteResponse{Message: "Product deleted successfully"})
 }

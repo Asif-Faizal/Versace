@@ -85,3 +85,19 @@ func (s *Store) UpdateProduct(p *product.Product) (*product.Product, error) {
 	// Fetch the updated product
 	return s.GetProductByID(p.ID)
 }
+
+func (s *Store) DeleteProduct(id int) error {
+	existingProduct, err := s.GetProductByID(id)
+	if err != nil {
+		return err
+	}
+	if existingProduct == nil {
+		return sql.ErrNoRows
+	}
+
+	_, err = s.db.Exec("DELETE FROM products WHERE id = ?", id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
