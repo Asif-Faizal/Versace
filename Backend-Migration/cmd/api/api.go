@@ -7,6 +7,7 @@ import (
 
 	"github.com/Asif-Faizal/Versace/config"
 	"github.com/Asif-Faizal/Versace/services/category"
+	"github.com/Asif-Faizal/Versace/services/product"
 	"github.com/Asif-Faizal/Versace/services/subcategory"
 	"github.com/Asif-Faizal/Versace/services/supabase"
 	"github.com/Asif-Faizal/Versace/services/user"
@@ -78,6 +79,13 @@ func (s *APIServer) Run() error {
 	// Initialize subcategory handler and register its routes
 	subcategoryHandler := subcategory.NewHandler(subcategoryStore, categoryStore, supabaseService)
 	subcategoryHandler.RegisterRoutes(subrouter, authService, storageMiddleware)
+
+	// Initialize product store
+	productStore := product.NewStore(s.db)
+
+	// Initialize product handler and register its routes
+	productHandler := product.NewHandler(productStore)
+	productHandler.RegisterRoutes(subrouter, authService, storageMiddleware)
 
 	log.Println("Starting server on", s.listenAddress)
 
