@@ -17,9 +17,9 @@ type ProductStore interface {
 	GetProducts() ([]Product, error)
 	GetProductByID(id int) (*Product, error)
 	CreateProduct(product *Product) (*Product, error)
-	// BulkCreateProduct(products []*Product) error
-	// UpdateProduct(product *Product) error
+	UpdateProduct(product *Product) (*Product, error)
 	// DeleteProduct(id int) error
+	// BulkCreateProduct(products []*Product) error
 }
 
 type ProductCreateRequest struct {

@@ -55,3 +55,33 @@ func (s *Store) GetProductByID(id int) (*product.Product, error) {
 	}
 	return &p, nil
 }
+
+func (s *Store) UpdateProduct(p *product.Product) (*product.Product, error) {
+	// First check if the product exists
+	existingProduct, err := s.GetProductByID(p.ID)
+	if err != nil {
+		return nil, err
+	}
+	if existingProduct == nil {
+		return nil, sql.ErrNoRows
+	}
+
+	// Execute the UPDATE statement
+	result, err := s.db.Exec("UPDATE products SET name = ?, description = ?, base_price = ?, main_image_url = ? WHERE id = ?",
+		p.Name, p.Description, p.BasePrice, p.MainImageURL, p.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if any rows were affected
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+	if rowsAffected == 0 {
+		return nil, sql.ErrNoRows
+	}
+
+	// Fetch the updated product
+	return s.GetProductByID(p.ID)
+}
