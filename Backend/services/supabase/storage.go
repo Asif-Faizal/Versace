@@ -42,8 +42,7 @@ func (s *SupabaseService) UploadFile(file *multipart.FileHeader, bucketName stri
 		return "", err
 	}
 	ext := filepath.Ext(file.Filename)
-	name := file.Filename[0 : len(file.Filename)-len(ext)]
-	fileName := fmt.Sprintf("%s_%d%s", name, time.Now().Unix(), ext)
+	base := file.Filename[0 : len(file.Filename)-len(ext)]
 
 	// Detect content type from file bytes to avoid mismatches (e.g., PNGs labeled as JPEG)
 	contentType := http.DetectContentType(fileBytes)
@@ -61,18 +60,24 @@ func (s *SupabaseService) UploadFile(file *multipart.FileHeader, bucketName stri
 			contentType = "image/jpeg"
 		}
 	}
-	_, err = s.client.UploadFile(bucketName, fileName, bytes.NewReader(fileBytes), supabasestorage.FileOptions{
-		ContentType: &contentType,
-	})
-	if err != nil {
-		return "", err
+	// Attempt up to 3 times to avoid name collisions when multiple files arrive within the same second
+	var lastErr error
+	for attempt := 0; attempt < 3; attempt++ {
+		fileName := fmt.Sprintf("%s_%d%s", base, time.Now().UnixNano(), ext)
+		_, err = s.client.UploadFile(bucketName, fileName, bytes.NewReader(fileBytes), supabasestorage.FileOptions{
+			ContentType: &contentType,
+		})
+		if err == nil {
+			res := s.client.GetPublicUrl(bucketName, fileName, supabasestorage.UrlOptions{Download: false})
+			return res.SignedURL, nil
+		}
+		lastErr = err
+		if !strings.Contains(err.Error(), "exists") {
+			break
+		}
+		time.Sleep(1 * time.Millisecond)
 	}
-
-	res := s.client.GetPublicUrl(bucketName, fileName, supabasestorage.UrlOptions{
-		Download: false,
-	})
-
-	return res.SignedURL, nil
+	return "", lastErr
 }
 
 // UploadBytes uploads a raw byte slice as a file to the given bucket and returns the public URL
