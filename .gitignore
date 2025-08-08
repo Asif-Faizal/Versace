@@ -64,6 +64,9 @@ google-services.json
 firebase.json
 GoogleService-Info.plist
 firebase_options.dart
-.env.development
-.env.production
-.env.simulator
+
+# Environment files (ignore all .env* except .env.example)
+.env*
+!.env.example
+Backend/.env*
+!Backend/.env.example
