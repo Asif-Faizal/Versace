@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/Asif-Faizal/Versace/services/supabase"
 	"github.com/Asif-Faizal/Versace/services/user"
 	"github.com/Asif-Faizal/Versace/types/product"
 	"github.com/Asif-Faizal/Versace/utils"
@@ -13,11 +14,12 @@ import (
 )
 
 type Handler struct {
-	store product.ProductStore
+	store           product.ProductStore
+	supabaseService *supabase.SupabaseService
 }
 
-func NewHandler(store product.ProductStore) *Handler {
-	return &Handler{store: store}
+func NewHandler(store product.ProductStore, supabaseService *supabase.SupabaseService) *Handler {
+	return &Handler{store: store, supabaseService: supabaseService}
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router, authService *user.AuthService, storageMiddleware *middleware.StorageMiddleware) {
@@ -33,6 +35,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router, authService *user.AuthServi
 	adminRouter.Use(user.AdminAuthMiddleware)
 
 	adminRouter.Handle("/product", storageMiddleware.Upload(http.HandlerFunc(h.CreateProduct))).Methods("POST")
+	adminRouter.HandleFunc("/products/bulk", h.handleBulkCreateProduct).Methods("POST")
 	adminRouter.Handle("/product/{id}", storageMiddleware.Upload(http.HandlerFunc(h.UpdateProduct))).Methods("PUT")
 	adminRouter.Handle("/product/{id}", http.HandlerFunc(h.DeleteProduct)).Methods("DELETE")
 	adminRouter.Handle("/product/{id}/image", storageMiddleware.Upload(http.HandlerFunc(h.UpdateProductImageURL))).Methods("PUT")

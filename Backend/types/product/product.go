@@ -20,7 +20,7 @@ type ProductStore interface {
 	UpdateProduct(product *Product) (*Product, error)
 	UpdateProductImageURL(id int, imageURL string) error
 	DeleteProduct(id int) error
-	// BulkCreateProduct(products []*Product) error
+	BulkCreateProduct(products []*Product) error
 }
 
 type ProductCreateRequest struct {

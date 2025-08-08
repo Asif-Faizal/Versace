@@ -84,7 +84,7 @@ func (s *APIServer) Run() error {
 	productStore := product.NewStore(s.db)
 
 	// Initialize product handler and register its routes
-	productHandler := product.NewHandler(productStore)
+	productHandler := product.NewHandler(productStore, supabaseService)
 	productHandler.RegisterRoutes(subrouter, authService, storageMiddleware)
 
 	log.Println("Starting server on", s.listenAddress)

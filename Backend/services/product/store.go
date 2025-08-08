@@ -102,6 +102,28 @@ func (s *Store) DeleteProduct(id int) error {
 	return nil
 }
 
+func (s *Store) BulkCreateProduct(products []*product.Product) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	stmt, err := tx.Prepare("INSERT INTO products (name, description, base_price, main_image_url) VALUES (?, ?, ?, ?)")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	for _, p := range products {
+		if _, err := stmt.Exec(p.Name, p.Description, p.BasePrice, p.MainImageURL); err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
+}
+
 func (s *Store) UpdateProductImageURL(id int, imageURL string) error {
 	existingProduct, err := s.GetProductByID(id)
 	if err != nil {

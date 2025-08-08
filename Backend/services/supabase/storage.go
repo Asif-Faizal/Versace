@@ -6,9 +6,11 @@ import (
 	"io"
 	"log"
 	"mime/multipart"
+	"net/http"
 	"net/url"
 	"path"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/Asif-Faizal/Versace/config"
@@ -43,8 +45,50 @@ func (s *SupabaseService) UploadFile(file *multipart.FileHeader, bucketName stri
 	name := file.Filename[0 : len(file.Filename)-len(ext)]
 	fileName := fmt.Sprintf("%s_%d%s", name, time.Now().Unix(), ext)
 
-	contentType := "image/jpeg"
+	// Detect content type from file bytes to avoid mismatches (e.g., PNGs labeled as JPEG)
+	contentType := http.DetectContentType(fileBytes)
+	if contentType == "application/octet-stream" {
+		switch strings.ToLower(ext) {
+		case ".png":
+			contentType = "image/png"
+		case ".jpg", ".jpeg":
+			contentType = "image/jpeg"
+		case ".webp":
+			contentType = "image/webp"
+		case ".gif":
+			contentType = "image/gif"
+		default:
+			contentType = "image/jpeg"
+		}
+	}
 	_, err = s.client.UploadFile(bucketName, fileName, bytes.NewReader(fileBytes), supabasestorage.FileOptions{
+		ContentType: &contentType,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	res := s.client.GetPublicUrl(bucketName, fileName, supabasestorage.UrlOptions{
+		Download: false,
+	})
+
+	return res.SignedURL, nil
+}
+
+// UploadBytes uploads a raw byte slice as a file to the given bucket and returns the public URL
+func (s *SupabaseService) UploadBytes(bucketName string, fileName string, fileBytes []byte, contentTypeOverride string) (string, error) {
+	// Detect content type if not provided
+	contentType := contentTypeOverride
+	if contentType == "" {
+		// net/http only needs the first 512 bytes for detection; if file is smaller, it's fine
+		contentType = http.DetectContentType(fileBytes)
+		if contentType == "application/octet-stream" {
+			// Default to jpeg if unknown; storage will still accept it
+			contentType = "image/jpeg"
+		}
+	}
+
+	_, err := s.client.UploadFile(bucketName, fileName, bytes.NewReader(fileBytes), supabasestorage.FileOptions{
 		ContentType: &contentType,
 	})
 	if err != nil {
