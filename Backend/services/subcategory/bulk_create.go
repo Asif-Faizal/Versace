@@ -78,6 +78,13 @@ func (h *Handler) handleBulkCreateSubcategory(w http.ResponseWriter, r *http.Req
 			continue
 		}
 
+		// Validate that category exists
+		_, err = h.categoryStore.GetCategoryByID(categoryID)
+		if err != nil {
+			log.Printf("bulk subcategory: category %d not found: %v", categoryID, err)
+			continue
+		}
+
 		// Resolve image
 		var fhKey string
 		if _, ok := r.MultipartForm.File[fmt.Sprintf("image[%d]", idx)]; ok {
@@ -128,7 +135,8 @@ func (h *Handler) handleBulkCreateSubcategory(w http.ResponseWriter, r *http.Req
 	}
 
 	if err := h.store.BulkCreateSubcategory(toCreate); err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "failed to create subcategories")
+		log.Printf("bulk subcategory creation error: %v", err)
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Sprintf("failed to create subcategories: %v", err))
 		return
 	}
 
