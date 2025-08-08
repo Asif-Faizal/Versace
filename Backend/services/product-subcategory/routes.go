@@ -12,6 +12,7 @@ import (
 	product_types "github.com/Asif-Faizal/Versace/types/product"
 	product_subcategory_types "github.com/Asif-Faizal/Versace/types/product-subcategory"
 	subcategory_types "github.com/Asif-Faizal/Versace/types/subcategory"
+	utils "github.com/Asif-Faizal/Versace/utils"
 	"github.com/Asif-Faizal/Versace/utils/middleware"
 	"github.com/gorilla/mux"
 )
@@ -48,7 +49,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router, authService *user.AuthServi
 func (h *Handler) GetProductSubcategories(w http.ResponseWriter, r *http.Request) {
 	productSubcategories, err := h.store.GetProductSubcategories()
 	if err != nil {
-		http.Error(w, "Failed to get product subcategories", http.StatusInternalServerError)
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get product subcategories")
 		return
 	}
 
@@ -56,9 +57,7 @@ func (h *Handler) GetProductSubcategories(w http.ResponseWriter, r *http.Request
 		ProductSubcategories: productSubcategories,
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
+	utils.WriteSuccess(w, http.StatusOK, "Product subcategories retrieved successfully", response)
 }
 
 func (h *Handler) GetProductSubcategoryByID(w http.ResponseWriter, r *http.Request) {
@@ -66,17 +65,17 @@ func (h *Handler) GetProductSubcategoryByID(w http.ResponseWriter, r *http.Reque
 	idStr := vars["id"]
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		utils.WriteError(w, http.StatusBadRequest, "Invalid ID")
 		return
 	}
 
 	productSubcategory, err := h.store.GetProductSubcategoryByID(id)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			http.Error(w, "Product subcategory not found", http.StatusNotFound)
+			utils.WriteError(w, http.StatusNotFound, "Product subcategory not found")
 			return
 		}
-		http.Error(w, "Failed to get product subcategory", http.StatusInternalServerError)
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get product subcategory")
 		return
 	}
 
@@ -84,9 +83,7 @@ func (h *Handler) GetProductSubcategoryByID(w http.ResponseWriter, r *http.Reque
 		ProductSubcategory: *productSubcategory,
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
+	utils.WriteSuccess(w, http.StatusOK, "Product subcategory retrieved successfully", response)
 }
 
 func (h *Handler) GetProductSubcategoriesByProductID(w http.ResponseWriter, r *http.Request) {
@@ -94,13 +91,13 @@ func (h *Handler) GetProductSubcategoriesByProductID(w http.ResponseWriter, r *h
 	productIDStr := vars["productId"]
 	productID, err := strconv.Atoi(productIDStr)
 	if err != nil {
-		http.Error(w, "Invalid product ID", http.StatusBadRequest)
+		utils.WriteError(w, http.StatusBadRequest, "Invalid product ID")
 		return
 	}
 
 	productSubcategories, err := h.store.GetProductSubcategoriesByProductID(productID)
 	if err != nil {
-		http.Error(w, "Failed to get product subcategories", http.StatusInternalServerError)
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get product subcategories")
 		return
 	}
 
@@ -108,9 +105,7 @@ func (h *Handler) GetProductSubcategoriesByProductID(w http.ResponseWriter, r *h
 		ProductSubcategories: productSubcategories,
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
+	utils.WriteSuccess(w, http.StatusOK, "Product subcategories retrieved successfully", response)
 }
 
 func (h *Handler) GetProductSubcategoriesBySubcategoryID(w http.ResponseWriter, r *http.Request) {
@@ -118,13 +113,13 @@ func (h *Handler) GetProductSubcategoriesBySubcategoryID(w http.ResponseWriter, 
 	subcategoryIDStr := vars["subcategoryId"]
 	subcategoryID, err := strconv.Atoi(subcategoryIDStr)
 	if err != nil {
-		http.Error(w, "Invalid subcategory ID", http.StatusBadRequest)
+		utils.WriteError(w, http.StatusBadRequest, "Invalid subcategory ID")
 		return
 	}
 
 	productSubcategories, err := h.store.GetProductSubcategoriesBySubcategoryID(subcategoryID)
 	if err != nil {
-		http.Error(w, "Failed to get product subcategories", http.StatusInternalServerError)
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get product subcategories")
 		return
 	}
 
@@ -132,15 +127,13 @@ func (h *Handler) GetProductSubcategoriesBySubcategoryID(w http.ResponseWriter, 
 		ProductSubcategories: productSubcategories,
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
+	utils.WriteSuccess(w, http.StatusOK, "Product subcategories retrieved successfully", response)
 }
 
 func (h *Handler) CreateProductSubcategory(w http.ResponseWriter, r *http.Request) {
 	var request product_subcategory_types.ProductSubcategoryCreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
@@ -148,10 +141,10 @@ func (h *Handler) CreateProductSubcategory(w http.ResponseWriter, r *http.Reques
 	_, err := h.productStore.GetProductByID(request.ProductID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			http.Error(w, "Product not found", http.StatusBadRequest)
+			utils.WriteError(w, http.StatusBadRequest, "Product not found")
 			return
 		}
-		http.Error(w, "Failed to validate product", http.StatusInternalServerError)
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to validate product")
 		return
 	}
 
@@ -159,22 +152,22 @@ func (h *Handler) CreateProductSubcategory(w http.ResponseWriter, r *http.Reques
 	_, err = h.subcategoryStore.GetSubcategoryByID(request.SubcategoryID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			http.Error(w, "Subcategory not found", http.StatusBadRequest)
+			utils.WriteError(w, http.StatusBadRequest, "Subcategory not found")
 			return
 		}
-		http.Error(w, "Failed to validate subcategory", http.StatusInternalServerError)
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to validate subcategory")
 		return
 	}
 
 	// Check if product-subcategory relationship already exists
 	existingProductSubcategories, err := h.store.GetProductSubcategoriesByProductID(request.ProductID)
 	if err != nil {
-		http.Error(w, "Failed to check existing product subcategories", http.StatusInternalServerError)
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to check existing product subcategories")
 		return
 	}
 	for _, existing := range existingProductSubcategories {
 		if existing.SubcategoryID == request.SubcategoryID {
-			http.Error(w, "Product subcategory relationship already exists", http.StatusConflict)
+			utils.WriteError(w, http.StatusConflict, "Product subcategory relationship already exists")
 			return
 		}
 	}
@@ -187,10 +180,10 @@ func (h *Handler) CreateProductSubcategory(w http.ResponseWriter, r *http.Reques
 	createdProductSubcategory, err := h.store.CreateProductSubcategory(productSubcategory)
 	if err != nil {
 		if err.Error() == "product subcategory already exists" {
-			http.Error(w, "Product subcategory already exists", http.StatusConflict)
+			utils.WriteError(w, http.StatusConflict, "Product subcategory already exists")
 			return
 		}
-		http.Error(w, "Failed to create product subcategory", http.StatusInternalServerError)
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to create product subcategory")
 		return
 	}
 
@@ -198,9 +191,7 @@ func (h *Handler) CreateProductSubcategory(w http.ResponseWriter, r *http.Reques
 		ProductSubcategory: *createdProductSubcategory,
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(response)
+	utils.WriteSuccess(w, http.StatusCreated, "Product subcategory created successfully", response)
 }
 
 func (h *Handler) BulkCreateProductSubcategory(w http.ResponseWriter, r *http.Request) {
@@ -208,12 +199,12 @@ func (h *Handler) BulkCreateProductSubcategory(w http.ResponseWriter, r *http.Re
 		ProductSubcategories []product_subcategory_types.ProductSubcategoryCreateRequest `json:"product_subcategories"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
 	if len(request.ProductSubcategories) == 0 {
-		http.Error(w, "No product subcategories provided", http.StatusBadRequest)
+		utils.WriteError(w, http.StatusBadRequest, "No product subcategories provided")
 		return
 	}
 
@@ -225,10 +216,10 @@ func (h *Handler) BulkCreateProductSubcategory(w http.ResponseWriter, r *http.Re
 		_, err := h.productStore.GetProductByID(req.ProductID)
 		if err != nil {
 			if err == sql.ErrNoRows {
-				http.Error(w, fmt.Sprintf("Product with ID %d not found", req.ProductID), http.StatusBadRequest)
+				utils.WriteError(w, http.StatusBadRequest, fmt.Sprintf("Product with ID %d not found", req.ProductID))
 				return
 			}
-			http.Error(w, "Failed to validate product", http.StatusInternalServerError)
+			utils.WriteError(w, http.StatusInternalServerError, "Failed to validate product")
 			return
 		}
 
@@ -236,17 +227,17 @@ func (h *Handler) BulkCreateProductSubcategory(w http.ResponseWriter, r *http.Re
 		_, err = h.subcategoryStore.GetSubcategoryByID(req.SubcategoryID)
 		if err != nil {
 			if err == sql.ErrNoRows {
-				http.Error(w, fmt.Sprintf("Subcategory with ID %d not found", req.SubcategoryID), http.StatusBadRequest)
+				utils.WriteError(w, http.StatusBadRequest, fmt.Sprintf("Subcategory with ID %d not found", req.SubcategoryID))
 				return
 			}
-			http.Error(w, "Failed to validate subcategory", http.StatusInternalServerError)
+			utils.WriteError(w, http.StatusInternalServerError, "Failed to validate subcategory")
 			return
 		}
 
 		// Check for duplicate combinations within the request
 		key := fmt.Sprintf("%d-%d", req.ProductID, req.SubcategoryID)
 		if productSubcategoryMap[key] {
-			http.Error(w, fmt.Sprintf("Duplicate product-subcategory combination: product_id=%d, subcategory_id=%d", req.ProductID, req.SubcategoryID), http.StatusBadRequest)
+			utils.WriteError(w, http.StatusBadRequest, fmt.Sprintf("Duplicate product-subcategory combination: product_id=%d, subcategory_id=%d", req.ProductID, req.SubcategoryID))
 			return
 		}
 		productSubcategoryMap[key] = true
@@ -260,10 +251,10 @@ func (h *Handler) BulkCreateProductSubcategory(w http.ResponseWriter, r *http.Re
 	err := h.store.BulkCreateProductSubcategory(productSubcategories)
 	if err != nil {
 		if err.Error() == "product subcategory already exists" {
-			http.Error(w, err.Error(), http.StatusConflict)
+			utils.WriteError(w, http.StatusConflict, err.Error())
 			return
 		}
-		http.Error(w, "Failed to create product subcategories", http.StatusInternalServerError)
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to create product subcategories")
 		return
 	}
 
@@ -274,9 +265,7 @@ func (h *Handler) BulkCreateProductSubcategory(w http.ResponseWriter, r *http.Re
 		response.ProductSubcategories[i] = *ps
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(response)
+	utils.WriteSuccess(w, http.StatusCreated, "Product subcategories created successfully", response)
 }
 
 func (h *Handler) UpdateProductSubcategory(w http.ResponseWriter, r *http.Request) {
@@ -284,13 +273,13 @@ func (h *Handler) UpdateProductSubcategory(w http.ResponseWriter, r *http.Reques
 	idStr := vars["id"]
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		utils.WriteError(w, http.StatusBadRequest, "Invalid ID")
 		return
 	}
 
 	var request product_subcategory_types.ProductSubcategoryUpdateRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
@@ -298,10 +287,10 @@ func (h *Handler) UpdateProductSubcategory(w http.ResponseWriter, r *http.Reques
 	existingProductSubcategory, err := h.store.GetProductSubcategoryByID(id)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			http.Error(w, "Product subcategory not found", http.StatusNotFound)
+			utils.WriteError(w, http.StatusNotFound, "Product subcategory not found")
 			return
 		}
-		http.Error(w, "Failed to get product subcategory", http.StatusInternalServerError)
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get product subcategory")
 		return
 	}
 
@@ -309,10 +298,10 @@ func (h *Handler) UpdateProductSubcategory(w http.ResponseWriter, r *http.Reques
 	_, err = h.productStore.GetProductByID(request.ProductID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			http.Error(w, "Product not found", http.StatusBadRequest)
+			utils.WriteError(w, http.StatusBadRequest, "Product not found")
 			return
 		}
-		http.Error(w, "Failed to validate product", http.StatusInternalServerError)
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to validate product")
 		return
 	}
 
@@ -320,10 +309,10 @@ func (h *Handler) UpdateProductSubcategory(w http.ResponseWriter, r *http.Reques
 	_, err = h.subcategoryStore.GetSubcategoryByID(request.SubcategoryID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			http.Error(w, "Subcategory not found", http.StatusBadRequest)
+			utils.WriteError(w, http.StatusBadRequest, "Subcategory not found")
 			return
 		}
-		http.Error(w, "Failed to validate subcategory", http.StatusInternalServerError)
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to validate subcategory")
 		return
 	}
 
@@ -332,7 +321,7 @@ func (h *Handler) UpdateProductSubcategory(w http.ResponseWriter, r *http.Reques
 
 	err = h.store.UpdateProductSubcategory(existingProductSubcategory)
 	if err != nil {
-		http.Error(w, "Failed to update product subcategory", http.StatusInternalServerError)
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to update product subcategory")
 		return
 	}
 
@@ -340,9 +329,7 @@ func (h *Handler) UpdateProductSubcategory(w http.ResponseWriter, r *http.Reques
 		ProductSubcategory: *existingProductSubcategory,
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
+	utils.WriteSuccess(w, http.StatusOK, "Product subcategory updated successfully", response)
 }
 
 func (h *Handler) DeleteProductSubcategory(w http.ResponseWriter, r *http.Request) {
@@ -350,7 +337,7 @@ func (h *Handler) DeleteProductSubcategory(w http.ResponseWriter, r *http.Reques
 	idStr := vars["id"]
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		utils.WriteError(w, http.StatusBadRequest, "Invalid ID")
 		return
 	}
 
@@ -358,16 +345,16 @@ func (h *Handler) DeleteProductSubcategory(w http.ResponseWriter, r *http.Reques
 	_, err = h.store.GetProductSubcategoryByID(id)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			http.Error(w, "Product subcategory not found", http.StatusNotFound)
+			utils.WriteError(w, http.StatusNotFound, "Product subcategory not found")
 			return
 		}
-		http.Error(w, "Failed to get product subcategory", http.StatusInternalServerError)
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get product subcategory")
 		return
 	}
 
 	err = h.store.DeleteProductSubcategory(id)
 	if err != nil {
-		http.Error(w, "Failed to delete product subcategory", http.StatusInternalServerError)
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to delete product subcategory")
 		return
 	}
 
@@ -375,7 +362,5 @@ func (h *Handler) DeleteProductSubcategory(w http.ResponseWriter, r *http.Reques
 		Message: "Product subcategory deleted successfully",
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
+	utils.WriteSuccess(w, http.StatusOK, "Product subcategory deleted successfully", response)
 }

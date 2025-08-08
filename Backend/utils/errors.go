@@ -5,17 +5,17 @@ import (
 	"net/http"
 )
 
-type ErrorResponse struct {
-	Status      string `json:"status"`
+type ErrorResponseWithDescription struct {
+	Status      bool   `json:"status"`
 	Message     string `json:"message"`
 	Description string `json:"description,omitempty"`
 }
 
-func WriteError(w http.ResponseWriter, statusCode int, message string, description string) {
+func WriteErrorWithDescription(w http.ResponseWriter, statusCode int, message string, description string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(ErrorResponse{
-		Status:      "Fail",
+	json.NewEncoder(w).Encode(ErrorResponseWithDescription{
+		Status:      false,
 		Message:     message,
 		Description: description,
 	})
