@@ -1,6 +1,8 @@
 package product_subcategory
 
 import (
+	"net/http"
+
 	"github.com/Asif-Faizal/Versace/services/supabase"
 	"github.com/Asif-Faizal/Versace/services/user"
 	product_types "github.com/Asif-Faizal/Versace/types/product"
@@ -38,3 +40,19 @@ func (h *Handler) RegisterRoutes(router *mux.Router, authService *user.AuthServi
 	adminRouter.HandleFunc("/product-subcategories/{id}", h.UpdateProductSubcategory).Methods("PUT")
 	adminRouter.HandleFunc("/product-subcategories/{id}", h.DeleteProductSubcategory).Methods("DELETE")
 }
+
+func (h *Handler) GetProductSubcategories(w http.ResponseWriter, r *http.Request) {}
+
+func (h *Handler) GetProductSubcategoryByID(w http.ResponseWriter, r *http.Request) {}
+
+func (h *Handler) GetProductSubcategoriesByProductID(w http.ResponseWriter, r *http.Request) {}
+
+func (h *Handler) GetProductSubcategoriesBySubcategoryID(w http.ResponseWriter, r *http.Request) {}
+
+func (h *Handler) CreateProductSubcategory(w http.ResponseWriter, r *http.Request) {}
+
+func (h *Handler) BulkCreateProductSubcategory(w http.ResponseWriter, r *http.Request) {}
+
+func (h *Handler) UpdateProductSubcategory(w http.ResponseWriter, r *http.Request) {}
+
+func (h *Handler) DeleteProductSubcategory(w http.ResponseWriter, r *http.Request) {}
