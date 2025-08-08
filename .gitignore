@@ -68,3 +68,5 @@ firebase_options.dart
 # Environment files (ignore all .env* except .env.example)
 .env*
 !.env.example
+Backend/.env*
+!Backend/.env.example
