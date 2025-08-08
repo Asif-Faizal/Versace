@@ -17,7 +17,7 @@ import (
 // Also supports underscore style: name_i, description_i, basePrice_i, image_i
 func (h *Handler) handleBulkCreateProduct(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseMultipartForm(200 << 20); err != nil { // 200MB
-		utils.WriteError(w, http.StatusBadRequest, "failed to parse multipart form", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "failed to parse multipart form")
 		return
 	}
 
@@ -116,12 +116,12 @@ func (h *Handler) handleBulkCreateProduct(w http.ResponseWriter, r *http.Request
 	}
 
 	if len(toCreate) == 0 {
-		utils.WriteError(w, http.StatusBadRequest, "no products to create", "ensure name[i], basePrice[i], image[i] are provided")
+		utils.WriteError(w, http.StatusBadRequest, "no products to create")
 		return
 	}
 
 	if err := h.store.BulkCreateProduct(toCreate); err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "failed to create products", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "failed to create products")
 		return
 	}
 

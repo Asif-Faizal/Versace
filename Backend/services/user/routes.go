@@ -74,7 +74,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := h.store.GetUsers()
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to get users", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get users")
 		return
 	}
 
@@ -91,25 +91,25 @@ func (h *Handler) GetUserByIDAdmin(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userIDStr, ok := vars["id"]
 	if !ok {
-		utils.WriteError(w, http.StatusBadRequest, "User ID is required", "")
+		utils.WriteError(w, http.StatusBadRequest, "User ID is required")
 		return
 	}
 
 	// Parse user ID from string to int
 	userID, err := strconv.Atoi(userIDStr)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid user ID format", "")
+		utils.WriteError(w, http.StatusBadRequest, "Invalid user ID format")
 		return
 	}
 
 	// Get the requested user by ID
 	user, err := h.store.GetUserByID(userID)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user")
 		return
 	}
 	if user == nil {
-		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		utils.WriteError(w, http.StatusNotFound, "User not found")
 		return
 	}
 
@@ -123,18 +123,18 @@ func (h *Handler) GetUserByIDAdmin(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context")
 		return
 	}
 
 	// Get the requested user by ID
 	user, err := h.store.GetUserByID(userFromCtx.ID)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user")
 		return
 	}
 	if user == nil {
-		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		utils.WriteError(w, http.StatusNotFound, "User not found")
 		return
 	}
 
@@ -149,46 +149,46 @@ func (h *Handler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	var userReq types.UserRegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&userReq); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
 	// Validate the user input
 	if !utils.IsValidEmail(userReq.Email) {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid email format", "")
+		utils.WriteError(w, http.StatusBadRequest, "Invalid email format")
 		return
 	}
 	if !utils.IsValidPassword(userReq.Password) {
-		utils.WriteError(w, http.StatusBadRequest, "Password must be more than 6 characters", "")
+		utils.WriteError(w, http.StatusBadRequest, "Password must be more than 6 characters")
 		return
 	}
 	if !utils.IsValidName(userReq.FirstName) {
-		utils.WriteError(w, http.StatusBadRequest, "First name must be more than 3 characters", "")
+		utils.WriteError(w, http.StatusBadRequest, "First name must be more than 3 characters")
 		return
 	}
 	if !utils.IsValidOptionalName(userReq.LastName) {
-		utils.WriteError(w, http.StatusBadRequest, "Last name must be empty or more than 3 characters", "")
+		utils.WriteError(w, http.StatusBadRequest, "Last name must be empty or more than 3 characters")
 		return
 	}
 
 	// Check if user already exists
 	existingUser, err := h.store.GetUserByEmail(userReq.Email)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to check for existing user", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to check for existing user")
 		return
 	}
 	if existingUser != nil {
-		utils.WriteError(w, http.StatusConflict, "User with this email already exists", "")
+		utils.WriteError(w, http.StatusConflict, "User with this email already exists")
 		return
 	}
 
 	if userReq.Role == "admin" {
 		if userReq.AdminCreationToken == "" {
-			utils.WriteError(w, http.StatusBadRequest, "adminCreationToken is required for admin registration", "")
+			utils.WriteError(w, http.StatusBadRequest, "adminCreationToken is required for admin registration")
 			return
 		}
 		if userReq.AdminCreationToken != h.adminCreationToken {
-			utils.WriteError(w, http.StatusUnauthorized, "invalid adminCreationToken", "")
+			utils.WriteError(w, http.StatusUnauthorized, "invalid adminCreationToken")
 			return
 		}
 	} else {
@@ -199,7 +199,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	hashedPassword, err := h.authService.HashPassword(userReq.Password)
 	if err != nil {
 		log.Printf("failed to hash password: %v", err)
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to process password", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to process password")
 		return
 	}
 
@@ -216,7 +216,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	createdUser, err := h.store.CreateUser(newUser)
 	if err != nil {
 		log.Printf("failed to create user: %v", err)
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to create user", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to create user")
 		return
 	}
 
@@ -232,7 +232,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	accessToken, refreshToken, err := h.authService.CreateToken(createdUser, deviceInfo)
 	if err != nil {
 		log.Printf("failed to create tokens: %v", err)
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to create tokens", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to create tokens")
 		return
 	}
 
@@ -249,13 +249,13 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) CheckEmail(w http.ResponseWriter, r *http.Request) {
 	var userReq types.CheckEmailRequest
 	if err := json.NewDecoder(r.Body).Decode(&userReq); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
 	// Validate the email format
 	if !utils.IsValidEmail(userReq.Email) {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid email format", "")
+		utils.WriteError(w, http.StatusBadRequest, "Invalid email format")
 		return
 	}
 
@@ -271,11 +271,11 @@ func (h *Handler) CheckEmail(w http.ResponseWriter, r *http.Request) {
 
 	existingUser, err := h.store.GetUserByEmail(userReq.Email)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to check for existing user", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to check for existing user")
 		return
 	}
 	if existingUser != nil {
-		utils.WriteError(w, http.StatusConflict, "User with this email already exists", "")
+		utils.WriteError(w, http.StatusConflict, "User with this email already exists")
 		return
 	}
 
@@ -285,30 +285,30 @@ func (h *Handler) CheckEmail(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) SendOTP(w http.ResponseWriter, r *http.Request) {
 	var req types.SendOTPRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
 	if !utils.IsValidEmail(req.Email) {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid email format", "")
+		utils.WriteError(w, http.StatusBadRequest, "Invalid email format")
 		return
 	}
 
 	otp, err := h.emailService.generateOTP()
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to generate OTP", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to generate OTP")
 		return
 	}
 
 	err = h.emailService.SendOTP(req.Email, otp)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to send OTP", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to send OTP")
 		return
 	}
 
 	otpExpiry, err := time.ParseDuration(h.emailService.config.OTPExpiry)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Invalid OTP expiry duration", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Invalid OTP expiry duration")
 		return
 	}
 
@@ -318,7 +318,7 @@ func (h *Handler) SendOTP(w http.ResponseWriter, r *http.Request) {
 		ExpiresAt: time.Now().Add(otpExpiry),
 	}
 	if err := h.store.SaveOTP(otpModel); err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to save OTP", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to save OTP")
 		return
 	}
 
@@ -328,28 +328,28 @@ func (h *Handler) SendOTP(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) VerifyOTP(w http.ResponseWriter, r *http.Request) {
 	var req types.VerifyOTPRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
 	storedOTP, err := h.store.GetOTPByEmail(req.Email)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to retrieve OTP", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to retrieve OTP")
 		return
 	}
 
 	if storedOTP == nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid or expired OTP", "")
+		utils.WriteError(w, http.StatusBadRequest, "Invalid or expired OTP")
 		return
 	}
 
 	if storedOTP.ExpiresAt.Before(time.Now()) {
-		utils.WriteError(w, http.StatusBadRequest, "OTP has expired", "")
+		utils.WriteError(w, http.StatusBadRequest, "OTP has expired")
 		return
 	}
 
 	if storedOTP.Code != req.OTP {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid OTP", "")
+		utils.WriteError(w, http.StatusBadRequest, "Invalid OTP")
 		return
 	}
 
@@ -365,7 +365,7 @@ func (h *Handler) VerifyOTP(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) GetDeviceSessions(w http.ResponseWriter, r *http.Request) {
 	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context")
 		return
 	}
 	userID := userFromCtx.ID
@@ -376,7 +376,7 @@ func (h *Handler) GetDeviceSessions(w http.ResponseWriter, r *http.Request) {
 	// 5. Fetch devices for this user
 	devices, err := h.tokenStore.GetDevicesByUserID(userID)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to get device sessions", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get device sessions")
 		return
 	}
 
@@ -389,7 +389,7 @@ func (h *Handler) GetDeviceSessions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !found {
-		utils.WriteError(w, http.StatusUnauthorized, "Device mismatch", "Device ID is not registered for this user")
+		utils.WriteError(w, http.StatusUnauthorized, "Device mismatch")
 		return
 	}
 
@@ -406,23 +406,23 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	// Parse request body
 	var req types.UpdateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
 	// Validate input
 	if !utils.IsValidName(req.FirstName) {
-		utils.WriteError(w, http.StatusBadRequest, "First name must be more than 3 characters", "")
+		utils.WriteError(w, http.StatusBadRequest, "First name must be more than 3 characters")
 		return
 	}
 	if !utils.IsValidOptionalName(req.LastName) {
-		utils.WriteError(w, http.StatusBadRequest, "Last name must be empty or more than 3 characters", "")
+		utils.WriteError(w, http.StatusBadRequest, "Last name must be empty or more than 3 characters")
 		return
 	}
 
 	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context")
 		return
 	}
 	userID := userFromCtx.ID
@@ -430,11 +430,11 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	// Check if user exists
 	existingUser, err := h.store.GetUserByID(userID)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user")
 		return
 	}
 	if existingUser == nil {
-		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		utils.WriteError(w, http.StatusNotFound, "User not found")
 		return
 	}
 
@@ -446,7 +446,7 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	// Update user in database
 	err = h.store.UpdateUser(existingUser)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to update user", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to update user")
 		return
 	}
 
@@ -461,7 +461,7 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context")
 		return
 	}
 	userID := userFromCtx.ID
@@ -469,18 +469,18 @@ func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	// Check if user exists
 	existingUser, err := h.store.GetUserByID(userID)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user")
 		return
 	}
 	if existingUser == nil {
-		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		utils.WriteError(w, http.StatusNotFound, "User not found")
 		return
 	}
 
 	// Delete user from database
 	err = h.store.DeleteUser(userID)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to delete user", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to delete user")
 		return
 	}
 
@@ -491,24 +491,24 @@ func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	var req types.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
 	// 1. Validate user exists
 	user, err := h.store.GetUserByEmail(req.Email)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Error fetching user", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Error fetching user")
 		return
 	}
 	if user == nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid email or password", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid email or password")
 		return
 	}
 
 	// 2. Compare password
 	if err := h.authService.ComparePasswords(user.Password, req.Password); err != nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid email or password", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid email or password")
 		return
 	}
 
@@ -523,14 +523,14 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if deviceInfo.DeviceID == "" {
-		utils.WriteError(w, http.StatusBadRequest, "Device ID is required", "")
+		utils.WriteError(w, http.StatusBadRequest, "Device ID is required")
 		return
 	}
 
 	// 4. Handle token creation/update
 	accessToken, refreshToken, err := h.authService.Login(user, deviceInfo)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to login", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to login")
 		return
 	}
 
@@ -549,20 +549,20 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context")
 		return
 	}
 	userID := userFromCtx.ID
 	deviceID := r.Header.Get("X-Device-ID")
 	if deviceID == "" {
-		utils.WriteError(w, http.StatusBadRequest, "Device ID is required", "")
+		utils.WriteError(w, http.StatusBadRequest, "Device ID is required")
 		return
 	}
 
 	// Revoke the token
 	err := h.store.RevokeToken(userID, deviceID)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to revoke token", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to revoke token")
 		return
 	}
 
@@ -573,7 +573,7 @@ func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) Refresh(w http.ResponseWriter, r *http.Request) {
 	var req types.RefreshTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
@@ -588,17 +588,17 @@ func (h *Handler) Refresh(w http.ResponseWriter, r *http.Request) {
 
 	newAccessToken, newRefreshToken, userID, err := h.authService.RefreshToken(req.RefreshToken, deviceInfo)
 	if err != nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Failed to refresh token", err.Error())
+		utils.WriteError(w, http.StatusUnauthorized, "Failed to refresh token")
 		return
 	}
 
 	user, err := h.store.GetUserByID(userID)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user details", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user details")
 		return
 	}
 	if user == nil {
-		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		utils.WriteError(w, http.StatusNotFound, "User not found")
 		return
 	}
 
@@ -617,19 +617,19 @@ func (h *Handler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	// Parse request body
 	var req types.ResetPasswordRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
 	// Validate new password
 	if !utils.IsValidPassword(req.NewPassword) {
-		utils.WriteError(w, http.StatusBadRequest, "New password must be more than 6 characters", "")
+		utils.WriteError(w, http.StatusBadRequest, "New password must be more than 6 characters")
 		return
 	}
 
 	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context")
 		return
 	}
 	userID := userFromCtx.ID
@@ -637,25 +637,25 @@ func (h *Handler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	// Check if user exists
 	existingUser, err := h.store.GetUserByID(userID)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user")
 		return
 	}
 	if existingUser == nil {
-		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		utils.WriteError(w, http.StatusNotFound, "User not found")
 		return
 	}
 
 	// Hash new password
 	hashedPassword, err := h.authService.HashPassword(req.NewPassword)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to hash password", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to hash password")
 		return
 	}
 
 	// Update password in database with hashed password
 	err = h.store.ChangePassword(userID, hashedPassword)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to reset password", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to reset password")
 		return
 	}
 
@@ -667,19 +667,19 @@ func (h *Handler) UpdateEmail(w http.ResponseWriter, r *http.Request) {
 	// Parse request body
 	var req types.UpdateEmailRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
 	// Validate email format
 	if !utils.IsValidEmail(req.Email) {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid email format", "")
+		utils.WriteError(w, http.StatusBadRequest, "Invalid email format")
 		return
 	}
 
 	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context")
 		return
 	}
 	userID := userFromCtx.ID
@@ -687,11 +687,11 @@ func (h *Handler) UpdateEmail(w http.ResponseWriter, r *http.Request) {
 	// Check if user exists
 	existingUser, err := h.store.GetUserByID(userID)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user")
 		return
 	}
 	if existingUser == nil {
-		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		utils.WriteError(w, http.StatusNotFound, "User not found")
 		return
 	}
 
@@ -699,11 +699,11 @@ func (h *Handler) UpdateEmail(w http.ResponseWriter, r *http.Request) {
 	if req.Email != existingUser.Email {
 		emailUser, err := h.store.GetUserByEmail(req.Email)
 		if err != nil {
-			utils.WriteError(w, http.StatusInternalServerError, "Failed to check email availability", err.Error())
+			utils.WriteError(w, http.StatusInternalServerError, "Failed to check email availability")
 			return
 		}
 		if emailUser != nil {
-			utils.WriteError(w, http.StatusConflict, "Email already exists", "")
+			utils.WriteError(w, http.StatusConflict, "Email already exists")
 			return
 		}
 	}
@@ -715,7 +715,7 @@ func (h *Handler) UpdateEmail(w http.ResponseWriter, r *http.Request) {
 	// Update user in database
 	err = h.store.UpdateEmail(userID, req.Email)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to update email", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to update email")
 		return
 	}
 
@@ -731,19 +731,19 @@ func (h *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	// Parse request body
 	var req types.ChangePasswordRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
 	// Validate new password
 	if !utils.IsValidPassword(req.NewPassword) {
-		utils.WriteError(w, http.StatusBadRequest, "New password must be more than 6 characters", "")
+		utils.WriteError(w, http.StatusBadRequest, "New password must be more than 6 characters")
 		return
 	}
 
 	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context")
 		return
 	}
 	userID := userFromCtx.ID
@@ -751,24 +751,24 @@ func (h *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	// Check if user exists
 	existingUser, err := h.store.GetUserByID(userID)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user")
 		return
 	}
 	if existingUser == nil {
-		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		utils.WriteError(w, http.StatusNotFound, "User not found")
 		return
 	}
 
 	// Verify current password
 	if err := h.authService.ComparePasswords(existingUser.Password, req.CurrentPassword); err != nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Current password is incorrect", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Current password is incorrect")
 		return
 	}
 
 	// Hash new password
 	hashedPassword, err := h.authService.HashPassword(req.NewPassword)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to hash password", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to hash password")
 		return
 	}
 
@@ -778,7 +778,7 @@ func (h *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	// Update password in database with hashed password
 	err = h.store.ChangePassword(userID, hashedPassword)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to update password", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to update password")
 		return
 	}
 
@@ -790,13 +790,13 @@ func (h *Handler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	// Parse request body
 	var req types.DeleteAccountRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
 	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context")
 		return
 	}
 	userID := userFromCtx.ID
@@ -804,24 +804,24 @@ func (h *Handler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	// Check if user exists
 	existingUser, err := h.store.GetUserByID(userID)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user")
 		return
 	}
 	if existingUser == nil {
-		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		utils.WriteError(w, http.StatusNotFound, "User not found")
 		return
 	}
 
 	// Verify password
 	if err := h.authService.ComparePasswords(existingUser.Password, req.Password); err != nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Password is incorrect", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Password is incorrect")
 		return
 	}
 
 	// Delete user from database
 	err = h.store.DeleteUser(userID)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to delete user", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to delete user")
 		return
 	}
 
@@ -833,44 +833,44 @@ func (h *Handler) AdminDeleteAccount(w http.ResponseWriter, r *http.Request) {
 	// Parse request body
 	var req types.AdminDeleteAccountRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
 	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context")
 		return
 	}
 	userID := userFromCtx.ID
 
 	// Verify admin creation token
 	if req.AdminCreationToken != h.adminCreationToken {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid admin creation token", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid admin creation token")
 		return
 	}
 
 	// Get the requested user by ID
 	existingUser, err := h.store.GetUserByID(userID)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user")
 		return
 	}
 	if existingUser == nil {
-		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		utils.WriteError(w, http.StatusNotFound, "User not found")
 		return
 	}
 
 	// Verify password
 	if err := h.authService.ComparePasswords(existingUser.Password, req.Password); err != nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Password is incorrect", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Password is incorrect")
 		return
 	}
 
 	// Delete admin from database
 	err = h.store.DeleteUser(userID)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to delete admin", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to delete admin")
 		return
 	}
 
@@ -880,17 +880,17 @@ func (h *Handler) AdminDeleteAccount(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) handleGetMyProfile(w http.ResponseWriter, r *http.Request) {
 	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context")
 		return
 	}
 
 	user, err := h.store.GetUserByID(userFromCtx.ID)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user")
 		return
 	}
 	if user == nil {
-		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		utils.WriteError(w, http.StatusNotFound, "User not found")
 		return
 	}
 
@@ -904,32 +904,32 @@ func (h *Handler) handleGetMyProfile(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) handleUpdateMyProfile(w http.ResponseWriter, r *http.Request) {
 	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context")
 		return
 	}
 
 	var req types.UpdateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
 	if !utils.IsValidName(req.FirstName) {
-		utils.WriteError(w, http.StatusBadRequest, "First name must be more than 3 characters", "")
+		utils.WriteError(w, http.StatusBadRequest, "First name must be more than 3 characters")
 		return
 	}
 	if !utils.IsValidOptionalName(req.LastName) {
-		utils.WriteError(w, http.StatusBadRequest, "Last name must be empty or more than 3 characters", "")
+		utils.WriteError(w, http.StatusBadRequest, "Last name must be empty or more than 3 characters")
 		return
 	}
 
 	user, err := h.store.GetUserByID(userFromCtx.ID)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user")
 		return
 	}
 	if user == nil {
-		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		utils.WriteError(w, http.StatusNotFound, "User not found")
 		return
 	}
 
@@ -939,7 +939,7 @@ func (h *Handler) handleUpdateMyProfile(w http.ResponseWriter, r *http.Request) 
 
 	err = h.store.UpdateUser(user)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to update user", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to update user")
 		return
 	}
 
@@ -953,39 +953,39 @@ func (h *Handler) handleUpdateMyProfile(w http.ResponseWriter, r *http.Request) 
 func (h *Handler) handleChangeEmail(w http.ResponseWriter, r *http.Request) {
 	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context")
 		return
 	}
 
 	var req types.UpdateEmailRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
 	if !utils.IsValidEmail(req.Email) {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid email format", "")
+		utils.WriteError(w, http.StatusBadRequest, "Invalid email format")
 		return
 	}
 
 	user, err := h.store.GetUserByID(userFromCtx.ID)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user")
 		return
 	}
 	if user == nil {
-		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		utils.WriteError(w, http.StatusNotFound, "User not found")
 		return
 	}
 
 	if req.Email != user.Email {
 		existingUser, err := h.store.GetUserByEmail(req.Email)
 		if err != nil {
-			utils.WriteError(w, http.StatusInternalServerError, "Failed to check email availability", err.Error())
+			utils.WriteError(w, http.StatusInternalServerError, "Failed to check email availability")
 			return
 		}
 		if existingUser != nil {
-			utils.WriteError(w, http.StatusConflict, "Email already exists", "")
+			utils.WriteError(w, http.StatusConflict, "Email already exists")
 			return
 		}
 	}
@@ -995,7 +995,7 @@ func (h *Handler) handleChangeEmail(w http.ResponseWriter, r *http.Request) {
 
 	err = h.store.UpdateEmail(user.ID, req.Email)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to update email", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to update email")
 		return
 	}
 
@@ -1009,45 +1009,45 @@ func (h *Handler) handleChangeEmail(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) handleChangePassword(w http.ResponseWriter, r *http.Request) {
 	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context")
 		return
 	}
 
 	var req types.ChangePasswordRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
 	if !utils.IsValidPassword(req.NewPassword) {
-		utils.WriteError(w, http.StatusBadRequest, "New password must be more than 6 characters", "")
+		utils.WriteError(w, http.StatusBadRequest, "New password must be more than 6 characters")
 		return
 	}
 
 	user, err := h.store.GetUserByID(userFromCtx.ID)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get user")
 		return
 	}
 	if user == nil {
-		utils.WriteError(w, http.StatusNotFound, "User not found", "")
+		utils.WriteError(w, http.StatusNotFound, "User not found")
 		return
 	}
 
 	if err := h.authService.ComparePasswords(user.Password, req.CurrentPassword); err != nil {
-		utils.WriteError(w, http.StatusUnauthorized, "Current password is incorrect", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Current password is incorrect")
 		return
 	}
 
 	hashedPassword, err := h.authService.HashPassword(req.NewPassword)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to hash password", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to hash password")
 		return
 	}
 
 	err = h.store.ChangePassword(user.ID, hashedPassword)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to update password", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to update password")
 		return
 	}
 
@@ -1057,13 +1057,13 @@ func (h *Handler) handleChangePassword(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) handleDeleteMyAccount(w http.ResponseWriter, r *http.Request) {
 	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context")
 		return
 	}
 
 	err := h.store.DeleteUser(userFromCtx.ID)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to delete user", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to delete user")
 		return
 	}
 
@@ -1073,27 +1073,27 @@ func (h *Handler) handleDeleteMyAccount(w http.ResponseWriter, r *http.Request) 
 func (h *Handler) handleUpdateProfileImage(w http.ResponseWriter, r *http.Request) {
 	userFromCtx, ok := r.Context().Value(types.UserKey).(types.AuthenticatedUser)
 	if !ok {
-		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context", "")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid user data in context")
 		return
 	}
 	userID := userFromCtx.ID
 
 	imageUrls, ok := r.Context().Value("imageUrls").([]string)
 	if !ok || len(imageUrls) == 0 {
-		utils.WriteError(w, http.StatusBadRequest, "Image URL not found", "")
+		utils.WriteError(w, http.StatusBadRequest, "Image URL not found")
 		return
 	}
 
 	user, err := h.store.GetUserByID(userID)
 	if err != nil {
-		utils.WriteError(w, http.StatusNotFound, "User not found", err.Error())
+		utils.WriteError(w, http.StatusNotFound, "User not found")
 		return
 	}
 
 	if user.ProfileURL.String != "" {
 		fileName, err := supabase.GetFileNameFromURL(user.ProfileURL.String)
 		if err != nil {
-			utils.WriteError(w, http.StatusInternalServerError, "Failed to parse old image URL", err.Error())
+			utils.WriteError(w, http.StatusInternalServerError, "Failed to parse old image URL")
 			return
 		}
 
@@ -1105,7 +1105,7 @@ func (h *Handler) handleUpdateProfileImage(w http.ResponseWriter, r *http.Reques
 	newImageURL := imageUrls[0]
 	nullImageURL := sql.NullString{String: newImageURL, Valid: true}
 	if err := h.store.UpdateProfileURL(userID, nullImageURL); err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to update user profile URL", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to update user profile URL")
 		return
 	}
 

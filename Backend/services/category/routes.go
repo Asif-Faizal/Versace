@@ -45,7 +45,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router, authService *user.AuthServi
 func (h *Handler) GetCategories(w http.ResponseWriter, r *http.Request) {
 	categories, err := h.store.GetCategories()
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to retrieve categories", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to retrieve categories")
 		return
 	}
 
@@ -56,19 +56,19 @@ func (h *Handler) GetCategoryByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	idStr, ok := vars["id"]
 	if !ok {
-		utils.WriteError(w, http.StatusBadRequest, "Missing category ID", "")
+		utils.WriteError(w, http.StatusBadRequest, "Missing category ID")
 		return
 	}
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid category ID", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid category ID")
 		return
 	}
 
 	category, err := h.store.GetCategoryByID(id)
 	if err != nil {
-		utils.WriteError(w, http.StatusNotFound, "Category not found", err.Error())
+		utils.WriteError(w, http.StatusNotFound, "Category not found")
 		return
 	}
 
@@ -78,7 +78,7 @@ func (h *Handler) GetCategoryByID(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) CreateCategory(w http.ResponseWriter, r *http.Request) {
 	imageUrls, ok := r.Context().Value("imageUrls").([]string)
 	if !ok || len(imageUrls) == 0 {
-		utils.WriteError(w, http.StatusBadRequest, "Image URL not found", "")
+		utils.WriteError(w, http.StatusBadRequest, "Image URL not found")
 		return
 	}
 
@@ -87,7 +87,7 @@ func (h *Handler) CreateCategory(w http.ResponseWriter, r *http.Request) {
 
 	// Simple validation
 	if name == "" {
-		utils.WriteError(w, http.StatusBadRequest, "Category name is required", "")
+		utils.WriteError(w, http.StatusBadRequest, "Category name is required")
 		return
 	}
 
@@ -99,7 +99,7 @@ func (h *Handler) CreateCategory(w http.ResponseWriter, r *http.Request) {
 
 	createdCategory, err := h.store.CreateCategory(category)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to create category", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to create category")
 		return
 	}
 
@@ -110,25 +110,25 @@ func (h *Handler) UpdateCategory(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	idStr, ok := vars["id"]
 	if !ok {
-		utils.WriteError(w, http.StatusBadRequest, "Missing category ID", "")
+		utils.WriteError(w, http.StatusBadRequest, "Missing category ID")
 		return
 	}
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid category ID", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid category ID")
 		return
 	}
 
 	var payload types.CategoryUpdateRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
 	// Simple validation
 	if payload.Name == "" {
-		utils.WriteError(w, http.StatusBadRequest, "Category name is required", "")
+		utils.WriteError(w, http.StatusBadRequest, "Category name is required")
 		return
 	}
 
@@ -139,7 +139,7 @@ func (h *Handler) UpdateCategory(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.store.UpdateCategory(category); err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to update category", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to update category")
 		return
 	}
 
@@ -150,32 +150,32 @@ func (h *Handler) UpdateCategoryImage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	idStr, ok := vars["id"]
 	if !ok {
-		utils.WriteError(w, http.StatusBadRequest, "Missing category ID", "")
+		utils.WriteError(w, http.StatusBadRequest, "Missing category ID")
 		return
 	}
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid category ID", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid category ID")
 		return
 	}
 
 	imageUrls, ok := r.Context().Value("imageUrls").([]string)
 	if !ok || len(imageUrls) == 0 {
-		utils.WriteError(w, http.StatusBadRequest, "Image URL not found", "")
+		utils.WriteError(w, http.StatusBadRequest, "Image URL not found")
 		return
 	}
 
 	category, err := h.store.GetCategoryByID(id)
 	if err != nil {
-		utils.WriteError(w, http.StatusNotFound, "Category not found", err.Error())
+		utils.WriteError(w, http.StatusNotFound, "Category not found")
 		return
 	}
 
 	if category.ImageURL != "" {
 		fileName, err := supabase.GetFileNameFromURL(category.ImageURL)
 		if err != nil {
-			utils.WriteError(w, http.StatusInternalServerError, "Failed to parse old image URL", err.Error())
+			utils.WriteError(w, http.StatusInternalServerError, "Failed to parse old image URL")
 			return
 		}
 
@@ -186,7 +186,7 @@ func (h *Handler) UpdateCategoryImage(w http.ResponseWriter, r *http.Request) {
 
 	newImageURL := imageUrls[0]
 	if err := h.store.UpdateCategoryImageURL(id, newImageURL); err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to update category image URL", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to update category image URL")
 		return
 	}
 
@@ -197,18 +197,18 @@ func (h *Handler) DeleteCategory(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	idStr, ok := vars["id"]
 	if !ok {
-		utils.WriteError(w, http.StatusBadRequest, "Missing category ID", "")
+		utils.WriteError(w, http.StatusBadRequest, "Missing category ID")
 		return
 	}
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid category ID", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid category ID")
 		return
 	}
 
 	if err := h.store.DeleteCategory(id); err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to delete category", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to delete category")
 		return
 	}
 

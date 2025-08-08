@@ -46,7 +46,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router, authService *user.AuthServi
 func (h *Handler) GetSubcategories(w http.ResponseWriter, r *http.Request) {
 	subcategories, err := h.store.GetSubcategories()
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to retrieve subcategories", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to retrieve subcategories")
 		return
 	}
 	utils.WriteSuccess(w, http.StatusOK, "Subcategories retrieved successfully", subcategoryTypes.SubcategoriesResponse{Subcategories: subcategories})
@@ -56,19 +56,19 @@ func (h *Handler) GetSubcategoryByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	idStr, ok := vars["id"]
 	if !ok {
-		utils.WriteError(w, http.StatusBadRequest, "Missing subcategory ID", "")
+		utils.WriteError(w, http.StatusBadRequest, "Missing subcategory ID")
 		return
 	}
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid subcategory ID", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid subcategory ID")
 		return
 	}
 
 	subcategory, err := h.store.GetSubcategoryByID(id)
 	if err != nil {
-		utils.WriteError(w, http.StatusNotFound, "Subcategory not found", err.Error())
+		utils.WriteError(w, http.StatusNotFound, "Subcategory not found")
 		return
 	}
 	utils.WriteSuccess(w, http.StatusOK, "Subcategory retrieved successfully", subcategoryTypes.SubcategoryByIDResponse{Subcategory: *subcategory})
@@ -78,19 +78,19 @@ func (h *Handler) GetSubcategoriesByCategoryID(w http.ResponseWriter, r *http.Re
 	vars := mux.Vars(r)
 	catIDStr, ok := vars["categoryId"]
 	if !ok {
-		utils.WriteError(w, http.StatusBadRequest, "Missing category ID", "")
+		utils.WriteError(w, http.StatusBadRequest, "Missing category ID")
 		return
 	}
 
 	catID, err := strconv.Atoi(catIDStr)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid category ID", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid category ID")
 		return
 	}
 
 	subcategories, err := h.store.GetSubcategoriesByCategoryID(catID)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to retrieve subcategories", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to retrieve subcategories")
 		return
 	}
 	utils.WriteSuccess(w, http.StatusOK, "Subcategories retrieved successfully", subcategoryTypes.SubcategoryByCategoryIDResponse{Subcategories: subcategories})
@@ -99,7 +99,7 @@ func (h *Handler) GetSubcategoriesByCategoryID(w http.ResponseWriter, r *http.Re
 func (h *Handler) CreateSubcategory(w http.ResponseWriter, r *http.Request) {
 	imageUrls, ok := r.Context().Value("imageUrls").([]string)
 	if !ok || len(imageUrls) == 0 {
-		utils.WriteError(w, http.StatusBadRequest, "Image URL not found", "")
+		utils.WriteError(w, http.StatusBadRequest, "Image URL not found")
 		return
 	}
 
@@ -108,19 +108,19 @@ func (h *Handler) CreateSubcategory(w http.ResponseWriter, r *http.Request) {
 	categoryIDStr := r.FormValue("categoryId")
 
 	if name == "" || categoryIDStr == "" {
-		utils.WriteError(w, http.StatusBadRequest, "Name and categoryId are required", "")
+		utils.WriteError(w, http.StatusBadRequest, "Name and categoryId are required")
 		return
 	}
 
 	categoryID, err := strconv.Atoi(categoryIDStr)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid category ID", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid category ID")
 		return
 	}
 
 	_, err = h.categoryStore.GetCategoryByID(categoryID)
 	if err != nil {
-		utils.WriteError(w, http.StatusNotFound, "Category not found", err.Error())
+		utils.WriteError(w, http.StatusNotFound, "Category not found")
 		return
 	}
 
@@ -131,7 +131,7 @@ func (h *Handler) CreateSubcategory(w http.ResponseWriter, r *http.Request) {
 		CategoryID:  categoryID,
 	})
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to create subcategory", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to create subcategory")
 		return
 	}
 
@@ -142,19 +142,19 @@ func (h *Handler) UpdateSubcategory(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	idStr, ok := vars["id"]
 	if !ok {
-		utils.WriteError(w, http.StatusBadRequest, "Missing subcategory ID", "")
+		utils.WriteError(w, http.StatusBadRequest, "Missing subcategory ID")
 		return
 	}
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid subcategory ID", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid subcategory ID")
 		return
 	}
 
 	var request subcategoryTypes.SubcategoryUpdateRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid request body", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
@@ -167,13 +167,13 @@ func (h *Handler) UpdateSubcategory(w http.ResponseWriter, r *http.Request) {
 
 	err = h.store.UpdateSubcategory(subcategory)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to update subcategory", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to update subcategory")
 		return
 	}
 
 	updatedSubcategory, err := h.store.GetSubcategoryByID(id)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to retrieve updated subcategory", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to retrieve updated subcategory")
 		return
 	}
 
@@ -184,32 +184,32 @@ func (h *Handler) UpdateSubcategoryImage(w http.ResponseWriter, r *http.Request)
 	vars := mux.Vars(r)
 	idStr, ok := vars["id"]
 	if !ok {
-		utils.WriteError(w, http.StatusBadRequest, "Missing subcategory ID", "")
+		utils.WriteError(w, http.StatusBadRequest, "Missing subcategory ID")
 		return
 	}
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid subcategory ID", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid subcategory ID")
 		return
 	}
 
 	imageUrls, ok := r.Context().Value("imageUrls").([]string)
 	if !ok || len(imageUrls) == 0 {
-		utils.WriteError(w, http.StatusBadRequest, "Image URL not found", "")
+		utils.WriteError(w, http.StatusBadRequest, "Image URL not found")
 		return
 	}
 
 	subcategory, err := h.store.GetSubcategoryByID(id)
 	if err != nil {
-		utils.WriteError(w, http.StatusNotFound, "Subcategory not found", err.Error())
+		utils.WriteError(w, http.StatusNotFound, "Subcategory not found")
 		return
 	}
 
 	if subcategory.ImageURL != "" {
 		fileName, err := supabase.GetFileNameFromURL(subcategory.ImageURL)
 		if err != nil {
-			utils.WriteError(w, http.StatusInternalServerError, "Failed to parse old image URL", err.Error())
+			utils.WriteError(w, http.StatusInternalServerError, "Failed to parse old image URL")
 			return
 		}
 
@@ -220,7 +220,7 @@ func (h *Handler) UpdateSubcategoryImage(w http.ResponseWriter, r *http.Request)
 
 	newImageURL := imageUrls[0]
 	if err := h.store.UpdateSubcategoryImageURL(id, newImageURL); err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to update subcategory image URL", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to update subcategory image URL")
 		return
 	}
 
@@ -231,19 +231,19 @@ func (h *Handler) DeleteSubcategory(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	idStr, ok := vars["id"]
 	if !ok {
-		utils.WriteError(w, http.StatusBadRequest, "Missing subcategory ID", "")
+		utils.WriteError(w, http.StatusBadRequest, "Missing subcategory ID")
 		return
 	}
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid subcategory ID", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid subcategory ID")
 		return
 	}
 
 	err = h.store.DeleteSubcategory(id)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to delete subcategory", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to delete subcategory")
 		return
 	}
 

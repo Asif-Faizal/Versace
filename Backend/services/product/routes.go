@@ -44,7 +44,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router, authService *user.AuthServi
 func (h *Handler) GetProducts(w http.ResponseWriter, r *http.Request) {
 	products, err := h.store.GetProducts()
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to get products", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to get products")
 		return
 	}
 	utils.WriteSuccess(w, http.StatusOK, "Products fetched successfully", product.ProductsResponse{Products: products})
@@ -54,12 +54,12 @@ func (h *Handler) GetProductByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid product ID", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid product ID")
 		return
 	}
 	prod, err := h.store.GetProductByID(id)
 	if err != nil {
-		utils.WriteError(w, http.StatusNotFound, "Product not found", err.Error())
+		utils.WriteError(w, http.StatusNotFound, "Product not found")
 		return
 	}
 	utils.WriteSuccess(w, http.StatusOK, "Product fetched successfully", product.ProductByIDResponse{Product: *prod})
@@ -68,7 +68,7 @@ func (h *Handler) GetProductByID(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	imageUrls, ok := r.Context().Value("imageUrls").([]string)
 	if !ok || len(imageUrls) == 0 {
-		utils.WriteError(w, http.StatusBadRequest, "Image URL not found", "")
+		utils.WriteError(w, http.StatusBadRequest, "Image URL not found")
 		return
 	}
 
@@ -77,13 +77,13 @@ func (h *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	basePriceStr := r.FormValue("basePrice")
 
 	if name == "" || description == "" || basePriceStr == "" {
-		utils.WriteError(w, http.StatusBadRequest, "Name, description, and basePrice are required", "")
+		utils.WriteError(w, http.StatusBadRequest, "Name, description, and basePrice are required")
 		return
 	}
 
 	basePrice, err := strconv.ParseFloat(basePriceStr, 64)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid base price", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid base price")
 		return
 	}
 
@@ -95,7 +95,7 @@ func (h *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to create product", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to create product")
 		return
 	}
 
@@ -106,13 +106,13 @@ func (h *Handler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid product ID", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid product ID")
 		return
 	}
 
 	imageUrls, ok := r.Context().Value("imageUrls").([]string)
 	if !ok || len(imageUrls) == 0 {
-		utils.WriteError(w, http.StatusBadRequest, "Image URL not found", "")
+		utils.WriteError(w, http.StatusBadRequest, "Image URL not found")
 		return
 	}
 
@@ -121,13 +121,13 @@ func (h *Handler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	basePriceStr := r.FormValue("basePrice")
 
 	if name == "" || description == "" || basePriceStr == "" {
-		utils.WriteError(w, http.StatusBadRequest, "Name, description, and basePrice are required", "")
+		utils.WriteError(w, http.StatusBadRequest, "Name, description, and basePrice are required")
 		return
 	}
 
 	basePrice, err := strconv.ParseFloat(basePriceStr, 64)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid base price", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid base price")
 		return
 	}
 
@@ -140,9 +140,9 @@ func (h *Handler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		if err == sql.ErrNoRows {
-			utils.WriteError(w, http.StatusNotFound, "Product not found", "Product with the specified ID does not exist")
+			utils.WriteError(w, http.StatusNotFound, "Product not found")
 		} else {
-			utils.WriteError(w, http.StatusInternalServerError, "Failed to update product", err.Error())
+			utils.WriteError(w, http.StatusInternalServerError, "Failed to update product")
 		}
 		return
 	}
@@ -153,13 +153,13 @@ func (h *Handler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid product ID", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid product ID")
 		return
 	}
 
 	err = h.store.DeleteProduct(id)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to delete product", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to delete product")
 		return
 	}
 	utils.WriteSuccess(w, http.StatusOK, "Product deleted successfully", product.ProductDeleteResponse{Message: "Product deleted successfully"})
@@ -169,19 +169,19 @@ func (h *Handler) UpdateProductImageURL(w http.ResponseWriter, r *http.Request) 
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Invalid product ID", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "Invalid product ID")
 		return
 	}
 
 	imageUrls, ok := r.Context().Value("imageUrls").([]string)
 	if !ok || len(imageUrls) == 0 {
-		utils.WriteError(w, http.StatusBadRequest, "Image URL not found", "")
+		utils.WriteError(w, http.StatusBadRequest, "Image URL not found")
 		return
 	}
 
 	err = h.store.UpdateProductImageURL(id, imageUrls[0])
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to update product image URL", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to update product image URL")
 		return
 	}
 	utils.WriteSuccess(w, http.StatusOK, "Product image URL updated successfully", product.ProductUpdateImageURLResponse{Message: "Product image URL updated successfully"})

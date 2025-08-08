@@ -18,7 +18,7 @@ import (
 // Also supports underscore style: name_i, description_i, categoryId_i, image_i
 func (h *Handler) handleBulkCreateSubcategory(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseMultipartForm(100 << 20); err != nil { // 100MB
-		utils.WriteError(w, http.StatusBadRequest, "failed to parse multipart form", err.Error())
+		utils.WriteError(w, http.StatusBadRequest, "failed to parse multipart form")
 		return
 	}
 
@@ -123,12 +123,12 @@ func (h *Handler) handleBulkCreateSubcategory(w http.ResponseWriter, r *http.Req
 	}
 
 	if len(toCreate) == 0 {
-		utils.WriteError(w, http.StatusBadRequest, "no subcategories to create", "ensure name[i], description[i], categoryId[i], image[i] are provided")
+		utils.WriteError(w, http.StatusBadRequest, "no subcategories to create")
 		return
 	}
 
 	if err := h.store.BulkCreateSubcategory(toCreate); err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "failed to create subcategories", err.Error())
+		utils.WriteError(w, http.StatusInternalServerError, "failed to create subcategories")
 		return
 	}
 
