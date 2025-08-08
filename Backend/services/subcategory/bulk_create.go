@@ -4,111 +4,135 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"mime/multipart"
 	"net/http"
+	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/Asif-Faizal/Versace/types/subcategory"
 	"github.com/Asif-Faizal/Versace/utils"
-	"github.com/xuri/excelize/v2"
 )
 
+// handleBulkCreateSubcategory expects multipart/form-data with repeated, indexed fields:
+// name[i], description[i], categoryId[i], image[i]
+// Also supports underscore style: name_i, description_i, categoryId_i, image_i
 func (h *Handler) handleBulkCreateSubcategory(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseMultipartForm(10 << 20) // 10 MB
-	if err != nil {
+	if err := r.ParseMultipartForm(100 << 20); err != nil { // 100MB
 		utils.WriteError(w, http.StatusBadRequest, "failed to parse multipart form", err.Error())
 		return
 	}
 
-	file, _, err := r.FormFile("sheet")
-	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "excel sheet is required", err.Error())
-		return
-	}
-	defer file.Close()
-
-	excelFile, err := excelize.OpenReader(file)
-	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "failed to read excel file", err.Error())
-		return
-	}
-
-	rows, err := excelFile.GetRows("Sheet1")
-	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "failed to get rows from excel sheet", err.Error())
-		return
-	}
-
-	formFiles := r.MultipartForm.File["images"]
-	if len(formFiles) == 0 {
-		utils.WriteError(w, http.StatusBadRequest, "at least one image is required", "")
-		return
-	}
-
-	filesMap := make(map[string]*multipart.FileHeader)
-	for _, fh := range formFiles {
-		filesMap[fh.Filename] = fh
-	}
-
-	var subcategoriesToCreate []*subcategory.Subcategory
-	imageURLMap := make(map[string]string) // To store uploaded image URLs
-
-	for i, row := range rows {
-		if i == 0 { // Skip header row
-			continue
-		}
-		if len(row) < 4 {
-			log.Printf("skipping row %d, not enough columns", i+1)
-			continue
-		}
-		subcategoryName := row[0]
-		subcategoryDesc := row[1]
-		imageFileName := row[2]
-		categoryIDStr := row[3]
-
-		categoryID, err := strconv.Atoi(categoryIDStr)
-		if err != nil {
-			log.Printf("invalid category ID '%s' on row %d, skipping", categoryIDStr, i+1)
-			continue
-		}
-
-		imageFileHeader, ok := filesMap[imageFileName]
-		if !ok {
-			log.Printf("image %s for subcategory %s not found in uploaded files, skipping", imageFileName, subcategoryName)
-			continue
-		}
-
-		imageURL, uploaded := imageURLMap[imageFileName]
-		if !uploaded {
-			var err error
-			imageURL, err = h.supabaseService.UploadFile(imageFileHeader, "images")
-			if err != nil {
-				log.Printf("failed to upload image %s for subcategory %s: %v, skipping", imageFileName, subcategoryName, err)
-				continue
+	// Discover row indexes from present keys
+	indexSet := map[int]struct{}{}
+	reBracket := regexp.MustCompile(`^(name|description|categoryId|image)\[(\d+)\]$`)
+	reUnderscore := regexp.MustCompile(`^(name|description|categoryId|image)_(\d+)$`)
+	for key := range r.MultipartForm.Value {
+		if m := reBracket.FindStringSubmatch(key); len(m) == 3 {
+			if idx, err := strconv.Atoi(m[2]); err == nil {
+				indexSet[idx] = struct{}{}
 			}
-			imageURLMap[imageFileName] = imageURL
+			continue
+		}
+		if m := reUnderscore.FindStringSubmatch(key); len(m) == 3 {
+			if idx, err := strconv.Atoi(m[2]); err == nil {
+				indexSet[idx] = struct{}{}
+			}
+		}
+	}
+	for key := range r.MultipartForm.File {
+		if m := reBracket.FindStringSubmatch(key); len(m) == 3 {
+			if idx, err := strconv.Atoi(m[2]); err == nil {
+				indexSet[idx] = struct{}{}
+			}
+			continue
+		}
+		if m := reUnderscore.FindStringSubmatch(key); len(m) == 3 {
+			if idx, err := strconv.Atoi(m[2]); err == nil {
+				indexSet[idx] = struct{}{}
+			}
+		}
+	}
+
+	// helpers
+	getVal := func(bracketKey, underscoreKey string) string {
+		if v, ok := r.MultipartForm.Value[bracketKey]; ok && len(v) > 0 {
+			return strings.TrimSpace(v[0])
+		}
+		if v, ok := r.MultipartForm.Value[underscoreKey]; ok && len(v) > 0 {
+			return strings.TrimSpace(v[0])
+		}
+		return ""
+	}
+
+	var toCreate []*subcategory.Subcategory
+
+	for idx := range indexSet {
+		name := getVal(fmt.Sprintf("name[%d]", idx), fmt.Sprintf("name_%d", idx))
+		desc := getVal(fmt.Sprintf("description[%d]", idx), fmt.Sprintf("description_%d", idx))
+		catStr := getVal(fmt.Sprintf("categoryId[%d]", idx), fmt.Sprintf("categoryId_%d", idx))
+		if name == "" || catStr == "" {
+			continue
+		}
+		categoryID, err := strconv.Atoi(catStr)
+		if err != nil {
+			continue
 		}
 
-		subcategoriesToCreate = append(subcategoriesToCreate, &subcategory.Subcategory{
-			Name:        subcategoryName,
-			Description: subcategoryDesc,
+		// Resolve image
+		var fhKey string
+		if _, ok := r.MultipartForm.File[fmt.Sprintf("image[%d]", idx)]; ok {
+			fhKey = fmt.Sprintf("image[%d]", idx)
+		} else if _, ok := r.MultipartForm.File[fmt.Sprintf("image_%d", idx)]; ok {
+			fhKey = fmt.Sprintf("image_%d", idx)
+		}
+
+		var imageURL string
+		if fhKey != "" {
+			fhs := r.MultipartForm.File[fhKey]
+			if len(fhs) > 0 {
+				url, err := h.supabaseService.UploadFile(fhs[0], "images")
+				if err == nil {
+					imageURL = url
+				} else {
+					log.Printf("bulk subcategory: upload failed for index %d key %s: %v", idx, fhKey, err)
+				}
+			}
+		}
+		if imageURL == "" {
+			if arr, ok := r.MultipartForm.File["images"]; ok && len(arr) > 0 {
+				if idx >= 0 && idx < len(arr) {
+					if url, err := h.supabaseService.UploadFile(arr[idx], "images"); err == nil {
+						imageURL = url
+					} else {
+						log.Printf("bulk subcategory: upload failed from images[] for index %d: %v", idx, err)
+					}
+				}
+			}
+		}
+		if imageURL == "" {
+			log.Printf("bulk subcategory: missing image for index %d (no image[i] or images[] match)", idx)
+			continue
+		}
+
+		toCreate = append(toCreate, &subcategory.Subcategory{
+			Name:        name,
+			Description: desc,
 			ImageURL:    imageURL,
 			CategoryID:  categoryID,
 		})
 	}
 
-	if len(subcategoriesToCreate) == 0 {
-		utils.WriteError(w, http.StatusBadRequest, "no subcategories to create", "please check excel file and images")
+	if len(toCreate) == 0 {
+		utils.WriteError(w, http.StatusBadRequest, "no subcategories to create", "ensure name[i], description[i], categoryId[i], image[i] are provided")
 		return
 	}
 
-	err = h.store.BulkCreateSubcategory(subcategoriesToCreate)
-	if err != nil {
+	if err := h.store.BulkCreateSubcategory(toCreate); err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, "failed to create subcategories", err.Error())
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"message": fmt.Sprintf("%d subcategories created successfully", len(subcategoriesToCreate))})
+	json.NewEncoder(w).Encode(map[string]int{"created": len(toCreate)})
 }
