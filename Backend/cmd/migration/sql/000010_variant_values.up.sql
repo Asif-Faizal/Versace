@@ -4,5 +4,6 @@ CREATE TABLE IF NOT EXISTS variant_values (
   value VARCHAR(255) NOT NULL,
   hex_code VARCHAR(7), -- optional for color
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (master_variant_id) REFERENCES master_variants(id) ON DELETE CASCADE
 );
