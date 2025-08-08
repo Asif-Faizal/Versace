@@ -8,15 +8,15 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/mattn/go-colorable v0.1.14
 	github.com/supabase-community/storage-go v0.7.0
-	golang.org/x/crypto v0.39.0
+	golang.org/x/crypto v0.41.0
 )
 
 require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	go.uber.org/atomic v1.7.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
+	go.uber.org/atomic v1.11.0 // indirect
+	golang.org/x/sys v0.35.0 // indirect
 )
 
 require (

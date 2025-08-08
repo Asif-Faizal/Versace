@@ -12,6 +12,14 @@ run:
 		exit 1; \
 	fi
 
+run-dev:
+	@if [ -f .env.dev ]; then \
+		export $$(cat .env.dev | grep -v '^#' | xargs) && go run cmd/main.go; \
+	else \
+		echo "Error: .env.dev file not found"; \
+		exit 1; \
+	fi
+
 # Migration commands
 migration-create:
 	@migrate create -ext sql -dir cmd/migration/sql -seq $(filter-out $@,$(MAKECMDGOALS))
@@ -24,6 +32,14 @@ migrate-up:
 		exit 1; \
 	fi
 
+migrate-up-dev:
+	@if [ -f .env.dev ]; then \
+		export $$(cat .env.dev | grep -v '^#' | xargs) && go run cmd/migration/main.go up; \
+	else \
+		echo "Error: .env.dev file not found"; \
+		exit 1; \
+	fi
+
 migrate-down:
 	@if [ -f .env ]; then \
 		export $$(cat .env | grep -v '^#' | xargs) && go run cmd/migration/main.go down; \
@@ -32,11 +48,27 @@ migrate-down:
 		exit 1; \
 	fi
 
+migrate-down-dev:
+	@if [ -f .env.dev ]; then \
+		export $$(cat .env.dev | grep -v '^#' | xargs) && go run cmd/migration/main.go down; \
+	else \
+		echo "Error: .env.dev file not found"; \
+		exit 1; \
+	fi
+
 migrate-drop:
 	@if [ -f .env ]; then \
 		export $$(cat .env | grep -v '^#' | xargs) && go run cmd/migration/main.go drop; \
 	else \
 		echo "Error: .env file not found"; \
+		exit 1; \
+	fi
+
+migrate-drop-dev:
+	@if [ -f .env.dev ]; then \
+		export $$(cat .env.dev | grep -v '^#' | xargs) && go run cmd/migration/main.go drop; \
+	else \
+		echo "Error: .env.dev file not found"; \
 		exit 1; \
 	fi
 
@@ -52,6 +84,18 @@ migrate-reset:
 		exit 1; \
 	fi
 
+migrate-reset-dev:
+	@if [ -f .env.dev ]; then \
+		echo "Resetting migrations for development..." && \
+		export $$(cat .env.dev | grep -v '^#' | xargs) && \
+		go run cmd/migration/main.go drop && \
+		go run cmd/migration/main.go up && \
+		echo "Development migrations reset successfully."; \
+	else \
+		echo "Error: .env.dev file not found"; \
+		exit 1; \
+	fi
+
 # Force migration version (fix dirty state)
 # Usage: make migrate-force version=1
 migrate-force:
@@ -63,6 +107,18 @@ migrate-force:
 		export $$(cat .env | grep -v '^#' | xargs) && go run cmd/migration/main.go force $(version); \
 	else \
 		echo "Error: .env file not found"; \
+		exit 1; \
+	fi
+
+migrate-force-dev:
+	@if [ -z "$(version)" ]; then \
+		echo "Error: Please provide a version, e.g., make migrate-force-dev version=1"; \
+		exit 1; \
+	fi
+	@if [ -f .env.dev ]; then \
+		export $$(cat .env.dev | grep -v '^#' | xargs) && go run cmd/migration/main.go force $(version); \
+	else \
+		echo "Error: .env.dev file not found"; \
 		exit 1; \
 	fi
 
